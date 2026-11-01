@@ -36,11 +36,11 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `PATCH /api/users/me/settings` | Planned | Update languages, goals/time budget, learning promise, reminders, Flo style, privacy, accessibility/text size, focus mode, low-bandwidth, or wellbeing settings; changed fields → `{settings}` | `400`, `401` |
 | `DELETE /api/users/me/settings` | Planned | Reset preferences to defaults → `{settings}` | `401` |
 | `DELETE /api/users/me` | Planned | Delete the account and its owned data after confirmation; `{confirmEmail}` → `{deleted:true}` | `400`, `401`, `409` |
-| `POST /api/users/me/data-exports` | Planned | Create an export job/preview → `{exportId,status}` | `401`, `500` |
-| `GET /api/users/me/data-exports` | Planned | List the learner's export jobs → `{exports:[...]}` | `401` |
-| `GET /api/users/me/data-exports/:exportId` | Planned | Read export status/details → `{export}` | `401`, `404` |
-| `GET /api/users/me/data-exports/:exportId/download` | Planned | Download the prepared local-demo JSON export | `401`, `404`, `409` |
-| `DELETE /api/users/me/data-exports/:exportId` | Planned | Cancel/delete an export job → `{deleted:true}` | `401`, `404` |
+| `POST /api/users/me/data-exports` | Partial | Create an export job/preview → `{exportId,status}` | `401`, `500` |
+| `GET /api/users/me/data-exports` | Partial | List the learner's export jobs → `{exports:[...]}` | `401` |
+| `GET /api/users/me/data-exports/:exportId` | Partial | Read export status/details → `{export}` | `401`, `404` |
+| `GET /api/users/me/data-exports/:exportId/download` | Partial | Download the prepared local-demo JSON export | `401`, `404`, `409` |
+| `DELETE /api/users/me/data-exports/:exportId` | Partial | Cancel/delete an export job → `{deleted:true}` | `401`, `404` |
 
 Account deletion requires explicit confirmation and removes the user's personal records. It does not delete curated content or other learners' records.
 
@@ -246,13 +246,15 @@ Notifications are system-created; clients can read, update read state, and delet
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/help/articles?category=` | Planned | Read FAQ/help topics → `{articles:[...]}` | `400`, `500` |
-| `GET /api/support/requests` | Planned | Read the learner's own support requests → `{requests:[...]}` | `401` |
-| `POST /api/support/requests` | Planned | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
-| `PATCH /api/support/requests/:requestId` | Planned | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
-| `DELETE /api/support/requests/:requestId` | Planned | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
+| `GET /api/help/articles?category=` | Implemented | Read FAQ/help topics → `{articles:[...]}` | `400`, `500` |
+| `GET /api/support/requests` | Partial | Read the learner's own support requests → `{requests:[...]}` | `401` |
+| `POST /api/support/requests` | Partial | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
+| `PATCH /api/support/requests/:requestId` | Partial | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
+| `DELETE /api/support/requests/:requestId` | Partial | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
 
 Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
+
+The support/export implementation needs issue #3 to set `res.locals.userId` from a verified bearer session. Until then, private routes return `401`. Export downloads currently contain the existing `User` fields and support requests; extend the payload as other learner-owned models are implemented.
 
 ## Flo AI Tutor
 
@@ -292,4 +294,4 @@ Help articles remain curated/read-only. Support requests can be changed only whi
 | Tutor chats/messages/notes | Create/read/update/delete owned chats/messages/notes; clear all history after confirmation. |
 | Offline downloads and unsent drafts | Device-local create/read/update/remove behavior; no backend CRUD. |
 
-All learner routes remain **Planned** until source code implements them. Validate ownership and group roles on every mutation; confirm destructive account/group/history actions. Do not expose mutation endpoints for curated definitions or derived/append-only records. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.
+Learner routes remain **Planned** or **Partial** until source code implements their documented behavior. Validate ownership and group roles on every mutation; confirm destructive account/group/history actions. Do not expose mutation endpoints for curated definitions or derived/append-only records. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.
