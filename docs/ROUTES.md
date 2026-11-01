@@ -1,6 +1,6 @@
 # Navigation Routes
 
-There is no navigation implementation in the repository. This is a proposed logical model derived from the selected Page 09 flow and Page 10 states, not a claim that these routes exist. Adapt names to the navigation library actually used.
+The Expo app currently has one placeholder `App.tsx` and no navigation library. The following is a proposed logical model derived from the selected Page 09 flow and Page 10 states, not a claim that these routes exist. Choose a navigation library when implementing the first real navigation flow and adapt names to it.
 
 ```text
 /

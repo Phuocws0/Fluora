@@ -1,10 +1,16 @@
 # Architecture
 
-## Current state
+## Current implementation
 
-The repository currently contains no application code, package configuration, Prisma schema, or Docker Compose file. The architecture below is the intended plan, not an implemented system.
+Fluora is an npm-workspaces monorepo. The implementation is an initial runnable scaffold, not the learner application:
 
-## Planned application shape
+- `mobile/` is an Expo SDK 57 React Native TypeScript placeholder with no navigation or product features.
+- `backend/` is one Express 5 TypeScript app. It currently exposes only `GET /health`, which checks the PostgreSQL connection through Prisma.
+- `backend/prisma/schema.prisma` contains an initial `User` model and its first migration; authentication fields and learner-domain models are not implemented.
+- `docker-compose.yml` runs the backend and PostgreSQL. Expo runs directly on the host.
+- `.github/workflows/ci.yml` runs typecheck, Prisma validation, backend build, and Android bundle export on pull requests and pushes to `main`.
+
+## Intended application shape
 
 ```text
 React Native + Expo
@@ -19,9 +25,9 @@ Node.js + Express
 PostgreSQL
 ```
 
-Fluora is intended to remain a monorepo, with mobile and backend code in the same repository. The backend is one application. The current scope does not require microservices, an API Gateway, Redis, Kafka, or cloud deployment.
+Mobile and backend code remain in this repository. The backend stays one application. The current scope does not require microservices, an API Gateway, Redis, Kafka, or cloud deployment.
 
-## Planned local development
+## Local development
 
 ```text
 Host machine
@@ -32,20 +38,20 @@ Host machine
     └── PostgreSQL
 ```
 
-React Native / Expo runs directly on the host and does not need to run inside Docker. Docker Compose is intended for the backend and database local runtime. Exact configuration and commands remain to be created.
+Run Expo on the host; it does not need Docker. Compose starts PostgreSQL and the backend, applies checked-in migrations, then starts the API. PostgreSQL is published on host port `5433` by default. The backend listens on port `4000` inside Docker and is published on host port `4000` by default (`PORT` can change the host port). See [README.md](../README.md) for setup commands.
 
 ## Responsibilities
 
 - **Mobile frontend:** Render screens and reusable UI, manage navigation and interaction state, call backend services through REST/JSON, and manage device-local downloads/unsent drafts.
 - **Backend:** Expose the API, validate requests, apply application logic, and use Prisma for synchronized account, learning, practice, community, rewards, and tutor data.
 - **Database:** Store durable account, learning-content, answer, progress, planning, vocabulary, community, reward, support, and tutor records as required by selected demo interactions. Analytics and totals can be derived from source records.
+- **CI:** Run lightweight static and build checks. It does not deploy the application.
 
-Offline course files and download-queue progress are device-local; the backend serves the existing course/unit/lesson content. Do not add a separate download service or storage platform for the local demo.
+Offline course files and download-queue progress are device-local; the backend serves course/unit/lesson content. Do not add a separate download service or storage platform for the local demo.
 
-## Architecture status
+## Planned and optional work
 
-- **Current:** Documentation only; there is no implementation to describe.
-- **Planned:** React Native + Expo mobile app, Express + TypeScript backend, Prisma, PostgreSQL, and local Docker Compose for backend/database.
+- **Planned:** Implement logical navigation and learner features from `docs/PRODUCT.md`, then extend API/schema in step with those features.
 - **Optional future improvements:** Add structure or tooling only when a concrete implementation need appears. No additional infrastructure is currently required.
 
-See [API.md](API.md), [DATABASE.md](DATABASE.md), and [ROUTES.md](ROUTES.md) for the planned contracts and navigation model.
+See [API.md](API.md), [DATABASE.md](DATABASE.md), [ROUTES.md](ROUTES.md), and [TESTING.md](TESTING.md) for current contracts and guidance.

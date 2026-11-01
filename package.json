@@ -1,0 +1,22 @@
+{
+  "name": "fluora",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev:mobile": "npm run start --workspace @fluora/mobile",
+    "dev:backend": "npm run dev --workspace @fluora/backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace @fluora/backend",
+    "check:mobile": "npm run check --workspace @fluora/mobile",
+    "prisma:generate": "npm run prisma:generate --workspace @fluora/backend",
+    "prisma:validate": "npm run prisma:validate --workspace @fluora/backend",
+    "db:migrate": "npm run db:migrate --workspace @fluora/backend",
+    "db:deploy": "npm run db:deploy --workspace @fluora/backend"
+  }
+}

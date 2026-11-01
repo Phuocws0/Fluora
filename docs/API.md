@@ -1,6 +1,6 @@
 # API Contract
 
-This is the planned learner-facing API for the selected Page 09 release and its Page 10 states. The repository has no backend, so every route below is **Planned**. The API supports the user-facing interactions in [PRODUCT.md](PRODUCT.md); it does not add admin content-management APIs that are absent from the Figma.
+This document records the implemented runtime health route and the planned learner-facing API for the selected Page 09 release and its Page 10 states. Learner routes below remain **Planned**; the current backend does not implement product APIs. The API supports the user-facing interactions in [PRODUCT.md](PRODUCT.md); it does not add admin content-management APIs that are absent from the Figma.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -9,6 +9,12 @@ Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <toke
 ```
 
 Common statuses: `400` invalid input, `401` missing/invalid session, `403` action not allowed by privacy/ownership, `404` missing resource, `409` conflict, `500` unexpected failure. Endpoint-specific errors are listed below.
+
+## Local runtime
+
+| Method / path | Status | Purpose; response | Errors |
+| --- | --- | --- | --- |
+| `GET /health` | Implemented | Check the Express process and PostgreSQL connection → `200 {status:"ok",database:"ok"}` | `503 {status:"error",database:"unavailable"}` |
 
 ## Auth and account
 
@@ -194,4 +200,4 @@ The Figma shows friend discovery and sending a request, but not accepting/declin
 | Tutor chats/notes | Create/read chats and messages and clear all history. Per-chat delete and note update/delete controls are not confirmed; saving a note and adding a personal example are shown. |
 | Offline downloads and unsent drafts | Device-local create/read/update/remove behavior; no backend CRUD. |
 
-All routes remain **Planned** until code proves otherwise. Keep payloads small, validate ownership and privacy on every mutation, and update this file when the implementation contract changes. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.
+All learner routes remain **Planned** until source code implements them. Keep payloads small, validate ownership and privacy on every mutation, and update this file when the implementation contract changes. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.

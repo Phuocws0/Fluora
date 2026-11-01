@@ -1,38 +1,94 @@
 # Fluora
 
-Fluora is a mobile language-learning application intended for local demonstration. Its planned learning experience covers courses, lessons, practice, progress, and supporting areas such as rewards, community, profile, settings, and the Flo AI Tutor.
+Fluora is a mobile language-learning app intended for local demonstration. The product scope and selected Figma flows are documented in [`docs/PRODUCT.md`](docs/PRODUCT.md) and [`docs/FIGMA.md`](docs/FIGMA.md).
 
-## Intended stack
+## Stack
 
-- Mobile: React Native, Expo, TypeScript
-- Backend: Node.js, Express, TypeScript, Prisma
-- Database: PostgreSQL
-- Local runtime: Docker Compose for backend and PostgreSQL; Expo runs on the host machine
-
-This repository currently contains documentation only. The application stack and run setup are planned; no app, backend, database schema, package scripts, or Docker configuration is present yet.
+- Mobile: React Native, Expo SDK 57, TypeScript
+- Backend: Node.js 24, Express 5, TypeScript, Prisma ORM 7
+- Database: PostgreSQL 17
+- Local runtime: Docker Compose for backend and PostgreSQL; Expo runs on the host
+- CI: GitHub Actions typecheck, Prisma validation, backend build, and Android bundle export
 
 ## Repository structure
 
 ```text
 fluora/
-├── AGENTS.md
-├── README.md
-├── docs/
-├── mobile/                 # planned
-├── backend/                # planned
-└── docker-compose.yml      # planned
+├── .agents/skills/          # Fluora-specific agent workflows
+├── .github/workflows/ci.yml
+├── backend/                 # Express app, Prisma schema and migrations
+├── docs/                    # Product, architecture, design, API and workflow docs
+├── mobile/                  # Expo React Native app
+├── docker-compose.yml       # Local backend + PostgreSQL runtime
+└── package.json             # npm workspaces and shared commands
 ```
 
-## Local development
+The mobile app is currently a runnable placeholder. The backend currently exposes only a database-backed health check. Learner features and their APIs are still planned.
 
-There are no runnable setup commands yet. The intended setup is to run the Express backend and PostgreSQL with Docker Compose, while running the Expo/React Native app directly on the host. Prerequisites, versions, and commands should be added once the initial project configuration exists. A Node.js environment and Docker with Compose will be needed for the planned setup; an Expo-compatible device or emulator is needed to run the mobile app.
+## Prerequisites
 
-## Project documentation
+- Node.js 24 and npm
+- Docker with Docker Compose
+- An Android emulator or device for the mobile demo; Expo also provides iOS and web start commands
 
-- [Product overview](docs/PRODUCT.md)
+## Run locally
+
+Copy the environment template and install workspace dependencies:
+
+```sh
+cp .env.example .env
+npm ci
+```
+
+The values in `.env.example` are local placeholders. Change the local PostgreSQL password and matching `DATABASE_URL` before starting services. `.env` is ignored by Git.
+
+Start the backend and database:
+
+```sh
+docker compose up --build -d
+```
+
+The backend applies checked-in Prisma migrations on startup and listens inside Docker on port `4000`; it is published at `http://localhost:4000` by default. Set `PORT` in `.env` to change the host-published backend port. Its database-backed health endpoint is `GET /health`. PostgreSQL is published on port `5433` by default to avoid conflicting with a local PostgreSQL server.
+
+Start Expo in a second terminal:
+
+```sh
+npm run dev:mobile
+```
+
+For an Android emulator, use `npm run android --workspace @fluora/mobile` or press `a` in the Expo terminal. The mobile placeholder does not call the API yet.
+
+Stop local containers while keeping the database volume:
+
+```sh
+docker compose down
+```
+
+When changing the Prisma schema, create and apply a migration from the host after the database is running:
+
+```sh
+npm run db:migrate --workspace @fluora/backend -- --name describe_change
+```
+
+Do not reset the database as a routine setup step.
+
+## Verification commands
+
+```sh
+npm run typecheck
+npm run prisma:validate
+npm run build
+npm run check:mobile
+```
+
+GitHub Actions runs these checks on pull requests and pushes to `main`. There are no feature tests yet.
+
+## Documentation
+
+- [Product scope](docs/PRODUCT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Figma references](docs/FIGMA.md)
-- [Navigation routes](docs/ROUTES.md)
+- [Navigation model](docs/ROUTES.md)
 - [API contract](docs/API.md)
 - [Database model](docs/DATABASE.md)
 - [Testing and verification](docs/TESTING.md)

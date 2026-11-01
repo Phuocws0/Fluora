@@ -2,3 +2,11 @@
 .env
 .env.*
 !.env.example
+
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+mobile/.expo/
+mobile/dist-check/
+backend/src/generated/prisma/

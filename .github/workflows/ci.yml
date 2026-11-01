@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Typecheck and build
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://fluora:local-ci-placeholder@localhost:5432/fluora?schema=public
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck workspaces
+        run: npm run typecheck
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+
+      - name: Build backend
+        run: npm run build
+
+      - name: Export Android mobile bundle
+        run: npm run check:mobile

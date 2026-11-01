@@ -1,6 +1,10 @@
 # Database Model
 
-There is no database schema in the repository yet. This is a conceptual model for data represented in the selected Figma features and planned API. It is not a Prisma schema and does not require one table per screen. When `schema.prisma` exists, it is the implementation source of truth.
+This document separates the current Prisma model from the conceptual model for the selected Figma features. `backend/prisma/schema.prisma` is the implementation source of truth; the concepts below are not a required one-table-per-feature schema.
+
+## Current implementation
+
+The initial schema contains only `User` with a UUID, unique email, optional display name, and creation/update timestamps. Its first migration is checked in. Passwords, sessions, settings, and learner-domain data are not implemented yet. Extend the actual schema with the first feature slice instead of treating the conceptual model below as an existing database.
 
 ## Account and preferences
 

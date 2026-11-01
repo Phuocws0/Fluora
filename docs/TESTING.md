@@ -1,6 +1,20 @@
 # Testing and Verification
 
-Keep verification proportional to a local demo and use tools already present. This repository currently has documentation only, so there are no runnable checks yet. Do not add a testing framework just because this plan exists.
+Keep verification proportional to a local demo and use tools already present. The scaffold has typecheck/build checks but no feature test suite yet; do not add a testing framework just because this plan exists.
+
+## Current checks and CI
+
+GitHub Actions runs on pull requests and pushes to `main`:
+
+```text
+npm ci
+npm run typecheck
+npm run prisma:validate
+npm run build
+npm run check:mobile
+```
+
+The CI job does not start PostgreSQL or deploy anything. For a local backend/database smoke check, run `docker compose up --build -d` and request `GET http://localhost:4000/health`; it should return `200` with both service and database status `ok`.
 
 ## Static verification
 
@@ -13,7 +27,7 @@ Where available, verify:
 
 ## Backend verification
 
-For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. For mutable user-owned resources, verify:
+For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. The current health endpoint should return `503` when its database connection is unavailable. For mutable user-owned resources, verify:
 
 - create/read/update/delete behavior where those controls are in selected scope;
 - owner checks, duplicate/conflict handling, and invalid IDs;

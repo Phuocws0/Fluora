@@ -1,6 +1,6 @@
 # Fluora Agent Instructions
 
-This file defines how coding, implementation, review, and audit agents should work in this repository. The repository currently contains no application source; treat the architecture and contracts in `docs/` as plans until code confirms them.
+This file defines how coding, implementation, review, and audit agents should work in this repository. The repository has an initial runnable scaffold but no learner features yet; treat planned architecture and contracts in `docs/` as plans until code confirms them.
 
 ## Required reading order
 
@@ -83,6 +83,7 @@ Route → Controller → Service → Prisma → PostgreSQL
 
 - Run TypeScript/type checking where available.
 - Run relevant tests and build/start checks where available and practical.
+- Keep changes compatible with `.github/workflows/ci.yml`; do not add CI services or deployment steps unless explicitly requested.
 - Inspect errors instead of hiding or suppressing them.
 - Check that frontend/backend contracts remain consistent and database use matches the schema.
 - Update `docs/STATUS.md` after meaningful implementation work. Update other docs when architecture or contracts actually change.
