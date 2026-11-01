@@ -1,6 +1,6 @@
 # API Contract
 
-This document records the implemented runtime health and learning-content read APIs plus the planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoints are marked **Planned** until implemented in the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
+This document records the implemented runtime health, learning-content reads, story reads, partial practice API, and planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoints are marked **Planned** until implemented in the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -110,27 +110,29 @@ Recording Studio captures audio locally on the device. The demo answer may inclu
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/vocabulary/sets` | Planned | List learner decks and provided sets → `{sets:[...]}` | `401` |
-| `POST /api/vocabulary/sets` | Planned | Create a learner-owned deck; `{name}` → `{set}` | `400`, `401` |
-| `GET /api/vocabulary/sets/:setId` | Planned | Read a deck and its cards → `{set,cards:[...]}` | `401`, `404` |
-| `PATCH /api/vocabulary/sets/:setId` | Planned | Rename/update a learner deck; changed fields → `{set}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/sets/:setId` | Planned | Delete a learner-owned deck and its cards → `{deleted:true}` | `401`, `404` |
-| `GET /api/vocabulary/sets/:setId/cards` | Planned | List deck cards → `{cards:[...]}` | `401`, `404` |
-| `POST /api/vocabulary/sets/:setId/cards` | Planned | Add a card; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
-| `GET /api/vocabulary/cards/:cardId` | Planned | Read one card → `{card}` | `401`, `404` |
-| `PATCH /api/vocabulary/cards/:cardId` | Planned | Edit a card; changed fields → `{card}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/cards/:cardId` | Planned | Remove a card → `{deleted:true}` | `401`, `404` |
+| `GET /api/vocabulary/sets` | Partial | List learner decks and provided sets → `{sets:[...]}` | `401` |
+| `POST /api/vocabulary/sets` | Partial | Create a learner-owned deck; `{name}` → `{set}` | `400`, `401` |
+| `GET /api/vocabulary/sets/:setId` | Partial | Read a deck and its cards → `{set,cards:[...]}` | `401`, `404` |
+| `PATCH /api/vocabulary/sets/:setId` | Partial | Rename/update a learner deck; changed fields → `{set}` | `400`, `401`, `404` |
+| `DELETE /api/vocabulary/sets/:setId` | Partial | Delete a learner-owned deck and its cards → `{deleted:true}` | `401`, `404` |
+| `GET /api/vocabulary/sets/:setId/cards` | Partial | List deck cards → `{cards:[...]}` | `401`, `404` |
+| `POST /api/vocabulary/sets/:setId/cards` | Partial | Add a card; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
+| `GET /api/vocabulary/cards/:cardId` | Partial | Read one card → `{card}` | `401`, `404` |
+| `PATCH /api/vocabulary/cards/:cardId` | Partial | Edit a card; changed fields → `{card}` | `400`, `401`, `404` |
+| `DELETE /api/vocabulary/cards/:cardId` | Partial | Remove a card → `{deleted:true}` | `401`, `404` |
 | `POST /api/vocabulary/import/preview` | Planned | Parse selected rows and column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
 | `POST /api/vocabulary/import` | Planned | Import approved rows into a deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
-| `GET /api/bookmarks` | Planned | List saved words/stories → `{bookmarks:[...]}` | `401` |
-| `POST /api/bookmarks` | Planned | Save a word or story; `{targetType,targetId}` → `{bookmark}` | `400`, `401`, `404`, `409` |
-| `PATCH /api/bookmarks/:bookmarkId` | Planned | Edit learner note/tag; changed fields → `{bookmark}` | `400`, `401`, `404` |
-| `DELETE /api/bookmarks/:bookmarkId` | Planned | Remove a saved item → `{deleted:true}` | `401`, `404` |
-| `GET /api/stories` | Planned | Story library → `{stories:[...]}` | `500` |
-| `GET /api/stories/:storyId` | Planned | Read a story/article/dialogue and comprehension tree → `{story}` | `404` |
-| `GET /api/stories/:storyId/progress` | Planned | Read learner reading position → `{progress}` | `401`, `404` |
-| `PUT /api/stories/:storyId/progress` | Planned | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
-| `DELETE /api/stories/:storyId/progress` | Planned | Reset learner reading position → `{deleted:true}` | `401`, `404` |
+| `GET /api/bookmarks` | Partial | List saved words/stories → `{bookmarks:[...]}` | `401` |
+| `POST /api/bookmarks` | Partial | Save a word or story; `{targetType,targetId}` → `{bookmark}` | `400`, `401`, `404`, `409` |
+| `PATCH /api/bookmarks/:bookmarkId` | Partial | Edit learner note/tag; changed fields → `{bookmark}` | `400`, `401`, `404` |
+| `DELETE /api/bookmarks/:bookmarkId` | Partial | Remove a saved item → `{deleted:true}` | `401`, `404` |
+| `GET /api/stories` | Implemented | Story library → `{stories:[...]}` | `500` |
+| `GET /api/stories/:storyId` | Implemented | Read a story/article/dialogue and comprehension tree → `{story}` | `404` |
+| `GET /api/stories/:storyId/progress` | Partial | Read learner reading position → `{progress}` | `401`, `404` |
+| `PUT /api/stories/:storyId/progress` | Partial | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
+| `DELETE /api/stories/:storyId/progress` | Partial | Reset learner reading position → `{deleted:true}` | `401`, `404` |
+
+The practice branch implements deck/card CRUD, story reads, story bookmarks, and reading progress. Private routes need issue #3 to set `res.locals.userId` from a verified bearer session; until then they return `401`. Word bookmarks, review items, imports, study tools, dictionary, and practice recommendations remain planned.
 
 The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed.
 

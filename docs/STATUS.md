@@ -11,6 +11,7 @@
 
 ## In Progress
 
+- Issue #39 backend branch: learner deck/card CRUD, curated story reads, story bookmarks, and reading progress are implemented. Private routes await verified session identity from issue #3. Review/import, study-tool, dictionary, and recommendation APIs remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
 - Issue #33 support/export backend branch: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.

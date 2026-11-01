@@ -16,6 +16,9 @@ model User {
   updatedAt   DateTime @updatedAt
   supportRequests SupportRequest[]
   dataExportRequests DataExportRequest[]
+  vocabularySets VocabularySet[]
+  bookmarks Bookmark[]
+  readingProgress ReadingProgress[]
 }
 
 model SupportRequest {
@@ -43,6 +46,79 @@ model DataExportRequest {
 
   @@index([userId, createdAt])
   @@map("data_export_requests")
+}
+
+model VocabularySet {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards VocabularyCard[]
+
+  @@index([userId, createdAt])
+  @@map("vocabulary_sets")
+}
+
+model VocabularyCard {
+  id String @id @default(uuid()) @db.Uuid
+  setId String @db.Uuid
+  front String
+  back String
+  tag String?
+  example String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  set VocabularySet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId, createdAt])
+  @@map("vocabulary_cards")
+}
+
+model Story {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique
+  title String
+  kind String
+  content Json
+  isPublished Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  readingProgress ReadingProgress[]
+
+  @@map("stories")
+}
+
+model Bookmark {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  targetType String
+  targetId String
+  note String?
+  tag String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, createdAt])
+  @@map("bookmarks")
+}
+
+model ReadingProgress {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  storyId String @db.Uuid
+  position Int @default(0)
+  completed Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@map("reading_progress")
 }
 
 model Course {
