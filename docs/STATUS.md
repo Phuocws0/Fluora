@@ -11,9 +11,9 @@
 
 ## In Progress
 
-- Issue #39 backend branch: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes await verified session identity from issue #3. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
+- Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes await verified session identity from issue #3. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- Issue #33 support/export backend branch: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
+- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
