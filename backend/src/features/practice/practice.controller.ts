@@ -1,4 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { currentUserId } from "../../auth/require-user.js";
 import * as service from "./practice.service.js";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -27,16 +28,7 @@ function id(value: unknown, response: Response): string | null {
   return value;
 }
 
-function userId(response: Response): string { return response.locals.userId as string; }
-
-export function requireUser(_request: Request, response: Response, next: NextFunction) {
-  const current: unknown = response.locals.userId;
-  if (typeof current !== "string" || !uuid.test(current)) {
-    error(response, 401, "UNAUTHORIZED", "A valid session is required.");
-    return;
-  }
-  next();
-}
+function userId(response: Response): string { return currentUserId(response); }
 
 async function run(response: Response, operation: () => Promise<unknown>, status = 200) {
   try {

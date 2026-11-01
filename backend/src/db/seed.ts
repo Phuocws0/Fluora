@@ -308,7 +308,22 @@ async function seedLearningContent() {
     },
   });
 
-  console.log("Seeded the English Foundations course, learning paths, and story.");
+  for (const goal of [
+    { slug: "introduce-yourself", title: "Introduce yourself", skill: "speaking", description: "Say your name and greet another learner." },
+    { slug: "ask-for-directions", title: "Ask for directions", skill: "reading", description: "Understand and use simple direction words." },
+  ]) {
+    await prisma.canDoGoal.upsert({ where: { slug: goal.slug }, create: goal, update: goal });
+  }
+
+  const firstLesson = await prisma.lesson.findFirst({ where: { slug: "greetings-and-introductions", unit: { courseId: course.id } }, select: { id: true } });
+  if (!firstLesson) throw new Error("Seeded first lesson was not found.");
+  await prisma.mission.upsert({
+    where: { slug: "first-conversation" },
+    create: { slug: "first-conversation", title: "First conversation", description: "Complete the greetings lesson to earn your first passport stamp.", requiredLessonId: firstLesson.id },
+    update: { title: "First conversation", description: "Complete the greetings lesson to earn your first passport stamp.", requiredLessonId: firstLesson.id },
+  });
+
+  console.log("Seeded the English Foundations course, learning paths, story, goals, and mission.");
 }
 
 seedLearningContent()

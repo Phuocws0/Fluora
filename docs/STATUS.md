@@ -11,6 +11,7 @@
 
 ## In Progress
 
+- Issue #27 backend branch: immutable exercise answers, idempotent lesson completion, derived XP/streak/analytics/skill confidence, planner/evidence CRUD, mission passport/completion, hints, and derived misconception dismiss/restore are implemented. Private routes await verified session identity from issue #3; placement-based baseline, enrollment-aware home, and rewards integration remain incomplete.
 - Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes await verified session identity from issue #3. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
 - Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
@@ -19,14 +20,14 @@
 
 ## Planned
 
-1. Implement backend identity (#3) and core-learning (#27) domains.
+1. Complete backend identity (#3), then connect verified sessions to the partial private APIs including #27.
 2. Integrate the matching FE flows when their API contracts are available.
 3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Blocked
 
-- None.
+- Private learner API integration waits for issue #3 to provide verified session identity.
 
 ## Next Recommended Tasks
 
-- Implement backend issue #3 and issue #27 as independent domain tasks; FE issues identify their API prerequisites.
+- Integrate issue #3 authentication with the backend domains, then connect the mobile lesson/progress flow to issue #27.
