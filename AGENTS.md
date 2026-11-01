@@ -25,7 +25,7 @@ Then inspect the relevant existing source code. Documentation does not replace s
 3. Understand the current implementation state; do not infer that a planned item is implemented.
 4. Avoid inventing requirements that are not supported by the repository, designs, or user request.
 5. Identify whether the task affects the frontend, backend, database, API contract, or multiple layers.
-6. For feature/UI scope, use the selected Page 09 inventory and Page 10 selection notes in `docs/FIGMA.md`; distinguish release scope from unselected draft concepts. Check the needed read/create/update/delete actions in `docs/API.md` and note prototype gaps instead of assuming controls exist.
+6. For feature/UI scope, use the Page 09 inventory and the 17 Page 10 concepts promoted into scope in `docs/FIGMA.md`. Follow the product-approved CRUD baseline in `docs/API.md`; add clear controls for those actions even if the draft frame omits them, without inventing unrelated behavior or visual details.
 
 ## General rules
 

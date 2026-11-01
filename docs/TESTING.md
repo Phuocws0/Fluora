@@ -29,9 +29,10 @@ Where available, verify:
 
 For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. The current health endpoint should return `503` when its database connection is unavailable. For mutable user-owned resources, verify:
 
-- create/read/update/delete behavior where those controls are in selected scope;
+- create/read/update/delete behavior for learner-owned resources and group-managed content in the approved CRUD baseline;
 - owner checks, duplicate/conflict handling, and invalid IDs;
-- friend/request/group actions only after their controls are confirmed in Figma;
+- group-role checks for group/room/poll management and ownership checks for personal edits/deletes;
+- confirmation and authorization for account deletion, export cancellation, and other destructive actions;
 - profile/privacy choices affect returned friend/community/tutor data;
 - reward/quest/progress totals change through recorded actions rather than arbitrary updates;
 - tutor history clearing and export behavior match settings/privacy choices.
@@ -55,7 +56,7 @@ iOS verification is desirable but not mandatory for each local task unless the c
 
 ## CRUD and design-gap checks
 
-For every mutation added to the API, locate its control/state in the selected Figma flow. If the design does not show it, keep it marked as a question in [FIGMA.md](FIGMA.md) and do not silently invent it. In particular, verify the intended behavior for card/deck deletion, friend request acceptance/removal, group join/leave, and group-plan/whiteboard edits before implementing those mutations.
+For every mutation added to the API, confirm it is in the owner-approved baseline in [API.md](API.md), then implement a clear control/state consistent with the selected design. Test create/read/update/delete for decks/cards, planner entries, friend requests/connections, groups/posts/comments, group challenges/rooms/polls, plan tasks/whiteboard notes, support requests, tutor chats/messages/notes, and data-export jobs. Keep curated learning content and derived progress/reward ledgers read-only or append-only as documented.
 
 ## Demo smoke flow
 

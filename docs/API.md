@@ -1,6 +1,6 @@
 # API Contract
 
-This document records the implemented runtime health route and the planned learner-facing API for the selected Page 09 release and its Page 10 states. Learner routes below remain **Planned**; the current backend does not implement product APIs. The API supports the user-facing interactions in [PRODUCT.md](PRODUCT.md); it does not add admin content-management APIs that are absent from the Figma.
+This document records the implemented runtime health route and the planned learner-facing API for Page 09 plus the 17 Page 10 concepts promoted into scope by the product owner. Learner routes below remain **Planned**; the current backend does not implement product APIs. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -33,10 +33,16 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `GET /api/users/me/sessions` | Planned | List signed-in devices → `{sessions:[...]}` | `401` |
 | `DELETE /api/users/me/sessions/:sessionId` | Planned | Revoke one device session → `{revoked:true}` | `401`, `404` |
 | `GET /api/users/me/settings` | Planned | Read preferences and privacy/accessibility choices → `{settings}` | `401` |
-| `PATCH /api/users/me/settings` | Planned | Update app/course language, learning goal and notification reminders, Flo style, privacy, accessibility, low-bandwidth, or wellbeing settings; changed fields → `{settings}` | `400`, `401` |
-| `POST /api/users/me/data-export` | Planned | Prepare the data-export preview shown in Privacy Settings → `{exportId,status}` | `401`, `500` |
+| `PATCH /api/users/me/settings` | Planned | Update languages, goals/time budget, learning promise, reminders, Flo style, privacy, accessibility/text size, focus mode, low-bandwidth, or wellbeing settings; changed fields → `{settings}` | `400`, `401` |
+| `DELETE /api/users/me/settings` | Planned | Reset preferences to defaults → `{settings}` | `401` |
+| `DELETE /api/users/me` | Planned | Delete the account and its owned data after confirmation; `{confirmEmail}` → `{deleted:true}` | `400`, `401`, `409` |
+| `POST /api/users/me/data-exports` | Planned | Create an export job/preview → `{exportId,status}` | `401`, `500` |
+| `GET /api/users/me/data-exports` | Planned | List the learner's export jobs → `{exports:[...]}` | `401` |
+| `GET /api/users/me/data-exports/:exportId` | Planned | Read export status/details → `{export}` | `401`, `404` |
+| `GET /api/users/me/data-exports/:exportId/download` | Planned | Download the prepared local-demo JSON export | `401`, `404`, `409` |
+| `DELETE /api/users/me/data-exports/:exportId` | Planned | Cancel/delete an export job → `{deleted:true}` | `401`, `404` |
 
-The Figma shows account creation, sign-in, verification, reset, security, sessions, and export. It does **not** show a delete-account action; do not add `DELETE /api/users/me` without a product decision.
+Account deletion requires explicit confirmation and removes the user's personal records. It does not delete curated content or other learners' records.
 
 ## Learning content and progress
 
@@ -49,12 +55,15 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `GET /api/courses/:courseId` | Planned | Course overview and units → `{course}` | `404` |
 | `GET /api/courses/:courseId/units` | Planned | Unit catalog → `{units:[...]}` | `404` |
 | `GET /api/units/:unitId` | Planned | Unit overview and lessons → `{unit}` | `404` |
-| `GET /api/lessons/:lessonId` | Planned | Lesson, exercise sequence, and content → `{lesson}` | `404` |
+| `GET /api/lessons/:lessonId` | Planned | Lesson, exercise sequence, story/article content, audio metadata, waveform/transcript gaps, dialogue branches, and comprehension structure → `{lesson}` | `404` |
 | `GET /api/lessons/search?query=&level=&skill=&minutes=` | Planned | Search/filter lessons → `{lessons:[...]}` | `400` |
 | `GET /api/learning-paths` | Planned | Compare/browse paths and outcomes → `{paths:[...]}` | `500` |
 | `GET /api/learning-paths/compare?ids=` | Planned | Compare selected paths and workloads → `{paths:[...]}` | `400`, `404` |
 | `GET /api/enrollments` | Planned | Read current learner's selected courses → `{enrollments:[...]}` | `401` |
 | `POST /api/enrollments` | Planned | Select/enroll in a course; `{courseId}` → `{enrollment}` | `401`, `404`, `409` |
+| `PATCH /api/enrollments/:enrollmentId` | Planned | Update learner-owned enrollment selection/state; changed fields → `{enrollment}` | `400`, `401`, `404` |
+| `DELETE /api/enrollments/:enrollmentId` | Planned | Unenroll from a course → `{deleted:true}` | `401`, `404` |
+| `GET /api/placement/attempts` | Planned | Read placement history and baseline → `{attempts:[...]}` | `401` |
 | `POST /api/placement/attempts` | Planned | Submit the optional placement answers; `{answers:[...]}` → `{level,skillBaseline}` | `400`; session optional if placement precedes registration |
 | `GET /api/progress` | Planned | Read completion, XP, streak, and gems → `{completedLessons,currentStreak,xp,gems}` | `401` |
 | `POST /api/lessons/:lessonId/complete` | Planned | Record lesson completion → `{lessonId,completedAt,xpEarned}` | `401`, `404`, `409` |
@@ -62,7 +71,13 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `GET /api/analytics/weekly` | Planned | Weekly XP/activity chart → `{days:[...],summary}` | `401` |
 | `GET /api/learning/evidence` | Planned | Read can-do goals and attached samples → `{goals:[...]}` | `401` |
 | `POST /api/learning/evidence` | Planned | Attach a completed learning sample; `{goalId,kind,summary,reference?}` → `{evidence}` | `400`, `401`, `404` |
+| `PATCH /api/learning/evidence/:evidenceId` | Planned | Edit a learner-owned evidence sample; changed fields → `{evidence}` | `400`, `401`, `404` |
 | `DELETE /api/learning/evidence/:evidenceId` | Planned | Remove a learner-attached sample → `{deleted:true}` | `401`, `404` |
+| `GET /api/missions/passport` | Planned | Read mission passport and earned stamps → `{missions:[...]}` | `401` |
+| `GET /api/missions/:missionId` | Planned | Read curated mission instructions → `{mission}` | `404` |
+| `POST /api/missions/:missionId/complete` | Planned | Record completed mission evidence; progress is derived → `{completion}` | `400`, `401`, `404`, `409` |
+| `GET /api/learning/misconceptions` | Planned | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
+| `PATCH /api/learning/misconceptions/:itemId` | Planned | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
 
 ## Planner and practice
 
@@ -70,45 +85,56 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | --- | --- | --- | --- |
 | `GET /api/practice` | Planned | Practice hub recommendations and due-item counts → `{suggestions,reviewDueCount}` | `401` |
 | `GET /api/planner/entries` | Planned | Read calendar/weekly plan → `{entries:[...]}` | `401` |
-| `POST /api/planner/entries` | Planned | **Control needs confirmation:** add a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
-| `PATCH /api/planner/entries/:entryId` | Planned | **Control needs confirmation:** move or edit a planned session; changed fields → `{entry}` | `400`, `401`, `404` |
-| `DELETE /api/planner/entries/:entryId` | Planned | **Control needs confirmation:** remove a planned session → `{deleted:true}` | `401`, `404` |
-| `POST /api/exercises/:exerciseId/answers` | Planned | Submit choice, text, matching, dictation, or speaking result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?}` | `400`, `401`, `404` |
+| `POST /api/planner/entries` | Planned | Create a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
+| `GET /api/planner/entries/:entryId` | Planned | Read one learner-owned session → `{entry}` | `401`, `404` |
+| `PATCH /api/planner/entries/:entryId` | Planned | Move or edit a planned session; changed fields → `{entry}` | `400`, `401`, `404` |
+| `DELETE /api/planner/entries/:entryId` | Planned | Remove a planned session → `{deleted:true}` | `401`, `404` |
+| `GET /api/lessons/:lessonId/answers` | Planned | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
+| `POST /api/exercises/:exerciseId/answers` | Planned | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
 | `GET /api/exercises/:exerciseId/hints?step=` | Planned | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
 | `GET /api/practice/review-items?kind=` | Planned | Read due vocabulary and recurring mistakes → `{items:[...]}` | `401` |
+| `GET /api/practice/review-items/:itemId` | Planned | Read one saved review item → `{item}` | `401`, `404` |
+| `POST /api/practice/review-items` | Planned | Create a learner-owned review item; `{front,back,kind?}` → `{item}` | `400`, `401` |
+| `PATCH /api/practice/review-items/:itemId` | Planned | Edit a custom review item or dismiss a derived mistake; changed fields → `{item}` | `400`, `401`, `404` |
+| `DELETE /api/practice/review-items/:itemId` | Planned | Delete a custom item or hide a derived mistake from this learner's queue → `{deleted:true}` | `401`, `404` |
 | `POST /api/practice/review-items/:itemId/answers` | Planned | Record recall/review outcome and update schedule → `{result,nextReviewAt}` | `400`, `401`, `404` |
 | `GET /api/study-tools` | Planned | List available curated study tools → `{tools:[...]}` | `401` |
-| `GET /api/study-tools/:toolId` | Planned | Read curated content for selected audio/pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit tools → `{tool}` | `401`, `404` |
+| `GET /api/study-tools/:toolId` | Planned | Read curated audio/waveform, pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit content → `{tool}` | `401`, `404` |
 | `GET /api/dictionary?query=` | Planned | Look up a selected word for the inline dictionary → `{entry}` | `400`, `401`, `404` |
 
-Figma includes microphone recording and pronunciation feedback. It does not define audio upload/storage or a scoring provider. Until that contract is decided, `answer` may carry a client-produced transcript/score for the local demo; do not assume an audio-storage service.
+Recording Studio captures audio locally on the device. The demo answer may include a client-produced transcript/score for the speaking scorecard; do not upload or persist raw voice samples on the backend. Tutor feedback and branching role-play use the existing chat/message contract.
 
 ## Vocabulary, bookmarks, stories, and offline use
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/vocabulary/sets` | Planned | List learner decks and provided sets → `{sets:[...]}` | `401` |
-| `POST /api/vocabulary/sets` | Planned | **Control not shown:** create a learner deck; `{name}` → `{set}` | `400`, `401` |
+| `POST /api/vocabulary/sets` | Planned | Create a learner-owned deck; `{name}` → `{set}` | `400`, `401` |
 | `GET /api/vocabulary/sets/:setId` | Planned | Read a deck and its cards → `{set,cards:[...]}` | `401`, `404` |
 | `PATCH /api/vocabulary/sets/:setId` | Planned | Rename/update a learner deck; changed fields → `{set}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/sets/:setId` | Planned | **Control not shown:** delete a learner-owned deck → `{deleted:true}` | `401`, `404` |
+| `DELETE /api/vocabulary/sets/:setId` | Planned | Delete a learner-owned deck and its cards → `{deleted:true}` | `401`, `404` |
 | `GET /api/vocabulary/sets/:setId/cards` | Planned | List deck cards → `{cards:[...]}` | `401`, `404` |
-| `POST /api/vocabulary/sets/:setId/cards` | Planned | **Control not shown:** add a card; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
+| `POST /api/vocabulary/sets/:setId/cards` | Planned | Add a card; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
 | `GET /api/vocabulary/cards/:cardId` | Planned | Read one card → `{card}` | `401`, `404` |
 | `PATCH /api/vocabulary/cards/:cardId` | Planned | Edit a card; changed fields → `{card}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/cards/:cardId` | Planned | **Control not shown:** remove a card → `{deleted:true}` | `401`, `404` |
+| `DELETE /api/vocabulary/cards/:cardId` | Planned | Remove a card → `{deleted:true}` | `401`, `404` |
 | `POST /api/vocabulary/import/preview` | Planned | Parse selected rows and column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
 | `POST /api/vocabulary/import` | Planned | Import approved rows into a deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
 | `GET /api/bookmarks` | Planned | List saved words/stories → `{bookmarks:[...]}` | `401` |
 | `POST /api/bookmarks` | Planned | Save a word or story; `{targetType,targetId}` → `{bookmark}` | `400`, `401`, `404`, `409` |
+| `PATCH /api/bookmarks/:bookmarkId` | Planned | Edit learner note/tag; changed fields → `{bookmark}` | `400`, `401`, `404` |
 | `DELETE /api/bookmarks/:bookmarkId` | Planned | Remove a saved item → `{deleted:true}` | `401`, `404` |
 | `GET /api/stories` | Planned | Story library → `{stories:[...]}` | `500` |
-| `GET /api/stories/:storyId` | Planned | Read a story → `{story}` | `404` |
-| `PATCH /api/stories/:storyId/progress` | Planned | Save reading position/completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
+| `GET /api/stories/:storyId` | Planned | Read a story/article/dialogue and comprehension tree → `{story}` | `404` |
+| `GET /api/stories/:storyId/progress` | Planned | Read learner reading position → `{progress}` | `401`, `404` |
+| `PUT /api/stories/:storyId/progress` | Planned | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
+| `DELETE /api/stories/:storyId/progress` | Planned | Reset learner reading position → `{deleted:true}` | `401`, `404` |
 
-The offline queue, transfer progress, storage limit, and downloaded files are device-local. The mobile app downloads content through the existing course/unit/lesson reads and manages pause, cancel, remove, and ready state locally; no server-side CRUD for device downloads is proposed.
+The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed.
 
 ## League, rewards, community, and notifications
+
+### Rewards and achievements
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
@@ -118,86 +144,150 @@ The offline queue, transfer progress, storage limit, and downloaded files are de
 | `POST /api/quests/:questId/claim` | Planned | Claim completed quest reward → `{reward}` | `401`, `404`, `409` |
 | `GET /api/achievements` | Planned | Read achievement collection → `{achievements:[...]}` | `401` |
 | `GET /api/achievements/:achievementId` | Planned | Read achievement detail → `{achievement}` | `401`, `404` |
-| `GET /api/wallet` | Planned | Read gem balance/transactions → `{balance,transactions:[...]}` | `401` |
+| `GET /api/wallet` | Planned | Read gem balance/immutable transactions → `{balance,transactions:[...]}` | `401` |
 | `GET /api/rewards` | Planned | Read available reward shop items → `{rewards:[...]}` | `401` |
 | `POST /api/rewards/:rewardId/redeem` | Planned | Spend gems and redeem item → `{redemption,balance}` | `401`, `404`, `409` |
+| `GET /api/redemptions` | Planned | Read own redemptions → `{redemptions:[...]}` | `401` |
+| `DELETE /api/redemptions/:redemptionId` | Planned | Cancel an unfulfilled redemption and refund gems → `{cancelled:true,balance}` | `401`, `404`, `409` |
+
+Quest/achievement definitions and wallet transactions are curated/derived or append-only; learners cannot edit historical balances or awards.
+
+### Friends
+
+| Method / path | Status | Purpose; request → response | Errors |
+| --- | --- | --- | --- |
 | `GET /api/friends` | Planned | Read accepted connections → `{friends:[...]}` | `401` |
 | `GET /api/users/search?q=` | Planned | Find discoverable learners → `{users:[...]}` | `400`, `401` |
 | `GET /api/users/:userId` | Planned | Read profile fields permitted by privacy settings → `{user}` | `401`, `403`, `404` |
-| `GET /api/friend-requests` | Planned | **Control not shown:** read incoming/outgoing request status → `{requests:[...]}` | `401` |
+| `GET /api/friend-requests` | Planned | Read incoming/outgoing requests → `{requests:[...]}` | `401` |
 | `POST /api/friend-requests` | Planned | Send a request; `{userId}` → `{request}` | `400`, `401`, `404`, `409` |
-| `PATCH /api/friend-requests/:requestId` | Planned | **Control not shown:** accept or decline; `{action:"accept"|"decline"}` → `{request}` | `400`, `401`, `404`, `409` |
-| `DELETE /api/friends/:userId` | Planned | **Control not shown:** remove an accepted connection → `{removed:true}` | `401`, `404` |
+| `PATCH /api/friend-requests/:requestId` | Planned | Accept or decline; `{action:"accept"|"decline"}` → `{request}` | `400`, `401`, `404`, `409` |
+| `DELETE /api/friend-requests/:requestId` | Planned | Cancel own outgoing request or remove a declined request → `{deleted:true}` | `401`, `404` |
+| `DELETE /api/friends/:userId` | Planned | Remove an accepted connection → `{removed:true}` | `401`, `404` |
+
+### Study groups, posts, and challenges
+
+| Method / path | Status | Purpose; request → response | Errors |
+| --- | --- | --- | --- |
 | `GET /api/study-groups` | Planned | Browse groups by goal/topic → `{groups:[...]}` | `401` |
+| `POST /api/study-groups` | Planned | Create a learner-owned group; `{name,goal,topic,visibility}` → `{group}` | `400`, `401` |
 | `GET /api/study-groups/:groupId` | Planned | Read group overview, members, meetup, and challenge → `{group}` | `401`, `404` |
-| `POST /api/study-groups/:groupId/membership` | Planned | **Control not shown:** join group → `{membership}` | `401`, `404`, `409` |
-| `DELETE /api/study-groups/:groupId/membership` | Planned | **Control not shown:** leave group → `{left:true}` | `401`, `404` |
-| `GET /api/study-groups/:groupId/discussion` | Planned | Read the designed discussion feed → `{posts:[...]}` | `401`, `404` |
+| `PATCH /api/study-groups/:groupId` | Planned | Edit group settings as owner → `{group}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId` | Planned | Archive/delete an owned group → `{deleted:true}` | `401`, `403`, `404`, `409` |
+| `GET /api/study-groups/:groupId/members` | Planned | Read group members/roles → `{members:[...]}` | `401`, `404` |
+| `POST /api/study-groups/:groupId/membership` | Planned | Join group → `{membership}` | `401`, `404`, `409` |
+| `DELETE /api/study-groups/:groupId/membership` | Planned | Leave group → `{left:true}` | `401`, `404` |
+| `GET /api/study-groups/:groupId/discussion` | Planned | Read discussion feed → `{posts:[...]}` | `401`, `404` |
+| `POST /api/study-groups/:groupId/discussion` | Planned | Create own post; `{body}` → `{post}` | `400`, `401`, `404` |
+| `PATCH /api/study-groups/:groupId/discussion/:postId` | Planned | Edit own post; `{body}` → `{post}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId/discussion/:postId` | Planned | Delete own post → `{deleted:true}` | `401`, `403`, `404` |
+| `GET /api/study-groups/:groupId/discussion/:postId/comments` | Planned | Read post comments → `{comments:[...]}` | `401`, `404` |
+| `POST /api/study-groups/:groupId/discussion/:postId/comments` | Planned | Add own comment; `{body}` → `{comment}` | `400`, `401`, `404` |
+| `PATCH /api/study-groups/:groupId/discussion/:postId/comments/:commentId` | Planned | Edit own comment; `{body}` → `{comment}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId/discussion/:postId/comments/:commentId` | Planned | Delete own comment → `{deleted:true}` | `401`, `403`, `404` |
 | `GET /api/study-groups/:groupId/challenge` | Planned | Read shared challenge/progress → `{challenge}` | `401`, `404` |
-| `POST /api/study-groups/:groupId/challenge/join` | Planned | **Control not shown:** join a group challenge → `{participant}` | `401`, `404`, `409` |
+| `POST /api/study-groups/:groupId/challenge` | Planned | Create group challenge as owner; challenge fields → `{challenge}` | `400`, `401`, `403`, `404` |
+| `PATCH /api/study-groups/:groupId/challenge` | Planned | Edit group challenge as owner → `{challenge}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId/challenge` | Planned | Delete group challenge as owner → `{deleted:true}` | `401`, `403`, `404` |
+| `POST /api/study-groups/:groupId/challenge/join` | Planned | Join a group challenge → `{participant}` | `401`, `404`, `409` |
+| `DELETE /api/study-groups/:groupId/challenge/join` | Planned | Leave a group challenge → `{left:true}` | `401`, `404` |
+
+### Study rooms and shared activities
+
+| Method / path | Status | Purpose; request → response | Errors |
+| --- | --- | --- | --- |
+| `POST /api/study-groups/:groupId/rooms` | Planned | Create a room as group owner; `{name?,startsAt?}` → `{room}` | `400`, `401`, `403`, `404` |
 | `GET /api/study-rooms/:roomId` | Planned | Read active study room/focus → `{room}` | `401`, `404` |
-| `POST /api/study-rooms/:roomId/participants` | Planned | **Control not shown:** join a study room → `{participant}` | `401`, `404`, `409` |
-| `DELETE /api/study-rooms/:roomId/participants/me` | Planned | **Control not shown:** leave a study room → `{left:true}` | `401`, `404` |
-| `GET /api/study-rooms/:roomId/messages` | Planned | Read live room messages → `{messages:[...]}` | `401`, `404` |
+| `PATCH /api/study-rooms/:roomId` | Planned | Edit room settings as host → `{room}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-rooms/:roomId` | Planned | Close/delete room as host → `{deleted:true}` | `401`, `403`, `404` |
+| `POST /api/study-rooms/:roomId/participants` | Planned | Join a study room → `{participant}` | `401`, `404`, `409` |
+| `DELETE /api/study-rooms/:roomId/participants/me` | Planned | Leave a study room → `{left:true}` | `401`, `404` |
+| `GET /api/study-rooms/:roomId/messages` | Planned | Read room messages → `{messages:[...]}` | `401`, `404` |
 | `POST /api/study-rooms/:roomId/messages` | Planned | Send/reply to a room message; `{body,replyToId?}` → `{message}` | `400`, `401`, `404` |
-| `GET /api/study-rooms/:roomId/polls` | Planned | Read active poll and choices → `{poll}` | `401`, `404` |
-| `POST /api/study-rooms/:roomId/polls/:pollId/votes` | Planned | Submit one vote; `{choiceId}` → `{voteCount,selectedChoice}` | `400`, `401`, `404`, `409` |
+| `PATCH /api/study-rooms/:roomId/messages/:messageId` | Planned | Edit own message → `{message}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-rooms/:roomId/messages/:messageId` | Planned | Delete own message → `{deleted:true}` | `401`, `403`, `404` |
+| `GET /api/study-rooms/:roomId/polls` | Planned | Read polls and own vote → `{polls:[...]}` | `401`, `404` |
+| `POST /api/study-rooms/:roomId/polls` | Planned | Create a poll as host; `{question,choices:[...]}` → `{poll}` | `400`, `401`, `403`, `404` |
+| `PATCH /api/study-rooms/:roomId/polls/:pollId` | Planned | Edit poll as host → `{poll}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-rooms/:roomId/polls/:pollId` | Planned | Delete poll as host → `{deleted:true}` | `401`, `403`, `404` |
+| `POST /api/study-rooms/:roomId/polls/:pollId/votes` | Planned | Submit vote; `{choiceId}` → `{voteCount,selectedChoice}` | `400`, `401`, `404`, `409` |
+| `PATCH /api/study-rooms/:roomId/polls/:pollId/votes/me` | Planned | Change own vote; `{choiceId}` → `{voteCount,selectedChoice}` | `400`, `401`, `404` |
+| `DELETE /api/study-rooms/:roomId/polls/:pollId/votes/me` | Planned | Withdraw own vote while poll is open → `{deleted:true}` | `401`, `404`, `409` |
 | `GET /api/peer-reviews` | Planned | Read available peer-review item → `{submission}` | `401` |
-| `POST /api/peer-reviews/:submissionId/comments` | Planned | Submit a review comment; `{body}` → `{comment}` | `400`, `401`, `404` |
+| `POST /api/peer-reviews/:submissionId/comments` | Planned | Submit own review comment; `{body}` → `{comment}` | `400`, `401`, `404` |
+| `PATCH /api/peer-reviews/:submissionId/comments/:commentId` | Planned | Edit own review comment → `{comment}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/peer-reviews/:submissionId/comments/:commentId` | Planned | Delete own review comment → `{deleted:true}` | `401`, `403`, `404` |
 | `GET /api/study-groups/:groupId/plan/tasks` | Planned | Read group plan/task lanes → `{tasks:[...]}` | `401`, `404` |
-| `POST /api/study-groups/:groupId/plan/tasks` | Planned | **Controls need confirmation:** add a plan task; `{title,lane}` → `{task}` | `400`, `401`, `404` |
-| `PATCH /api/study-groups/:groupId/plan/tasks/:taskId` | Planned | **Controls need confirmation:** edit/move a task; changed fields → `{task}` | `400`, `401`, `404` |
-| `DELETE /api/study-groups/:groupId/plan/tasks/:taskId` | Planned | **Controls need confirmation:** remove a task → `{deleted:true}` | `401`, `404` |
-| `GET /api/study-groups/:groupId/whiteboard/notes` | Planned | Read shared sticky notes → `{notes:[...]}` | `401`, `404` |
-| `POST /api/study-groups/:groupId/whiteboard/notes` | Planned | **Controls need confirmation:** add a note; `{text,position?}` → `{note}` | `400`, `401`, `404` |
-| `PATCH /api/study-groups/:groupId/whiteboard/notes/:noteId` | Planned | **Controls need confirmation:** edit/move a note; changed fields → `{note}` | `400`, `401`, `404` |
-| `DELETE /api/study-groups/:groupId/whiteboard/notes/:noteId` | Planned | **Controls need confirmation:** remove a note → `{deleted:true}` | `401`, `404` |
+| `POST /api/study-groups/:groupId/plan/tasks` | Planned | Add a task; `{title,lane}` → `{task}` | `400`, `401`, `404` |
+| `PATCH /api/study-groups/:groupId/plan/tasks/:taskId` | Planned | Edit/move a task → `{task}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId/plan/tasks/:taskId` | Planned | Remove a task → `{deleted:true}` | `401`, `403`, `404` |
+| `GET /api/study-groups/:groupId/whiteboard/notes` | Planned | Read shared notes → `{notes:[...]}` | `401`, `404` |
+| `POST /api/study-groups/:groupId/whiteboard/notes` | Planned | Add a note; `{text,position?}` → `{note}` | `400`, `401`, `404` |
+| `PATCH /api/study-groups/:groupId/whiteboard/notes/:noteId` | Planned | Edit/move own note → `{note}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/study-groups/:groupId/whiteboard/notes/:noteId` | Planned | Remove own note → `{deleted:true}` | `401`, `403`, `404` |
+
+Group, room, challenge, and poll administration requires the relevant owner/host role. Members may change only their own records.
+
+### Notifications
+
+| Method / path | Status | Purpose; request → response | Errors |
+| --- | --- | --- | --- |
 | `GET /api/notifications` | Planned | Read notifications and unread count → `{notifications:[...],unreadCount}` | `401` |
 | `PATCH /api/notifications/read-all` | Planned | Mark all notifications read → `{updatedCount}` | `401` |
-| `PATCH /api/notifications/:notificationId` | Planned | Mark one notification read; `{read:true}` → `{notification}` | `401`, `404` |
+| `PATCH /api/notifications/:notificationId` | Planned | Mark one notification read/unread; `{read}` → `{notification}` | `400`, `401`, `404` |
+| `DELETE /api/notifications/:notificationId` | Planned | Delete one own notification → `{deleted:true}` | `401`, `404` |
+| `DELETE /api/notifications` | Planned | Clear own notification list → `{deletedCount}` | `401` |
 
-The Figma shows friend discovery and sending a request, but not accepting/declining/removing a friendship. It does not clearly show group join/leave controls. Those friend/group membership routes remain provisional and must not be implemented until the controls are confirmed. It shows group discussion as a feed without a compose control, so this contract does not invent create/edit/delete endpoints for discussion posts. Group creation/administration is also not shown.
+Notifications are system-created; clients can read, update read state, and delete them.
 
 ## Help and support
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/help/articles?category=` | Planned | Read FAQ/help topics → `{articles:[...]}` | `400`, `500` |
-| `POST /api/support/requests` | Planned | Submit issue; multipart fields `message`, optional PNG/JPG screenshot (≤5 MB), and device details → `{requestId,status}` | `400`, `401`, `413` |
+| `GET /api/support/requests` | Planned | Read the learner's own support requests → `{requests:[...]}` | `401` |
+| `POST /api/support/requests` | Planned | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
+| `PATCH /api/support/requests/:requestId` | Planned | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
+| `DELETE /api/support/requests/:requestId` | Planned | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
+
+Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
 
 ## Flo AI Tutor
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/tutor/role-plays` | Planned | Read designed conversation scenarios → `{scenarios:[...]}` | `401` |
+| `GET /api/tutor/role-plays` | Planned | Read curated branching role-play scenarios → `{scenarios:[...]}` | `401` |
 | `GET /api/tutor/chats` | Planned | Read saved conversation list → `{chats:[...]}` | `401` |
 | `POST /api/tutor/chats` | Planned | Start chat/role-play; `{scenarioId?}` → `{chat}` | `400`, `401`, `404` |
+| `PATCH /api/tutor/chats/:chatId` | Planned | Rename a chat or update its save preference → `{chat}` | `400`, `401`, `404` |
 | `GET /api/tutor/chats/:chatId` | Planned | Read messages and saved-note links → `{chat,messages:[...]}` | `401`, `404` |
-| `POST /api/tutor/chats/:chatId/messages` | Planned | Send question, grammar/mistake context, or role-play response; `{message,context?}` → `{userMessage,tutorMessage}` | `400`, `401`, `404`, `500` |
-| `DELETE /api/tutor/chats/:chatId` | Planned | **Control not shown:** delete one chat → `{deleted:true}` | `401`, `404` |
+| `POST /api/tutor/chats/:chatId/messages` | Planned | Send question, grammar/mistake context, or role-play response; `{message,context?}` → `{userMessage,tutorMessage,feedback?,nextTurn?}` | `400`, `401`, `404`, `500` |
+| `PATCH /api/tutor/chats/:chatId/messages/:messageId` | Planned | Edit own message and regenerate tutor feedback → `{userMessage,tutorMessage}` | `400`, `401`, `403`, `404` |
+| `DELETE /api/tutor/chats/:chatId/messages/:messageId` | Planned | Delete own message and linked response → `{deleted:true}` | `401`, `403`, `404` |
+| `DELETE /api/tutor/chats/:chatId` | Planned | Delete one chat after confirmation → `{deleted:true}` | `401`, `404` |
 | `DELETE /api/tutor/chats` | Planned | Clear all history after confirmation → `{deletedCount}` | `401` |
 | `GET /api/tutor/notes` | Planned | Read saved tutor notes → `{notes:[...]}` | `401` |
 | `POST /api/tutor/notes` | Planned | Save a phrase/pattern; `{chatId?,phrase,pattern,personalExample?}` → `{note}` | `400`, `401` |
 | `GET /api/tutor/notes/:noteId` | Planned | Read one saved note → `{note}` | `401`, `404` |
-| `PATCH /api/tutor/notes/:noteId` | Planned | **Control needs confirmation:** edit note/personal example; changed fields → `{note}` | `400`, `401`, `404` |
-| `DELETE /api/tutor/notes/:noteId` | Planned | **Control not shown:** delete one saved note → `{deleted:true}` | `401`, `404` |
+| `PATCH /api/tutor/notes/:noteId` | Planned | Edit note/personal example; changed fields → `{note}` | `400`, `401`, `404` |
+| `DELETE /api/tutor/notes/:noteId` | Planned | Delete one saved note → `{deleted:true}` | `401`, `404` |
 
 ## CRUD coverage and deliberate boundaries
 
 | Data | Planned learner operations |
 | --- | --- |
-| Account/profile/settings | Create and read account; update profile/settings; sign in/out, verify/recover credentials, revoke sessions, request export. Account deletion is not in the reviewed design. |
+| Account/profile/settings/exports | Create/read account; update profile/settings; delete account with confirmation; reset settings; revoke sessions; create/read/download/cancel export jobs. |
 | Course/unit/lesson/exercise definitions | Read only. No learner/admin create/update/delete endpoints. |
-| Enrollments and learning evidence | Select/read enrollment; un-enroll is not shown. Read/attach/remove evidence; evidence editing is not confirmed. |
-| Placement, answers, progress, review, quests, rewards | Create attempts/answers/claims/redemptions; read results. Progress and rewards are derived, not arbitrary CRUD fields. |
-| Planner entries | Calendar/weekly plan is visible; create/read/update/delete are proposed, with exact controls still to confirm. |
-| Learner vocabulary sets/cards | Deck name/cards are editable and import is visible; full create/read/update/delete routes are proposed, but explicit add/delete controls still need confirmation. |
-| Bookmarks/story progress | Create/read/remove bookmarks; read/update reading progress. |
-| Friends and groups | Search/read and send a request. Accept/decline/remove, join/leave, and challenge-join endpoints are provisional because those controls are not shown. No group creation or discussion-post write controls are shown. |
-| Study-room activities | Read/send live message, vote, and submit peer feedback are visible. Room join/leave and plan-task/whiteboard-note create/read/update/delete routes are provisional because the frames do not identify all mutation controls. |
-| Notifications | Read and mark read; no delete control is shown. |
-| Support | Create a request and show its designed confirmation; no later status/read, edit, or delete flow is shown. |
-| Tutor chats/notes | Create/read chats and messages and clear all history. Per-chat delete and note update/delete controls are not confirmed; saving a note and adding a personal example are shown. |
+| Enrollments/evidence/planner | Enrollment, evidence, and planner entries support create/read/update/delete under the learner's ownership. |
+| Placement/answers/progress/missions | Placement attempts and answers are create/read. Submitted answers and completion events are immutable; progress, mission passport, XP, streaks, and analytics are derived. Misconception cards can be dismissed/restored, not edited as source answers. |
+| Practice data | Learner decks/cards, bookmarks, reading progress, and custom review items support create/read/update/delete. Import creates cards after preview. Offline media/queue is device-local CRUD. |
+| Friends | Requests support create/read/update (accept/decline)/delete (cancel); friendships support read/delete. |
+| Groups/discussion/challenges | Group owners support group/challenge create/read/update/delete; membership supports join/read/leave; posts/comments support create/read/update/delete by their authors or authorized group owners. |
+| Study rooms | Hosts manage room/poll create/read/update/delete; members join/leave, manage their own messages, votes, review comments, plan tasks, and whiteboard notes. |
+| Rewards/achievements | Definitions and earned summaries are read-only; claims/redemptions are actions. Wallet transactions remain append-only; only unfulfilled redemptions may be canceled. |
+| Notifications | System-created; learners read, mark read/unread, delete one, or clear their own list. |
+| Support | Learner requests support create/read/update/delete while the request is open. |
+| Tutor chats/messages/notes | Create/read/update/delete owned chats/messages/notes; clear all history after confirmation. |
 | Offline downloads and unsent drafts | Device-local create/read/update/remove behavior; no backend CRUD. |
 
-All learner routes remain **Planned** until source code implements them. Keep payloads small, validate ownership and privacy on every mutation, and update this file when the implementation contract changes. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.
+All learner routes remain **Planned** until source code implements them. Validate ownership and group roles on every mutation; confirm destructive account/group/history actions. Do not expose mutation endpoints for curated definitions or derived/append-only records. See [DATABASE.md](DATABASE.md) for conceptual data relationships and [TESTING.md](TESTING.md) for CRUD verification.
