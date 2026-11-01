@@ -12,7 +12,7 @@
 ## In Progress
 
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- Review/merge of the local learning-data and mobile starter branch remains pending.
+- [PR #43](https://github.com/Phuocws0/Fluora/pull/43) combines the learning-data and mobile starter work and is waiting for owner review/merge.
 
 ## Planned
 
