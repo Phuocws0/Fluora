@@ -36,15 +36,39 @@ The prototype directory labels a 100-screen selected release. This grouped list 
 
 Page 10 records 160 numbered design explorations and an audit mapping 100 selected tasks into the Page 09 release. Its numbered frames 01–100 include authentication and placement variants, exercise/flashcard states, lesson and practice results, download completion, achievement details, friend-request confirmation, profile and settings alternatives, and tutor explanation/privacy/error states. Use those frames to resolve interaction details; do not count them again as separate features or routes.
 
-The 60 frames labeled `DRAFT / 101–160` include design variants. The audit maps 43 of these source designs to selected release tasks. The following 17 concepts are not in the selected 100 and must remain clearly marked as draft candidates unless the product scope is explicitly expanded:
+The 60 frames labeled `DRAFT / 101–160` include design variants. The audit maps 43 of these source designs to selected release tasks. At the product owner's request, the following 17 previously unselected concepts are now included in Fluora's planned scope:
 
 `103 Daily time budget`, `105 Learning promise`, `106 Waveform player`, `108 Transcript gap`, `111 Recording studio`, `115 Speaking scorecard`, `117 Sentence tiles`, `121 Article reader`, `124 Comprehension tree`, `133 Dialogue comic`, `135 Mission passport`, `143 Misconception map`, `144 Branching role-play`, `145 Tutor feedback`, `146 Focus mode`, `147 Large type preview`, and `148 Audio-only lesson`.
+
+These concepts are in scope while their Page 10 visuals remain drafts. Page 09 remains the primary flow and UI reference; use Page 10 for these added concepts and supporting states. Other draft explorations remain out of scope. Implement the concepts within existing logical flows unless a distinct user journey requires a route.
+
+| Page 10 draft | Planned flow / treatment | Backlog issue |
+| --- | --- | --- |
+| 103 · Daily time budget | Onboarding and editable learning preference | #5 |
+| 105 · Learning promise | Onboarding and editable learning preference | #5 |
+| 106 · Waveform player | Reusable audio control in lesson/practice | #8 |
+| 108 · Transcript gap | Exercise mode within the lesson player | #8 |
+| 111 · Recording studio | Device-local speaking practice in a lesson | #8 |
+| 115 · Speaking scorecard | Result state for speaking practice | #8 |
+| 117 · Sentence tiles | Exercise mode within the lesson player | #8 |
+| 121 · Article reader | Reader content mode | #13 |
+| 124 · Comprehension tree | Comprehension component/state in the reader | #13 |
+| 133 · Dialogue comic | Reader content mode | #13 |
+| 135 · Mission passport | Learning insights screen backed by derived completions | #10 |
+| 143 · Misconception map | Learning insights screen backed by answer history | #10 |
+| 144 · Branching role-play | Tutor conversation mode | #22 |
+| 145 · Tutor feedback | Tutor/lesson feedback state | #22 |
+| 146 · Focus mode | Editable accessibility/wellbeing preference | #20 |
+| 147 · Large type preview | Accessibility setting preview state | #20 |
+| 148 · Audio-only lesson | Lesson playback mode | #8 |
+
+This maps all 17 promoted concepts to existing feature issues. The issue number is implementation planning; it does not mean the feature is already implemented.
 
 ## How to map a Figma frame
 
 Classify each frame as a **route**, **screen**, **reusable component**, **UI state**, **modal**, or **overlay**. A frame is not automatically a route. Correct/incorrect answers, selected/unselected values, loading, validation, connection errors, completion, reward feedback, and confirmation dialogs are normally states or overlays within a logical flow.
 
-Use visible controls and copy to identify data operations. A list or detail frame alone does not prove create, update, or delete behavior. When a CRUD action is not shown or its effect is unclear, record the design gap and do not invent behavior. The planned endpoint coverage and unresolved actions are tracked in [API.md](API.md).
+Use visible controls and copy as the visual reference. The product owner has approved the expanded learner CRUD baseline in [API.md](API.md), including straightforward create/edit/delete controls for learner-owned and group-managed content even where the prototype omits those controls. Keep those controls consistent with the existing design and include confirmation for destructive actions. Do not invent unrelated business behavior or visual details.
 
 If Figma access is available, inspect the relevant frame before UI implementation. If direct access fails, do not invent visual details; use this document, existing UI, and user-provided screenshots/specifications.
 
@@ -61,4 +85,4 @@ Prototype reactions inspected in Page 09/10 confirm these linked flows:
 - Tutor privacy has settings and a **clear chat history** confirmation overlay.
 - The selected collaborative-study exploration links study room → poll → peer review → group plan → shared whiteboard. It shows live message/reply, poll choices, a comment box, task lanes, and sticky notes; the detailed create/edit/delete controls are not specified consistently in the frames.
 
-These findings are reflected in [API.md](API.md). Before implementing an action that is not visible (especially delete controls, friend request acceptance, group membership changes, or group content editing), either confirm the interaction in Figma or keep it marked as a product/API decision. The prototype confirms the feature area, but a visible list/detail alone does not define its full CRUD behavior.
+These findings are reflected in [API.md](API.md). The owner has chosen a practical CRUD baseline for planner entries, vocabulary decks/cards, friend requests, groups, discussion, shared study content, support requests, tutor chats/notes, and account/export actions. Implement those actions as explicit controls and confirmation states; use ownership and group-role checks. Voice practice stays device-local for this demo; tutor history follows the learner's save preference. The approved baseline resolves the earlier design-gap question without treating every Figma frame as a route.

@@ -32,6 +32,9 @@ The Expo app currently has one placeholder `App.tsx` and no navigation library. 
 ├── course/[courseId]
 ├── unit/[unitId]
 ├── lesson/[lessonId]
+├── planner
+├── missions/passport
+├── learning/insights
 ├── learning-tools/[toolId]
 ├── vocabulary/sets/[setId]
 ├── stories/[storyId]
@@ -50,12 +53,12 @@ The Expo app currently has one placeholder `App.tsx` and no navigation library. 
 | Logical route area | Figma destinations covered |
 | --- | --- |
 | Auth and onboarding | Welcome/splash, register, sign-in, email verification, password recovery, app/course language, motivation, level/placement, daily goal, reminder, and validation/result states |
-| Home and learn | Learning Home, course catalog/detail, unit catalog/detail, course/learning-path comparison, syllabus, lesson search, weekly planner, skill baseline, analytics, and can-do evidence |
-| Lesson | Lesson introduction/session and exercise modes: sentence building, choice/listening, fill-gap, matching, speaking, pronunciation, and story challenge |
-| Practice | Practice hub, vocabulary set/deck editor/import, review/error notebook, stories/reading, grammar and study tools, calendar, bookmarks, and offline downloads |
-| Tutor tab | Flo home, conversation/role-play, saved notes, chat history/privacy, prompt composition, and hints |
-| League tab | Leaderboard, quests, achievements, friends/profile/requests, groups/discussion/challenges, study room, poll, peer review, group plan, whiteboard, rewards, and notifications |
-| Profile and settings | Profile/edit, analytics, account security, notification/accessibility/privacy settings, low-bandwidth and wellbeing controls, help/support, and data export |
+| Home and learn | Learning Home, course catalog/detail, unit catalog/detail, course/learning-path comparison, syllabus, lesson search, weekly planner, skill baseline, analytics, can-do evidence, mission passport, and misconception map |
+| Lesson | Lesson session and sentence tiles, transcript gaps, listening/waveform/audio-only, local recording and speaking scorecard; these remain exercise modes/states within a lesson |
+| Practice | Practice hub, vocabulary set/deck CRUD/import, review/error notebook, article/story reader, comprehension tree, dialogue comic, grammar and study tools, calendar, bookmarks, and offline downloads |
+| Tutor tab | Flo home, branching role-play, feedback, saved notes, chat history/privacy, prompt composition, and hints |
+| League tab | Leaderboard, quests, achievements, friends/requests, group CRUD/discussion/challenges, study-room CRUD, polls, peer review, group plan, whiteboard, rewards, and notifications |
+| Profile and settings | Profile/edit/delete account, analytics, account security, notification/accessibility/privacy settings, large-type preview, focus mode, low-bandwidth and wellbeing controls, help/support CRUD, and data exports |
 | Rewards | Reward shop and redemption confirmation, reached within the League/Profile flow |
 
 This table groups the selected screen inventory in [FIGMA.md](FIGMA.md); it does not create a route for every numbered frame. An independently navigable tool can use a shared tool route/screen where that fits the implementation.
@@ -80,7 +83,11 @@ Examples:
 | Lesson completed, quest reward, password reset success | UI state or modal |
 | Sign-out / clear-history confirmation | Modal |
 | Tooltip and small contextual hint | Overlay |
+| Waveform, transcript gap, recording studio, speaking scorecard, sentence tiles | Components/states inside lesson or practice screens |
+| Article reader, comprehension tree, dialogue comic | Content modes within the story reader route |
+| Daily time budget, learning promise, focus mode, large-type preview | Onboarding/settings fields or preview states |
+| Mission passport, misconception map, tutor branching/feedback | Learning insights or tutor conversation screens/states |
 
 ## Data operations are separate from navigation
 
-Editing a profile, importing a vocabulary list, sending a friend request, voting in a poll, redeeming a reward, or clearing tutor history is an action within a flow; it does not require a new route for each operation. See [API.md](API.md) for planned operations and explicit CRUD coverage, and [FIGMA.md](FIGMA.md) for the selected/draft boundary.
+Editing a profile, managing a group post, importing a vocabulary list, sending a friend request, voting in a poll, redeeming a reward, or clearing tutor history is an action within a flow; it does not require a new route for each operation. The product-approved CRUD baseline is in [API.md](API.md), and [FIGMA.md](FIGMA.md) distinguishes the 17 promoted Page 10 concepts from other drafts.

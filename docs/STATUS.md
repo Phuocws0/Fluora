@@ -4,7 +4,7 @@
 
 - Documentation foundation and second consistency audit against the selected Figma scope.
 - Initial npm-workspaces monorepo scaffold: Expo TypeScript placeholder, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and first migration, Docker Compose local runtime, and GitHub Actions CI.
-- Created 25 GitHub Issues across four milestones for the selected feature backlog; issues remain unassigned for team allocation.
+- Created the GitHub backlog and four milestones; the open feature issues now include the 17 promoted Page 10 concepts and expanded learner-owned CRUD scope.
 - Repository is public and `main` is protected: pull requests, one approval, and passing CI are required; only the owner can update or merge into `main`.
 
 ## In Progress
@@ -14,8 +14,8 @@
 ## Planned
 
 1. Implement authentication and onboarding as the first vertical slice.
-2. Continue through the selected course, lesson, exercise, progress, and practice flows.
-3. Implement the remaining selected community, rewards, profile/settings, support, and tutor features in `docs/PRODUCT.md`.
+2. Implement the expanded learner-owned CRUD contract alongside the relevant feature slices.
+3. Continue through the course, lesson, exercise, progress, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Blocked
 
