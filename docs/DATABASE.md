@@ -4,7 +4,7 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The schema contains `User` plus the curated learning-content models `Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath`. The initial account migration and the learning-content migration are checked in. The seed command creates one sample English course, two ordered units, four lessons with representative exercise modes, and two learning paths for comparison. Passwords, sessions, enrollments, learner answers, and progress are not implemented yet.
+The schema contains `User`, the curated learning-content models `Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath`, plus owner-scoped `SupportRequest` and `DataExportRequest` records. Their migrations are checked in. The seed command creates one sample English course, two ordered units, four lessons, and two learning paths. Passwords, sessions, settings, learner answers, and progress are not implemented yet. The support/export routes still need verified session identity from issue #3.
 
 ## Account and preferences
 

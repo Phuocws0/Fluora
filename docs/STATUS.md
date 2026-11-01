@@ -12,12 +12,13 @@
 ## In Progress
 
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- [PR #43](https://github.com/Phuocws0/Fluora/pull/43) combines the learning-data and mobile starter work and is waiting for owner review/merge.
-- The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is reserved for Thành while his collaborator invitation is pending.
+- Issue #33 support/export backend branch: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
+- [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
+- The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
 ## Planned
 
-1. Start backend identity (#3) and core-learning (#27) domains in parallel after PR #43 merges.
+1. Implement backend identity (#3) and core-learning (#27) domains.
 2. Integrate the matching FE flows when their API contracts are available.
 3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 

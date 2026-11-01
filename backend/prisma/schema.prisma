@@ -14,6 +14,35 @@ model User {
   displayName String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  supportRequests SupportRequest[]
+  dataExportRequests DataExportRequest[]
+}
+
+model SupportRequest {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  message       String   @db.Text
+  screenshot    String?
+  deviceDetails Json
+  status        String   @default("open")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("support_requests")
+}
+
+model DataExportRequest {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  status    String   @default("ready")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("data_export_requests")
 }
 
 model Course {
