@@ -1,60 +1,70 @@
 # Testing and Verification
 
-Keep verification proportional to a local demo. Prefer tools already present in the project; this document does not require adding a testing framework. The repository currently has no application code or runnable checks, so commands should be documented after the project setup exists.
+Keep verification proportional to a local demo and use tools already present. This repository currently has documentation only, so there are no runnable checks yet. Do not add a testing framework just because this plan exists.
 
-## 1. Static verification
+## Static verification
 
-Where available, check that:
+Where available, verify:
 
-- TypeScript type checking passes.
-- There are no unresolved imports.
-- Existing linting reports no obvious errors.
-- There is no unjustified `any` or obvious dead import.
-- Frontend and backend types/contracts do not obviously disagree.
+- TypeScript typecheck passes and imports resolve.
+- Existing linting has no clear errors, unjustified `any`, or dead imports.
+- Mobile/backend types and API request/response shapes agree with [API.md](API.md).
+- Prisma usage agrees with `schema.prisma` and [DATABASE.md](DATABASE.md).
 
-## 2. Backend verification
+## Backend verification
 
-For implemented endpoints, verify:
+For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. For mutable user-owned resources, verify:
 
-- A valid expected request works.
-- Basic request validation behaves as expected.
-- The success response has the documented shape.
-- A relevant error path returns a useful status and response.
-- The database operation works against the local database.
-- The endpoint remains consistent with [API.md](API.md).
+- create/read/update/delete behavior where those controls are in selected scope;
+- owner checks, duplicate/conflict handling, and invalid IDs;
+- friend/request/group actions only after their controls are confirmed in Figma;
+- profile/privacy choices affect returned friend/community/tutor data;
+- reward/quest/progress totals change through recorded actions rather than arbitrary updates;
+- tutor history clearing and export behavior match settings/privacy choices.
 
-## 3. Mobile verification
+Check that device-local offline queues and drafts do not accidentally depend on a server-side CRUD endpoint. Confirm each response/error against [API.md](API.md).
 
-For implemented screens and flows, verify:
+## Mobile verification
 
-- The screen renders and navigation works.
-- Relevant loading and error states do not crash the app.
-- API integration works.
-- Important interaction states behave correctly.
-- The Android demo flow works.
+For implemented screens/flows, verify layout, navigation, major controls, loading/error states, and Android behavior. Use the full feature coverage in [PRODUCT.md](PRODUCT.md) and selected frame inventory in [FIGMA.md](FIGMA.md). At minimum check:
 
-iOS verification is desirable, but not required for every local task unless the change concerns iOS behavior.
+- account registration, sign-in, verification/recovery, onboarding, placement, and sign-out;
+- learning home, course/unit/lesson navigation, search/filter, planner, and progress;
+- lesson exercise variants, correct/incorrect/hint/completion states, review, and pronunciation feedback;
+- vocabulary deck editing/import preview, stories/bookmarks, offline download/connection fallback;
+- league/rewards, friends/groups, notifications, profile/settings/privacy/export, support;
+- tutor chat/role-play, saved note, privacy controls, and clear-history confirmation.
+
+Do not treat each Figma frame as a route. Test route navigation and the contained UI states together.
+
+iOS verification is desirable but not mandatory for each local task unless the change involves iOS behavior.
+
+## CRUD and design-gap checks
+
+For every mutation added to the API, locate its control/state in the selected Figma flow. If the design does not show it, keep it marked as a question in [FIGMA.md](FIGMA.md) and do not silently invent it. In particular, verify the intended behavior for card/deck deletion, friend request acceptance/removal, group join/leave, and group-plan/whiteboard edits before implementing those mutations.
 
 ## Demo smoke flow
 
-Once these features exist, use this as a minimum end-to-end sanity check:
+Once these features exist, use this as the minimum end-to-end sanity check:
 
 ```text
 Launch app
 ↓
-Login
+Choose app/course language and onboarding preferences
+↓
+Register or login and complete placement if offered
 ↓
 Learning Home
 ↓
-Open Course
+Open Course → Unit → Lesson
 ↓
-Open Unit
+Complete an exercise → show feedback/result
 ↓
-Open Lesson
+Update progress, XP, and streak
 ↓
-Complete Exercise
+Open Practice → review/save a vocabulary item
 ↓
-Show Result
-↓
-Update Progress
+Open Profile or Tutor and verify the selected secondary flow
 ```
+
+Add a focused check for each changed domain; the smoke flow is not a replacement for the CRUD/error-path checks above.

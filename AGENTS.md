@@ -25,6 +25,7 @@ Then inspect the relevant existing source code. Documentation does not replace s
 3. Understand the current implementation state; do not infer that a planned item is implemented.
 4. Avoid inventing requirements that are not supported by the repository, designs, or user request.
 5. Identify whether the task affects the frontend, backend, database, API contract, or multiple layers.
+6. For feature/UI scope, use the selected Page 09 inventory and Page 10 selection notes in `docs/FIGMA.md`; distinguish release scope from unselected draft concepts. Check the needed read/create/update/delete actions in `docs/API.md` and note prototype gaps instead of assuming controls exist.
 
 ## General rules
 
@@ -111,7 +112,7 @@ When explicitly asked to audit the repository, inspect and report findings befor
 | Severity | Examples |
 | --- | --- |
 | Critical | App cannot run; broken imports/build or navigation; frontend/backend contract or database/schema mismatch; committed secrets; data loss or destructive behavior; core demo flow broken |
-| High | Incorrect user flow; duplicate screens/routes caused by Figma frame duplication; API error handling or state problems; major type-safety issues; critical Figma behavior missing |
+| High | Incorrect user flow; duplicate screens/routes caused by Figma frame duplication; missing CRUD/API coverage for selected user actions; API error handling or state problems; major type-safety issues; critical Figma behavior missing |
 | Medium | Code duplication; poor separation of concerns; unnecessary complexity; inconsistent naming; dead code; documentation drift |
 | Low | Formatting; minor naming improvements; cosmetic refactors |
 

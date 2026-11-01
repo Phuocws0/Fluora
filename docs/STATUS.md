@@ -2,7 +2,7 @@
 
 ## Completed
 
-- Documentation/bootstrap foundation. No application implementation is present.
+- Documentation foundation, including selected Page 09 feature inventory, Page 10 selection/draft boundary, proposed routes/API/CRUD coverage, and a second consistency audit. No application implementation is present.
 
 ## In Progress
 
@@ -10,14 +10,10 @@
 
 ## Planned
 
-1. Initialize or verify the React Native + Expo frontend.
-2. Initialize or verify the Express + TypeScript backend.
-3. Configure PostgreSQL + Prisma.
-4. Configure Docker Compose for the backend and database.
-5. Implement authentication as the first vertical slice.
-6. Connect the login frontend to the backend.
-7. Implement Learning Home and Courses.
-8. Continue through the lesson, exercise, and progress flow.
+1. Initialize the planned React Native + Expo frontend, Express + TypeScript backend, Prisma/PostgreSQL, and local Docker Compose runtime.
+2. Implement authentication and onboarding as the first vertical slice.
+3. Continue through the selected course, lesson, exercise, progress, and practice flows.
+4. Implement the remaining selected community, rewards, profile/settings, support, and tutor features in `docs/PRODUCT.md`.
 
 ## Blocked
 
@@ -25,4 +21,4 @@
 
 ## Next Recommended Tasks
 
-- Bootstrap the planned local stack, then use authentication as the first end-to-end vertical slice.
+- Bootstrap the planned local stack, then implement authentication/onboarding as the first end-to-end vertical slice.

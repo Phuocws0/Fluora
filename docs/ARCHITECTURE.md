@@ -36,9 +36,11 @@ React Native / Expo runs directly on the host and does not need to run inside Do
 
 ## Responsibilities
 
-- **Mobile frontend:** Render screens and reusable UI, manage navigation and interaction state, and call backend services through REST/JSON.
-- **Backend:** Expose the API, validate requests, apply application logic, and use Prisma for database access.
-- **Database:** Store account, learning-content, answer, progress, streak, and achievement data as required by the demo.
+- **Mobile frontend:** Render screens and reusable UI, manage navigation and interaction state, call backend services through REST/JSON, and manage device-local downloads/unsent drafts.
+- **Backend:** Expose the API, validate requests, apply application logic, and use Prisma for synchronized account, learning, practice, community, rewards, and tutor data.
+- **Database:** Store durable account, learning-content, answer, progress, planning, vocabulary, community, reward, support, and tutor records as required by selected demo interactions. Analytics and totals can be derived from source records.
+
+Offline course files and download-queue progress are device-local; the backend serves the existing course/unit/lesson content. Do not add a separate download service or storage platform for the local demo.
 
 ## Architecture status
 
