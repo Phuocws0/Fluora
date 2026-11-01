@@ -3,19 +3,22 @@
 ## Completed
 
 - Documentation foundation and second consistency audit against the selected Figma scope.
-- Initial npm-workspaces monorepo scaffold: Expo TypeScript placeholder, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and first migration, Docker Compose local runtime, and GitHub Actions CI.
+- Initial npm-workspaces monorepo scaffold: Expo TypeScript app, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and migrations, Docker Compose local runtime, and GitHub Actions CI.
 - Created the GitHub backlog and four milestones; the open feature issues now include the 17 promoted Page 10 concepts and expanded learner-owned CRUD scope.
 - Repository is public and `main` is protected: pull requests, one approval, and passing CI are required; only the owner can update or merge into `main`.
+- Issue #6 learning-content schema, seed data, and read APIs are implemented; a seeded PostgreSQL API smoke check passed.
+- Issue #2 mobile navigation shell is implemented with five logical tabs and auth/onboarding/detail destinations; typecheck and Android bundle export pass.
 
 ## In Progress
 
-- Issue #6: curated learning schema, demo seed, and read APIs are implemented on the local feature branch; review/merge and a database-backed smoke check remain.
+- Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
+- Review/merge of the local learning-data and mobile starter branch remains pending.
 
 ## Planned
 
-1. Implement authentication and onboarding as the first vertical slice.
-2. Connect the mobile Learning Home and lesson flow to the implemented course and lesson APIs.
-3. Continue through progress, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
+1. Complete the connected Learning Home flow with learner progress and a real continue-learning destination.
+2. Implement authentication and onboarding as the next vertical slice.
+3. Continue through lesson answers, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Blocked
 
@@ -23,4 +26,4 @@
 
 ## Next Recommended Tasks
 
-- Implement authentication and onboarding as the first end-to-end vertical slice.
+- Finish the open acceptance criteria in issue #7 on top of the mobile navigation/service structure.

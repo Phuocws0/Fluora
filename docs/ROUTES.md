@@ -1,6 +1,43 @@
 # Navigation Routes
 
-The Expo app currently has one placeholder `App.tsx` and no navigation library. The following is a proposed logical model derived from the selected Page 09 flow and Page 10 states, not a claim that these routes exist. Choose a navigation library when implementing the first real navigation flow and adapt names to it.
+The mobile app now uses Expo Router. The routes below are the implemented starter routes; feature destinations that are not ready show a plain placeholder. The broader product map remains a plan until its feature UI is implemented.
+
+## Implemented starter routes
+
+```text
+/
+└── redirects to /(tabs)/learn
+
+/(tabs)/
+├── learn
+├── practice
+├── tutor
+├── league
+└── profile
+
+course/[courseId]
+unit/[unitId]
+lesson/[lessonId]
+lessons/search
+learning-paths
+
+/(auth)/
+├── welcome
+├── login
+├── register
+├── onboarding
+├── verify-email
+├── forgot-password
+└── reset-password
+
+settings/[section]
+```
+
+Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth/onboarding, settings, and the other four tabs currently render placeholders to establish destinations; they do not imply those features are implemented.
+
+## Planned logical model
+
+The following routes are still proposed destinations for later feature work:
 
 ```text
 /

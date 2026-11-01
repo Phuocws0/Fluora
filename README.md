@@ -18,12 +18,17 @@ fluora/
 ├── .github/workflows/ci.yml
 ├── backend/                 # Express app, Prisma schema and migrations
 ├── docs/                    # Product, architecture, design, API and workflow docs
-├── mobile/                  # Expo React Native app
+├── mobile/
+│   ├── app/                 # Expo Router destinations and tab layout
+│   ├── components/          # Shared UI
+│   ├── features/learning/   # Learning screens and feature API methods
+│   ├── services/            # Shared HTTP transport
+│   └── types/               # Mobile API response types
 ├── docker-compose.yml       # Local backend + PostgreSQL runtime
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app is currently a runnable placeholder. The backend has a database-backed health check and the first curated learning-content read APIs for courses, units, lessons, search, and learning paths. Authentication, learner progress, and the mobile feature flows are still planned.
+The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. Authentication, learner progress, and the remaining feature screens are still planned; unfinished destinations show a simple placeholder.
 
 ## Prerequisites
 
@@ -64,7 +69,7 @@ Start Expo in a second terminal:
 npm run dev:mobile
 ```
 
-For an Android emulator, use `npm run android --workspace @fluora/mobile` or press `a` in the Expo terminal. The mobile placeholder does not call the API yet.
+For an Android emulator, use `npm run android --workspace @fluora/mobile` or press `a` in the Expo terminal. The app connects to the backend at `10.0.2.2:4000` on Android emulators and `localhost:4000` on iOS simulators and web. For a physical device or a different host, set `EXPO_PUBLIC_API_URL` to an address reachable from that device before starting Expo, for example `EXPO_PUBLIC_API_URL=http://192.168.1.20:4000 npm run dev:mobile`.
 
 Stop local containers while keeping the database volume:
 

@@ -2,9 +2,9 @@
 
 ## Current implementation
 
-Fluora is an npm-workspaces monorepo. The implementation is an initial runnable scaffold, not the learner application:
+Fluora is an npm-workspaces monorepo. The implementation is an initial local-demo scaffold with one connected learning flow:
 
-- `mobile/` is an Expo SDK 57 React Native TypeScript placeholder with no navigation or product features.
+- `mobile/` is an Expo SDK 57 React Native TypeScript app using Expo Router. It has the five logical tabs and reads published courses, units, lessons, lesson search results, and learning paths through a mobile service layer. The auth, practice, tutor, league, and profile feature UIs remain placeholders.
 - `backend/` is one Express 5 TypeScript app. It exposes `GET /health` and public, read-only course, unit, lesson, lesson-search, and learning-path endpoints under `/api`.
 - `backend/prisma/schema.prisma` contains the initial `User` model and the curated `Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath` models with checked-in migrations. Authentication and learner-owned answer/progress data are not implemented.
 - `backend/src/db/seed.ts` provides repeatable demo content seeding; apply it explicitly after migrations.
@@ -43,7 +43,7 @@ Run Expo on the host; it does not need Docker. Compose starts PostgreSQL and the
 
 ## Responsibilities
 
-- **Mobile frontend:** Render screens and reusable UI, manage navigation and interaction state, call backend services through REST/JSON, and manage device-local downloads/unsent drafts.
+- **Mobile frontend:** Render screens and reusable UI, manage Expo Router navigation and interaction state, call backend services through REST/JSON, and manage device-local downloads/unsent drafts. The current learning feature separates route files, feature screens/services, shared components, API transport, and response types.
 - **Backend:** Expose the API, validate requests, apply application logic, and use Prisma for synchronized account, learning, practice, community, rewards, and tutor data.
 - **Database:** Store durable account, learning-content, answer, progress, planning, vocabulary, community, reward, support, and tutor records as required by selected demo interactions. Analytics and totals can be derived from source records.
 - **CI:** Run lightweight static and build checks. It does not deploy the application.
@@ -52,7 +52,8 @@ Offline course files and download-queue progress are device-local; the backend s
 
 ## Planned and optional work
 
-- **Planned:** Implement logical navigation and learner features from `docs/PRODUCT.md`, then extend API/schema in step with those features.
+- **Implemented starter:** Logical five-tab navigation and the public learning-content read flow from Learning Home through course, unit, lesson preview, lesson search, and learning-path comparison.
+- **Planned:** Continue learner features from `docs/PRODUCT.md`; add authentication and learner progress before claiming a personalized continue-learning state.
 - **Optional future improvements:** Add structure or tooling only when a concrete implementation need appears. No additional infrastructure is currently required.
 
 See [API.md](API.md), [DATABASE.md](DATABASE.md), [ROUTES.md](ROUTES.md), and [TESTING.md](TESTING.md) for current contracts and guidance.
