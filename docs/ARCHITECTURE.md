@@ -5,8 +5,8 @@
 Fluora is an npm-workspaces monorepo. The implementation is an initial local-demo scaffold with one connected learning flow:
 
 - `mobile/` is an Expo SDK 57 React Native TypeScript app using Expo Router. It has the five logical tabs and reads published courses, units, lessons, lesson search results, and learning paths through a mobile service layer. The auth, practice, tutor, league, and profile feature UIs remain placeholders.
-- `backend/` is one Express 5 TypeScript app. It exposes `GET /health` and public, read-only course, unit, lesson, lesson-search, and learning-path endpoints under `/api`.
-- `backend/prisma/schema.prisma` contains the initial `User` model and the curated `Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath` models with checked-in migrations. Authentication and learner-owned answer/progress data are not implemented.
+- `backend/` is one Express 5 TypeScript app. It exposes `GET /health`, public learning-content and help reads, and partial support/export routes. The private routes require verified session identity from issue #3.
+- `backend/prisma/schema.prisma` contains `User`, curated learning-content models, `SupportRequest`, and `DataExportRequest` with checked-in migrations. Authentication and learner-owned answer/progress data are not implemented.
 - `backend/src/db/seed.ts` provides repeatable demo content seeding; apply it explicitly after migrations.
 - `docker-compose.yml` runs the backend and PostgreSQL. Expo runs directly on the host.
 - `.github/workflows/ci.yml` runs typecheck, Prisma validation, backend build, and Android bundle export on pull requests and pushes to `main`.
