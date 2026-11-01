@@ -85,7 +85,7 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/practice` | Planned | Practice hub recommendations and due-item counts → `{suggestions,reviewDueCount}` | `401` |
+| `GET /api/practice` | Partial | Practice hub recommendations and due-item counts → `{suggestions,reviewDueCount}` | `401` |
 | `GET /api/planner/entries` | Planned | Read calendar/weekly plan → `{entries:[...]}` | `401` |
 | `POST /api/planner/entries` | Planned | Create a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
 | `GET /api/planner/entries/:entryId` | Planned | Read one learner-owned session → `{entry}` | `401`, `404` |
@@ -94,15 +94,15 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 | `GET /api/lessons/:lessonId/answers` | Planned | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
 | `POST /api/exercises/:exerciseId/answers` | Planned | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
 | `GET /api/exercises/:exerciseId/hints?step=` | Planned | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
-| `GET /api/practice/review-items?kind=` | Planned | Read due vocabulary and recurring mistakes → `{items:[...]}` | `401` |
-| `GET /api/practice/review-items/:itemId` | Planned | Read one saved review item → `{item}` | `401`, `404` |
-| `POST /api/practice/review-items` | Planned | Create a learner-owned review item; `{front,back,kind?}` → `{item}` | `400`, `401` |
-| `PATCH /api/practice/review-items/:itemId` | Planned | Edit a custom review item or dismiss a derived mistake; changed fields → `{item}` | `400`, `401`, `404` |
-| `DELETE /api/practice/review-items/:itemId` | Planned | Delete a custom item or hide a derived mistake from this learner's queue → `{deleted:true}` | `401`, `404` |
-| `POST /api/practice/review-items/:itemId/answers` | Planned | Record recall/review outcome and update schedule → `{result,nextReviewAt}` | `400`, `401`, `404` |
-| `GET /api/study-tools` | Planned | List available curated study tools → `{tools:[...]}` | `401` |
-| `GET /api/study-tools/:toolId` | Planned | Read curated audio/waveform, pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit content → `{tool}` | `401`, `404` |
-| `GET /api/dictionary?query=` | Planned | Look up a selected word for the inline dictionary → `{entry}` | `400`, `401`, `404` |
+| `GET /api/practice/review-items?kind=` | Partial | Read due vocabulary and recurring mistakes → `{items:[...]}` | `401` |
+| `GET /api/practice/review-items/:itemId` | Partial | Read one saved review item → `{item}` | `401`, `404` |
+| `POST /api/practice/review-items` | Partial | Create a learner-owned review item; `{front,back,kind?}` → `{item}` | `400`, `401` |
+| `PATCH /api/practice/review-items/:itemId` | Partial | Edit a custom review item or dismiss a derived mistake; changed fields → `{item}` | `400`, `401`, `404` |
+| `DELETE /api/practice/review-items/:itemId` | Partial | Delete a custom item or hide a derived mistake from this learner's queue → `{deleted:true}` | `401`, `404` |
+| `POST /api/practice/review-items/:itemId/answers` | Partial | Record recall/review outcome and update schedule → `{result,nextReviewAt}` | `400`, `401`, `404` |
+| `GET /api/study-tools` | Partial | List available curated study tools → `{tools:[...]}` | `401` |
+| `GET /api/study-tools/:toolId` | Partial | Read curated audio/waveform, pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit content → `{tool}` | `401`, `404` |
+| `GET /api/dictionary?query=` | Partial | Look up a selected word for the inline dictionary → `{entry}` | `400`, `401`, `404` |
 
 Recording Studio captures audio locally on the device. The demo answer may include a client-produced transcript/score for the speaking scorecard; do not upload or persist raw voice samples on the backend. Tutor feedback and branching role-play use the existing chat/message contract.
 
@@ -120,8 +120,8 @@ Recording Studio captures audio locally on the device. The demo answer may inclu
 | `GET /api/vocabulary/cards/:cardId` | Partial | Read one card → `{card}` | `401`, `404` |
 | `PATCH /api/vocabulary/cards/:cardId` | Partial | Edit a card; changed fields → `{card}` | `400`, `401`, `404` |
 | `DELETE /api/vocabulary/cards/:cardId` | Partial | Remove a card → `{deleted:true}` | `401`, `404` |
-| `POST /api/vocabulary/import/preview` | Planned | Parse selected rows and column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
-| `POST /api/vocabulary/import` | Planned | Import approved rows into a deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
+| `POST /api/vocabulary/import/preview` | Partial | Parse selected rows and column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
+| `POST /api/vocabulary/import` | Partial | Import approved rows into a deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
 | `GET /api/bookmarks` | Partial | List saved words/stories → `{bookmarks:[...]}` | `401` |
 | `POST /api/bookmarks` | Partial | Save a word or story; `{targetType,targetId}` → `{bookmark}` | `400`, `401`, `404`, `409` |
 | `PATCH /api/bookmarks/:bookmarkId` | Partial | Edit learner note/tag; changed fields → `{bookmark}` | `400`, `401`, `404` |
@@ -132,7 +132,7 @@ Recording Studio captures audio locally on the device. The demo answer may inclu
 | `PUT /api/stories/:storyId/progress` | Partial | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
 | `DELETE /api/stories/:storyId/progress` | Partial | Reset learner reading position → `{deleted:true}` | `401`, `404` |
 
-The practice branch implements deck/card CRUD, story reads, story bookmarks, and reading progress. Private routes need issue #3 to set `res.locals.userId` from a verified bearer session; until then they return `401`. Word bookmarks, review items, imports, study tools, dictionary, and practice recommendations remain planned.
+The practice branch implements deck/card CRUD, story reads, story bookmarks, and reading progress. Private routes need issue #3 to set `res.locals.userId` from a verified bearer session; until then they return `401`. Custom review items and scheduling, deck import preview/import, basic study-tool metadata, a small local dictionary, and story-based recommendations are implemented. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned; story challenge answers reuse issue #27.
 
 The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed.
 
