@@ -17,6 +17,7 @@
     "prisma:generate": "npm run prisma:generate --workspace @fluora/backend",
     "prisma:validate": "npm run prisma:validate --workspace @fluora/backend",
     "db:migrate": "npm run db:migrate --workspace @fluora/backend",
-    "db:deploy": "npm run db:deploy --workspace @fluora/backend"
+    "db:deploy": "npm run db:deploy --workspace @fluora/backend",
+    "db:seed": "npm run db:seed --workspace @fluora/backend"
   }
 }

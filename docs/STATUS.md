@@ -9,13 +9,13 @@
 
 ## In Progress
 
-- None.
+- Issue #6: curated learning schema, demo seed, and read APIs are implemented on the local feature branch; review/merge and a database-backed smoke check remain.
 
 ## Planned
 
 1. Implement authentication and onboarding as the first vertical slice.
-2. Implement the expanded learner-owned CRUD contract alongside the relevant feature slices.
-3. Continue through the course, lesson, exercise, progress, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
+2. Connect the mobile Learning Home and lesson flow to the implemented course and lesson APIs.
+3. Continue through progress, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Blocked
 

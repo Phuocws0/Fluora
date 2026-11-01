@@ -23,7 +23,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app is currently a runnable placeholder. The backend currently exposes only a database-backed health check. Learner features and their APIs are still planned.
+The mobile app is currently a runnable placeholder. The backend has a database-backed health check and the first curated learning-content read APIs for courses, units, lessons, search, and learning paths. Authentication, learner progress, and the mobile feature flows are still planned.
 
 ## Prerequisites
 
@@ -49,6 +49,14 @@ docker compose up --build -d
 ```
 
 The backend applies checked-in Prisma migrations on startup and listens inside Docker on port `4000`; it is published at `http://localhost:4000` by default. Set `PORT` in `.env` to change the host-published backend port. Its database-backed health endpoint is `GET /health`. PostgreSQL is published on port `5433` by default to avoid conflicting with a local PostgreSQL server.
+
+Seed the demonstration course after the backend and database are running:
+
+```sh
+npm run db:seed --workspace @fluora/backend
+```
+
+The seed command is safe to run again and does not reset the database. The learning-content API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
 
 Start Expo in a second terminal:
 
