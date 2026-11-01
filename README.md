@@ -83,6 +83,8 @@ npm run check:mobile
 
 GitHub Actions runs these checks on pull requests and pushes to `main`. There are no feature tests yet.
 
+The public `main` branch requires a pull request, one approval, and passing CI. Only the repository owner can update or merge into `main`; collaborators can push work to feature branches.
+
 ## Documentation
 
 - [Product scope](docs/PRODUCT.md)
