@@ -1,6 +1,6 @@
 # API Contract
 
-This document records the implemented runtime health route and the planned learner-facing API for Page 09 plus the 17 Page 10 concepts promoted into scope by the product owner. Learner routes below remain **Planned**; the current backend does not implement product APIs. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
+This document records the implemented runtime health and learning-content read APIs plus the planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoints are marked **Planned** until implemented in the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -51,14 +51,14 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/home` | Planned | Home cards and continue-learning summary → `{course,progress,streak,wallet}` | `401` |
-| `GET /api/courses` | Planned | Course catalog → `{courses:[...]}` | `500` |
-| `GET /api/courses/:courseId` | Planned | Course overview and units → `{course}` | `404` |
-| `GET /api/courses/:courseId/units` | Planned | Unit catalog → `{units:[...]}` | `404` |
-| `GET /api/units/:unitId` | Planned | Unit overview and lessons → `{unit}` | `404` |
-| `GET /api/lessons/:lessonId` | Planned | Lesson, exercise sequence, story/article content, audio metadata, waveform/transcript gaps, dialogue branches, and comprehension structure → `{lesson}` | `404` |
-| `GET /api/lessons/search?query=&level=&skill=&minutes=` | Planned | Search/filter lessons → `{lessons:[...]}` | `400` |
-| `GET /api/learning-paths` | Planned | Compare/browse paths and outcomes → `{paths:[...]}` | `500` |
-| `GET /api/learning-paths/compare?ids=` | Planned | Compare selected paths and workloads → `{paths:[...]}` | `400`, `404` |
+| `GET /api/courses` | Implemented | Published course catalog → `{courses:[{id,slug,title,description,language,level,estimatedMinutes,unitCount,lessonCount,learningPaths}]}` | `500` |
+| `GET /api/courses/:courseId` | Implemented | Course overview and ordered syllabus units/lessons → `{course:{...,units:[...],learningPaths:[...]}}` | `400`, `404`, `500` |
+| `GET /api/courses/:courseId/units` | Implemented | Ordered unit catalog with lesson counts → `{units:[{id,slug,title,description,order,lessonCount}]}` | `400`, `404`, `500` |
+| `GET /api/units/:unitId` | Implemented | Unit overview, course summary, and ordered lessons → `{unit:{...,course,lessons:[...]}}` | `400`, `404`, `500` |
+| `GET /api/lessons/:lessonId` | Implemented | Lesson, ordered exercises, public exercise content/options, and course/unit summaries → `{lesson:{...,exercises:[...]}}` | `400`, `404`, `500` |
+| `GET /api/lessons/search?query=&level=&skill=&minutes=` | Implemented | Search title/description and filter by level, skill, or maximum duration in minutes → `{lessons:[...]}` | `400`, `500` |
+| `GET /api/learning-paths` | Implemented | Published path metadata, outcomes, and linked course → `{paths:[...]}` | `500` |
+| `GET /api/learning-paths/compare?ids=<id1>,<id2>` | Implemented | Compare at least two distinct path IDs, returned in request order → `{paths:[...]}` | `400`, `404`, `500` |
 | `GET /api/enrollments` | Planned | Read current learner's selected courses → `{enrollments:[...]}` | `401` |
 | `POST /api/enrollments` | Planned | Select/enroll in a course; `{courseId}` → `{enrollment}` | `401`, `404`, `409` |
 | `PATCH /api/enrollments/:enrollmentId` | Planned | Update learner-owned enrollment selection/state; changed fields → `{enrollment}` | `400`, `401`, `404` |
@@ -78,6 +78,8 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `POST /api/missions/:missionId/complete` | Planned | Record completed mission evidence; progress is derived → `{completion}` | `400`, `401`, `404`, `409` |
 | `GET /api/learning/misconceptions` | Planned | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
 | `PATCH /api/learning/misconceptions/:itemId` | Planned | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
+
+The implemented course, unit, lesson, and learning-path reads are public curated content and do not require authentication. The course detail response is the course syllabus. Lesson responses omit exercise answer keys, correctness flags, and feedback explanations; those remain server-side until an answer is submitted.
 
 ## Planner and practice
 

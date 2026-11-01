@@ -4,7 +4,7 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The initial schema contains only `User` with a UUID, unique email, optional display name, and creation/update timestamps. Its first migration is checked in. Passwords, sessions, settings, and learner-domain data are not implemented yet. Extend the actual schema with the first feature slice instead of treating the conceptual model below as an existing database.
+The schema contains `User` plus the curated learning-content models `Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath`. The initial account migration and the learning-content migration are checked in. The seed command creates one sample English course, two ordered units, four lessons with representative exercise modes, and two learning paths for comparison. Passwords, sessions, enrollments, learner answers, and progress are not implemented yet.
 
 ## Account and preferences
 
@@ -29,13 +29,17 @@ Course
        └── Lesson
             └── Exercise
                  └── ExerciseOption
+
+LearningPath
+  └── Course
 ```
 
-- **courses:** Learner-facing courses and learning paths.
+- **courses:** Curated course title, language, level, and estimated workload.
 - **units:** Ordered course sections.
 - **lessons:** Learning sessions in a unit.
-- **exercises:** Lesson prompts, including sentence tiles, transcript gaps, listening/waveform/audio-only metadata, local recording prompts, speaking scorecards, writing, vocabulary, grammar, and story activities.
-- **exercise_options:** Options for choice/matching exercises.
+- **learning_paths:** Curated path metadata, career goal, estimated workload, level, outcomes, and linked course. Multiple paths can point to the same course while presenting different goals for comparison.
+- **exercises:** Ordered lesson prompts. A shared `type` and JSON content/answer key support modes such as sentence tiles, transcript gaps, speaking, and matching without a table per exercise frame.
+- **exercise_options:** Ordered choices for supported choice exercises. Correctness flags and exercise answer keys are excluded from learner-facing lesson reads.
 - **stories:** Curated story/article/dialogue content, comprehension structures, and story challenges.
 - **Study-tool and dictionary content:** Keep reference material and tool configuration with curated lesson/content data where practical; a separate table is not implied by each tool screen.
 

@@ -44,23 +44,23 @@ These concepts are in scope while their Page 10 visuals remain drafts. Page 09 r
 
 | Page 10 draft | Planned flow / treatment | Backlog issue |
 | --- | --- | --- |
-| 103 · Daily time budget | Onboarding and editable learning preference | #5 |
-| 105 · Learning promise | Onboarding and editable learning preference | #5 |
-| 106 · Waveform player | Reusable audio control in lesson/practice | #8 |
-| 108 · Transcript gap | Exercise mode within the lesson player | #8 |
-| 111 · Recording studio | Device-local speaking practice in a lesson | #8 |
-| 115 · Speaking scorecard | Result state for speaking practice | #8 |
-| 117 · Sentence tiles | Exercise mode within the lesson player | #8 |
-| 121 · Article reader | Reader content mode | #13 |
-| 124 · Comprehension tree | Comprehension component/state in the reader | #13 |
-| 133 · Dialogue comic | Reader content mode | #13 |
-| 135 · Mission passport | Learning insights screen backed by derived completions | #10 |
-| 143 · Misconception map | Learning insights screen backed by answer history | #10 |
+| 103 · Daily time budget | Onboarding and editable learning preference | #4 |
+| 105 · Learning promise | Onboarding and editable learning preference | #4 |
+| 106 · Waveform player | Reusable audio control in lesson/practice | #7 |
+| 108 · Transcript gap | Exercise mode within the lesson player | #7 |
+| 111 · Recording studio | Device-local speaking practice in a lesson | #7 |
+| 115 · Speaking scorecard | Result state for speaking practice | #7 |
+| 117 · Sentence tiles | Exercise mode within the lesson player | #7 |
+| 121 · Article reader | Reader content mode | #11 |
+| 124 · Comprehension tree | Comprehension component/state in the reader | #11 |
+| 133 · Dialogue comic | Reader content mode | #11 |
+| 135 · Mission passport | Learning insights screen backed by derived completions | #7 |
+| 143 · Misconception map | Learning insights screen backed by answer history | #7 |
 | 144 · Branching role-play | Tutor conversation mode | #22 |
 | 145 · Tutor feedback | Tutor/lesson feedback state | #22 |
 | 146 · Focus mode | Editable accessibility/wellbeing preference | #20 |
 | 147 · Large type preview | Accessibility setting preview state | #20 |
-| 148 · Audio-only lesson | Lesson playback mode | #8 |
+| 148 · Audio-only lesson | Lesson playback mode | #7 |
 
 This maps all 17 promoted concepts to existing feature issues. The issue number is implementation planning; it does not mean the feature is already implemented.
 

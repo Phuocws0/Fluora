@@ -1,6 +1,6 @@
 # Testing and Verification
 
-Keep verification proportional to a local demo and use tools already present. The scaffold has typecheck/build checks but no feature test suite yet; do not add a testing framework just because this plan exists.
+Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks but no feature test suite yet; do not add a testing framework just because this plan exists.
 
 ## Current checks and CI
 
@@ -27,7 +27,11 @@ Where available, verify:
 
 ## Backend verification
 
-For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. The current health endpoint should return `503` when its database connection is unavailable. For mutable user-owned resources, verify:
+For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. The current health endpoint should return `503` when its database connection is unavailable.
+
+For the learning-content API, seed the local database and check the course catalog, course syllabus, ordered units/lessons/exercises, lesson search filters, and comparison of at least two learning paths. Confirm lesson responses do not expose answer keys, option correctness flags, or feedback explanations before an answer is submitted.
+
+For mutable user-owned resources, verify:
 
 - create/read/update/delete behavior for learner-owned resources and group-managed content in the approved CRUD baseline;
 - owner checks, duplicate/conflict handling, and invalid IDs;
