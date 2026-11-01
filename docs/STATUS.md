@@ -13,12 +13,13 @@
 
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) combines the learning-data and mobile starter work and is waiting for owner review/merge.
+- The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is reserved for Thành while his collaborator invitation is pending.
 
 ## Planned
 
-1. Complete the connected Learning Home flow with learner progress and a real continue-learning destination.
-2. Implement authentication and onboarding as the next vertical slice.
-3. Continue through lesson answers, practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
+1. Start backend identity (#3) and core-learning (#27) domains in parallel after PR #43 merges.
+2. Integrate the matching FE flows when their API contracts are available.
+3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Blocked
 
@@ -26,4 +27,4 @@
 
 ## Next Recommended Tasks
 
-- Finish the open acceptance criteria in issue #7 on top of the mobile navigation/service structure.
+- Implement backend issue #3 and issue #27 as independent domain tasks; FE issues identify their API prerequisites.
