@@ -2,12 +2,14 @@ import express from "express";
 import { prisma } from "./db/prisma.js";
 import { learningRouter } from "./features/learning/learning.routes.js";
 import { supportRouter } from "./features/support/support.routes.js";
+import { practiceRouter } from "./features/practice/practice.routes.js";
 
 const app = express();
 
 app.use(express.json());
 app.use("/api", learningRouter);
 app.use("/api", supportRouter);
+app.use("/api", practiceRouter);
 
 app.get("/health", async (_request, response) => {
   try {

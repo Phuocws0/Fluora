@@ -284,7 +284,31 @@ async function seedLearningContent() {
     });
   }
 
-  console.log("Seeded the English Foundations course and learning paths.");
+  const storyContent = {
+    paragraphs: [
+      { speaker: "Mia", text: "Good morning! My name is Mia." },
+      { speaker: "Leo", text: "Good morning, Mia. I am Leo." },
+      { speaker: "Mia", text: "Nice to meet you, Leo." },
+    ],
+    comprehension: [{ question: "When do Mia and Leo meet?", options: ["Morning", "Evening"] }],
+  };
+
+  await prisma.story.upsert({
+    where: { slug: "first-conversation" },
+    create: {
+      slug: "first-conversation",
+      title: "A first conversation",
+      kind: "dialogue",
+      content: storyContent,
+    },
+    update: {
+      title: "A first conversation",
+      kind: "dialogue",
+      content: storyContent,
+    },
+  });
+
+  console.log("Seeded the English Foundations course, learning paths, and story.");
 }
 
 seedLearningContent()
