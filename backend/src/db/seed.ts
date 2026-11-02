@@ -326,9 +326,107 @@ async function seedLearningContent() {
   console.log("Seeded the English Foundations course, learning paths, story, goals, and mission.");
 }
 
-seedLearningContent()
+const questSeeds = [
+  { slug: "daily-lesson", title: "Complete 1 lesson", metric: "lessons_completed", target: 1, rewardGems: 10, order: 1 },
+  { slug: "daily-xp", title: "Earn 20 XP", metric: "xp_earned", target: 20, rewardGems: 15, order: 2 },
+  { slug: "daily-review", title: "Answer 3 review cards", metric: "review_answers", target: 3, rewardGems: 10, order: 3 },
+  { slug: "daily-story", title: "Finish 1 story", metric: "stories_completed", target: 1, rewardGems: 10, order: 4 },
+];
+
+const achievementSeeds = [
+  { slug: "first-lesson", title: "First steps", description: "Complete your first lesson.", metric: "lessons_completed_total", target: 1, order: 1 },
+  { slug: "course-finisher", title: "Course finisher", description: "Complete all four starter lessons.", metric: "lessons_completed_total", target: 4, order: 2 },
+  { slug: "xp-50", title: "Growing garden", description: "Earn 50 XP in total.", metric: "xp_total", target: 50, order: 3 },
+  { slug: "streak-2", title: "Two-day streak", description: "Learn on two days in a row.", metric: "streak_days", target: 2, order: 4 },
+  { slug: "first-friend", title: "Study buddy", description: "Make your first friend.", metric: "friends_count", target: 1, order: 5 },
+  { slug: "first-claim", title: "Quest seeker", description: "Claim your first daily quest.", metric: "quests_claimed_total", target: 1, order: 6 },
+];
+
+const rewardSeeds = [
+  { slug: "streak-freeze", name: "Streak freeze", description: "Protect your streak for one missed day.", costGems: 20, kind: "streak_freeze", fulfillment: "deferred", order: 1 },
+  { slug: "profile-frame", name: "Leaf profile frame", description: "A leafy frame around your profile photo.", costGems: 30, kind: "profile_frame", fulfillment: "instant", order: 2 },
+  { slug: "garden-theme", name: "Garden theme", description: "A calm green app theme.", costGems: 40, kind: "theme", fulfillment: "instant", order: 3 },
+  { slug: "flo-outfit", name: "Flo explorer outfit", description: "A travel outfit for your Flo companion.", costGems: 45, kind: "flo_outfit", fulfillment: "instant", order: 4 },
+];
+
+const peerReviewSeeds = [
+  {
+    slug: "weekend-plans",
+    title: "My weekend plans",
+    prompt: "Write three sentences about your plans for the weekend.",
+    body: "On Saturday I go to the market with my sister. In the afternoon we will cooking a big lunch. On Sunday I want relax at home and read a book.",
+    authorLabel: "Learner A2",
+    order: 1,
+  },
+  {
+    slug: "favourite-place",
+    title: "My favourite place",
+    prompt: "Describe a place you like to visit and explain why.",
+    body: "My favourite place is a small café near my office. The coffee is very good and the people is friendly. I go there every morning before work.",
+    authorLabel: "Learner A2",
+    order: 2,
+  },
+];
+
+/** Password-less demo learners (they can't sign in) so search, profiles, and the League have data. */
+const demoLearnerSeeds = [
+  { email: "demo.linh@fluora.local", displayName: "Linh (demo)", lessonCount: 0 },
+  { email: "demo.minh@fluora.local", displayName: "Minh (demo)", lessonCount: 2 },
+  { email: "demo.an@fluora.local", displayName: "An (demo)", lessonCount: 4 },
+];
+
+async function seedCommunityAndLeague() {
+  for (const quest of questSeeds) {
+    await prisma.quest.upsert({ where: { slug: quest.slug }, create: quest, update: quest });
+  }
+  for (const achievement of achievementSeeds) {
+    await prisma.achievement.upsert({ where: { slug: achievement.slug }, create: achievement, update: achievement });
+  }
+  for (const reward of rewardSeeds) {
+    await prisma.reward.upsert({ where: { slug: reward.slug }, create: reward, update: reward });
+  }
+  for (const submission of peerReviewSeeds) {
+    await prisma.peerReviewSubmission.upsert({ where: { slug: submission.slug }, create: submission, update: submission });
+  }
+
+  const lessons = await prisma.lesson.findMany({
+    where: { unit: { course: { slug: courseSeed.slug } } },
+    orderBy: [{ unit: { order: "asc" } }, { order: "asc" }],
+    select: { id: true, _count: { select: { exercises: true } } },
+  });
+  const now = new Date();
+  for (const demo of demoLearnerSeeds) {
+    const user = await prisma.user.upsert({
+      where: { email: demo.email },
+      create: { email: demo.email, displayName: demo.displayName, emailVerifiedAt: now },
+      update: { displayName: demo.displayName },
+    });
+    await prisma.userSettings.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, discoverable: true, progressVisibility: "public" },
+      update: { discoverable: true, progressVisibility: "public" },
+    });
+    // Keep the demo XP inside the current League week so the leaderboard always has data.
+    for (const lesson of lessons.slice(0, demo.lessonCount)) {
+      await prisma.lessonCompletion.upsert({
+        where: { userId_lessonId: { userId: user.id, lessonId: lesson.id } },
+        create: { userId: user.id, lessonId: lesson.id, xpEarned: 10 + lesson._count.exercises * 2, completedAt: now },
+        update: { completedAt: now },
+      });
+    }
+  }
+
+  console.log("Seeded quests, achievements, rewards, peer-review samples, and demo learners.");
+}
+
+async function seed() {
+  await seedLearningContent();
+  await seedCommunityAndLeague();
+}
+
+seed()
   .catch((error: unknown) => {
-    console.error("Failed to seed learning content:", error);
+    console.error("Failed to seed demo data:", error);
     process.exitCode = 1;
   })
   .finally(async () => {

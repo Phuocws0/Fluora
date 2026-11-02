@@ -35,6 +35,24 @@ model User {
   learningEvidence LearningEvidence[]
   missionCompletions MissionCompletion[]
   misconceptionStates MisconceptionState[]
+  sentFriendRequests      FriendRequest[]        @relation("FriendRequestsSent")
+  receivedFriendRequests  FriendRequest[]        @relation("FriendRequestsReceived")
+  notifications           Notification[]
+  groupMemberships        GroupMembership[]
+  groupPosts              GroupPost[]
+  groupComments           GroupComment[]
+  challengeParticipations ChallengeParticipant[]
+  hostedRooms             StudyRoom[]            @relation("HostedRooms")
+  roomParticipations      RoomParticipant[]
+  roomMessages            RoomMessage[]
+  pollVotes               PollVote[]
+  peerReviewComments      PeerReviewComment[]
+  planTasks               GroupPlanTask[]
+  whiteboardNotes         WhiteboardNote[]
+  questClaims             QuestClaim[]
+  achievements            UserAchievement[]
+  redemptions             RewardRedemption[]
+  walletTransactions      WalletTransaction[]
 }
 
 model Session {
@@ -464,4 +482,386 @@ model MisconceptionState {
 
   @@unique([userId, exerciseId])
   @@map("misconception_states")
+}
+
+model FriendRequest {
+  id          String    @id @default(uuid()) @db.Uuid
+  requesterId String    @db.Uuid
+  addresseeId String    @db.Uuid
+  pairKey     String    @unique
+  status      String    @default("pending")
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  requester   User      @relation("FriendRequestsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User      @relation("FriendRequestsReceived", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+  @@map("friend_requests")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      String
+  title     String
+  body      String
+  data      Json      @default("{}")
+  dedupeKey String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+
+model StudyGroup {
+  id          String            @id @default(uuid()) @db.Uuid
+  name        String
+  goal        String
+  topic       String
+  visibility  String            @default("public")
+  meetupAt    DateTime?
+  meetupNote  String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships GroupMembership[]
+  posts       GroupPost[]
+  challenge   GroupChallenge?
+  rooms       StudyRoom[]
+  planTasks   GroupPlanTask[]
+  notes       WhiteboardNote[]
+
+  @@index([visibility, topic])
+  @@map("study_groups")
+}
+
+model GroupMembership {
+  id       String     @id @default(uuid()) @db.Uuid
+  groupId  String     @db.Uuid
+  userId   String     @db.Uuid
+  role     String     @default("member")
+  joinedAt DateTime   @default(now())
+  group    StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_memberships")
+}
+
+model GroupPost {
+  id        String         @id @default(uuid()) @db.Uuid
+  groupId   String         @db.Uuid
+  authorId  String         @db.Uuid
+  body      String         @db.Text
+  editedAt  DateTime?
+  createdAt DateTime       @default(now())
+  group     StudyGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  GroupComment[]
+
+  @@index([groupId, createdAt])
+  @@map("group_posts")
+}
+
+model GroupComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  postId    String    @db.Uuid
+  authorId  String    @db.Uuid
+  body      String    @db.Text
+  editedAt  DateTime?
+  createdAt DateTime  @default(now())
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@map("group_comments")
+}
+
+model GroupChallenge {
+  id           String                 @id @default(uuid()) @db.Uuid
+  groupId      String                 @unique @db.Uuid
+  title        String
+  metric       String
+  target       Int
+  startsAt     DateTime
+  endsAt       DateTime
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  group        StudyGroup             @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  participants ChallengeParticipant[]
+
+  @@map("group_challenges")
+}
+
+model ChallengeParticipant {
+  id          String         @id @default(uuid()) @db.Uuid
+  challengeId String         @db.Uuid
+  userId      String         @db.Uuid
+  joinedAt    DateTime       @default(now())
+  challenge   GroupChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_participants")
+}
+
+
+model StudyRoom {
+  id           String            @id @default(uuid()) @db.Uuid
+  groupId      String            @db.Uuid
+  hostId       String            @db.Uuid
+  name         String
+  focus        String?
+  startsAt     DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  group        StudyGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  host         User              @relation("HostedRooms", fields: [hostId], references: [id], onDelete: Cascade)
+  participants RoomParticipant[]
+  messages     RoomMessage[]
+  polls        Poll[]
+
+  @@index([groupId, createdAt])
+  @@map("study_rooms")
+}
+
+model RoomParticipant {
+  id       String    @id @default(uuid()) @db.Uuid
+  roomId   String    @db.Uuid
+  userId   String    @db.Uuid
+  joinedAt DateTime  @default(now())
+  room     StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("room_participants")
+}
+
+model RoomMessage {
+  id        String        @id @default(uuid()) @db.Uuid
+  roomId    String        @db.Uuid
+  authorId  String        @db.Uuid
+  body      String        @db.Text
+  replyToId String?       @db.Uuid
+  editedAt  DateTime?
+  createdAt DateTime      @default(now())
+  room      StudyRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo   RoomMessage?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies   RoomMessage[] @relation("MessageReplies")
+
+  @@index([roomId, createdAt])
+  @@map("room_messages")
+}
+
+model Poll {
+  id        String       @id @default(uuid()) @db.Uuid
+  roomId    String       @db.Uuid
+  question  String
+  closedAt  DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  room      StudyRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  choices   PollChoice[]
+  votes     PollVote[]
+
+  @@index([roomId, createdAt])
+  @@map("polls")
+}
+
+model PollChoice {
+  id     String     @id @default(uuid()) @db.Uuid
+  pollId String     @db.Uuid
+  label  String
+  order  Int
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes  PollVote[]
+
+  @@unique([pollId, order])
+  @@map("poll_choices")
+}
+
+model PollVote {
+  id        String     @id @default(uuid()) @db.Uuid
+  pollId    String     @db.Uuid
+  choiceId  String     @db.Uuid
+  userId    String     @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  choice    PollChoice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@map("poll_votes")
+}
+
+model PeerReviewSubmission {
+  id        String              @id @default(uuid()) @db.Uuid
+  slug      String              @unique
+  title     String
+  prompt    String              @db.Text
+  body      String              @db.Text
+  authorLabel String
+  order     Int                 @default(0)
+  comments  PeerReviewComment[]
+
+  @@map("peer_review_submissions")
+}
+
+model PeerReviewComment {
+  id           String               @id @default(uuid()) @db.Uuid
+  submissionId String               @db.Uuid
+  authorId     String               @db.Uuid
+  body         String               @db.Text
+  editedAt     DateTime?
+  createdAt    DateTime             @default(now())
+  submission   PeerReviewSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  author       User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId, createdAt])
+  @@map("peer_review_comments")
+}
+
+model GroupPlanTask {
+  id          String     @id @default(uuid()) @db.Uuid
+  groupId     String     @db.Uuid
+  createdById String     @db.Uuid
+  title       String
+  lane        String     @default("todo")
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([groupId, lane, order])
+  @@map("group_plan_tasks")
+}
+
+model WhiteboardNote {
+  id        String     @id @default(uuid()) @db.Uuid
+  groupId   String     @db.Uuid
+  authorId  String     @db.Uuid
+  text      String
+  x         Int        @default(0)
+  y         Int        @default(0)
+  color     String     @default("yellow")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  group     StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@map("whiteboard_notes")
+}
+
+
+model Quest {
+  id         String       @id @default(uuid()) @db.Uuid
+  slug       String       @unique
+  title      String
+  metric     String
+  target     Int
+  rewardGems Int
+  order      Int          @default(0)
+  isActive   Boolean      @default(true)
+  claims     QuestClaim[]
+
+  @@map("quests")
+}
+
+model QuestClaim {
+  id          String             @id @default(uuid()) @db.Uuid
+  userId      String             @db.Uuid
+  questId     String             @db.Uuid
+  periodKey   String
+  rewardGems  Int
+  claimedAt   DateTime           @default(now())
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest       Quest              @relation(fields: [questId], references: [id], onDelete: Restrict)
+  transaction WalletTransaction?
+
+  @@unique([userId, questId, periodKey])
+  @@map("quest_claims")
+}
+
+model Achievement {
+  id          String            @id @default(uuid()) @db.Uuid
+  slug        String            @unique
+  title       String
+  description String
+  metric      String
+  target      Int
+  order       Int               @default(0)
+  earned      UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @db.Uuid
+  achievementId String      @db.Uuid
+  earnedAt      DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model Reward {
+  id          String             @id @default(uuid()) @db.Uuid
+  slug        String             @unique
+  name        String
+  description String
+  costGems    Int
+  kind        String
+  fulfillment String
+  order       Int                @default(0)
+  isActive    Boolean            @default(true)
+  redemptions RewardRedemption[]
+
+  @@map("rewards")
+}
+
+model RewardRedemption {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @db.Uuid
+  rewardId     String              @db.Uuid
+  costGems     Int
+  status       String
+  createdAt    DateTime            @default(now())
+  cancelledAt  DateTime?
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward       Reward              @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  transactions WalletTransaction[]
+
+  @@index([userId, createdAt])
+  @@map("reward_redemptions")
+}
+
+model WalletTransaction {
+  id           String            @id @default(uuid()) @db.Uuid
+  userId       String            @db.Uuid
+  amount       Int
+  reason       String
+  questClaimId String?           @unique @db.Uuid
+  redemptionId String?           @db.Uuid
+  createdAt    DateTime          @default(now())
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questClaim   QuestClaim?       @relation(fields: [questClaimId], references: [id], onDelete: NoAction)
+  redemption   RewardRedemption? @relation(fields: [redemptionId], references: [id], onDelete: NoAction)
+
+  @@unique([redemptionId, reason])
+  @@index([userId, createdAt])
+  @@map("wallet_transactions")
 }
