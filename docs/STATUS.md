@@ -8,26 +8,34 @@
 - Repository is public and `main` is protected: pull requests, one approval, and passing CI are required; only the owner can update or merge into `main`.
 - Issue #6 learning-content schema, seed data, and read APIs are implemented; a seeded PostgreSQL API smoke check passed.
 - Issue #2 mobile navigation shell is implemented with five logical tabs and auth/onboarding/detail destinations; typecheck and Android bundle export pass.
+- Issue #27 core learning activity API records answers and idempotent completions, derives progress/analytics/skill confidence, and supports planner/evidence CRUD, mission passport/completion, hints, and misconception dismiss/restore. Private routes use verified bearer sessions.
 
 ## In Progress
 
-- Issue #27 backend branch: immutable exercise answers, idempotent lesson completion, derived XP/streak/analytics/skill confidence, planner/evidence CRUD, mission passport/completion, hints, and derived misconception dismiss/restore are implemented. Private routes await verified session identity from issue #3; placement-based baseline, enrollment-aware home, and rewards integration remain incomplete.
-- Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes await verified session identity from issue #3. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
+- Issue #3 identity backend, part 1 of 3 (see [plans/03-identity-onboarding-settings.md](plans/03-identity-onboarding-settings.md)): the identity schema and migration, scrypt password hashing, opaque bearer sessions, the `authenticate`/`requireUser` middleware, API-wide JSON 404/error handling, and register, login, logout, profile read/update, password change, and session list/revoke are implemented. A local Docker smoke check covered success, validation, ownership, revocation, and the support/practice integration. Settings, onboarding, placement (part 2), and email verification, password recovery, Google sign-in, and account deletion (part 3) remain planned.
+- Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes now use the issue #3 bearer session. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes await verified bearer-session identity from issue #3; exports currently include the existing user fields and support requests.
+- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes now use the issue #3 bearer session; exports include the public user fields and support requests.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
 ## Planned
 
-1. Complete backend identity (#3), then connect verified sessions to the partial private APIs including #27.
-2. Integrate the matching FE flows when their API contracts are available.
+1. Finish backend identity (#3 parts 2–3), including settings and placement.
+2. Integrate mobile sign-in (#4) and lesson/progress UI (#7) with the implemented APIs.
 3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
+
+## Known limitations
+
+- Login has no rate limiting in this local demo.
+- Existing feature controllers (`learning`, `support`, `practice`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
+- Enrollment-aware home selection, placement-based baseline, and real gem/reward accounting belong to later domain work.
 
 ## Blocked
 
-- Private learner API integration waits for issue #3 to provide verified session identity.
+- None.
 
 ## Next Recommended Tasks
 
-- Integrate issue #3 authentication with the backend domains, then connect the mobile lesson/progress flow to issue #27.
+- Issue #3 part 2: settings, onboarding resume, and placement endpoints.
+- Connect mobile sign-in and lesson/progress screens to the bearer-session and learning-activity APIs.

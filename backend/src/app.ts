@@ -1,17 +1,23 @@
 import express from "express";
 import { prisma } from "./db/prisma.js";
+import { identityRouter } from "./features/identity/identity.routes.js";
 import { learningRouter } from "./features/learning/learning.routes.js";
 import { supportRouter } from "./features/support/support.routes.js";
 import { practiceRouter } from "./features/practice/practice.routes.js";
 import { activityRouter } from "./features/activity/activity.routes.js";
+import { authenticate } from "./http/auth.js";
+import { apiNotFound, jsonErrorHandler } from "./http/errors.js";
 
 const app = express();
 
 app.use(express.json());
+app.use("/api", authenticate);
+app.use("/api", identityRouter);
 app.use("/api", learningRouter);
 app.use("/api", supportRouter);
 app.use("/api", practiceRouter);
 app.use("/api", activityRouter);
+app.use("/api", apiNotFound);
 
 app.get("/health", async (_request, response) => {
   try {
@@ -22,5 +28,7 @@ app.get("/health", async (_request, response) => {
     response.status(503).json({ status: "error", database: "unavailable" });
   }
 });
+
+app.use(jsonErrorHandler);
 
 export { app };

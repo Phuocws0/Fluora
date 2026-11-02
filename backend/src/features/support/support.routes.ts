@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as controller from "./support.controller.js";
-import { requireUser } from "../../auth/require-user.js";
+import { requireUser } from "../../http/auth.js";
 
 const supportRouter = Router();
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as controller from "./practice.controller.js";
-import { requireUser } from "../../auth/require-user.js";
+import { requireUser } from "../../http/auth.js";
 
 const practiceRouter = Router();
 practiceRouter.get("/practice", requireUser, controller.practice);

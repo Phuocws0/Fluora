@@ -4,22 +4,28 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The schema contains `User`, curated learning-content models (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath`), support/export models, practice models, and learner activity models: `UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, and `MisconceptionState`. The checked-in migrations cover these models. The seed command creates a sample English course, four lessons, two learning paths, one dialogue, two can-do goals, and one mission. Passwords, sessions, settings, and placement attempts are not implemented yet. Private routes need verified session identity from issue #3.
+The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; and learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons, two learning paths, one dialogue, two can-do goals, and one mission.
+
+Scrypt password hashes and bearer sessions are implemented, and registration creates default settings. Settings, placement, and verification/reset-token tables exist, but their API flows remain in progress under issue #3. Exercise answers and lesson completions are persisted; progress and analytics are derived from them.
 
 ## Account and preferences
 
-- **users:** Account identity and learner profile (display name, bio, avatar reference, verification state).
-- **user_settings:** App/course language, onboarding goals/level, daily target/time budget, learning promise, reminders, Flo companion, accessibility/text size, focus mode, privacy, low-bandwidth, wellbeing, and tutor-history preferences.
-- **sessions:** Active device sign-ins that can be reviewed and revoked.
+- **users:** Account identity and learner profile: display name, bio, avatar URL, verification time, an optional scrypt `passwordHash` (absent for Google-only accounts), and an optional unique `googleSubject`.
+- **user_settings:** One row per user, keyed by `userId`. It holds app/course language, onboarding goals/level, daily target/time budget, learning promise, reminders, Flo companion, accessibility/text size, focus mode, privacy, low-bandwidth, wellbeing, tutor-history preferences, and onboarding completion time.
+- **sessions:** Active device sign-ins with a SHA-256 token hash, device name, user agent, last use, and expiry. Learners can review and revoke them.
+- **auth_tokens:** Single-use email-verification and password-reset tokens (`purpose`), stored only as SHA-256 hashes with expiry and use time.
+- **placement_attempts:** Submitted placement answers, question-set version, suggested level, and skill baseline.
 - **data_export_requests:** Owner, request time, status, and expiry for user-initiated export previews/downloads.
 
 ```text
 User
  ├── UserSettings
- └── Session
+ ├── Session
+ ├── AuthToken
+ └── PlacementAttempt
 ```
 
-Password reset/verification tokens should be short-lived auth data; exact persistence belongs in the implementation design and should avoid storing raw credentials/tokens.
+Every user-owned model uses `onDelete: Cascade` to `User`, so account deletion removes only that learner's records. Password hashes, token hashes, and `googleSubject` must never appear in API responses or data exports.
 
 ## Curated learning content
 

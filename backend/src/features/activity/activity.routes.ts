@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireUser } from "../../auth/require-user.js";
+import { requireUser } from "../../http/auth.js";
 import * as controller from "./activity.controller.js";
 
 const activityRouter = Router();

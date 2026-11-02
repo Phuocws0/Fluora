@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { currentUserId } from "../../auth/require-user.js";
+import { currentUserId } from "../../http/auth.js";
 import * as activity from "./activity.service.js";
 import * as insights from "./insights.service.js";
 

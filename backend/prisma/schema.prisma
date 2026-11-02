@@ -12,8 +12,17 @@ model User {
   id          String   @id @default(uuid()) @db.Uuid
   email       String   @unique
   displayName String?
+  bio             String?   @db.Text
+  avatarUrl       String?
+  passwordHash    String?
+  googleSubject   String?   @unique
+  emailVerifiedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  settings          UserSettings?
+  sessions          Session[]
+  authTokens        AuthToken[]
+  placementAttempts PlacementAttempt[]
   supportRequests SupportRequest[]
   dataExportRequests DataExportRequest[]
   vocabularySets VocabularySet[]
@@ -26,6 +35,82 @@ model User {
   learningEvidence LearningEvidence[]
   missionCompletions MissionCompletion[]
   misconceptionStates MisconceptionState[]
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  tokenHash  String   @unique
+  deviceName String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  expiresAt  DateTime
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lastUsedAt])
+  @@map("sessions")
+}
+
+model AuthToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  purpose   String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("auth_tokens")
+}
+
+model UserSettings {
+  userId                 String    @id @db.Uuid
+  appLanguage            String    @default("en")
+  courseLanguage         String?
+  motivation             String?
+  startingLevel          String?
+  dailyGoalMinutes       Int?
+  dailyTimeBudgetMinutes Int?
+  learningPromise        String?
+  reminderEnabled        Boolean   @default(false)
+  reminderTime           String?
+  reminderDays           Int[]     @default([])
+  timezone               String?
+  notifyFriendRequests   Boolean   @default(true)
+  notifyRewards          Boolean   @default(true)
+  notifyReminders        Boolean   @default(true)
+  floCompanion           String?
+  progressVisibility     String    @default("friends")
+  discoverable           Boolean   @default(true)
+  saveTutorHistory       Boolean   @default(true)
+  textSize               String    @default("default")
+  reducedMotion          Boolean   @default(false)
+  captions               Boolean   @default(false)
+  focusMode              Boolean   @default(false)
+  lowBandwidth           Boolean   @default(false)
+  wellbeingTimerMinutes  Int?
+  onboardingCompletedAt  DateTime?
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model PlacementAttempt {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @db.Uuid
+  questionSetVersion Int
+  answers            Json
+  level              String
+  skillBaseline      Json
+  createdAt          DateTime @default(now())
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("placement_attempts")
 }
 
 model SupportRequest {

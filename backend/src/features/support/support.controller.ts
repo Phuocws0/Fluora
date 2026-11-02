@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { currentUserId } from "../../auth/require-user.js";
+import { currentUserId } from "../../http/auth.js";
 import * as service from "./support.service.js";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
