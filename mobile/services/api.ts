@@ -8,16 +8,30 @@ const apiBaseUrl = (process.env.EXPO_PUBLIC_API_URL ?? defaultHost).replace(
   "",
 );
 
-type ErrorResponse = { error?: { message?: string } };
+type ErrorResponse = { error?: { code?: string; message?: string } };
+
+type UnauthorizedHandler = (rejectedToken: string) => void | Promise<void>;
+
+let unauthorizedHandler: UnauthorizedHandler | undefined;
 
 export class ApiError extends Error {
   constructor(
     message: string,
     readonly status?: number,
+    readonly code?: string,
   ) {
     super(message);
     this.name = "ApiError";
   }
+}
+
+export function setUnauthorizedHandler(
+  handler: UnauthorizedHandler,
+): () => void {
+  unauthorizedHandler = handler;
+  return () => {
+    if (unauthorizedHandler === handler) unauthorizedHandler = undefined;
+  };
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -38,10 +52,24 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse;
-    throw new ApiError(
+    const error = new ApiError(
       body.error?.message ?? "The request could not be completed.",
       response.status,
+      body.error?.code,
     );
+    if (
+      response.status === 401 &&
+      body.error?.code === "UNAUTHORIZED" &&
+      accessToken &&
+      unauthorizedHandler
+    ) {
+      try {
+        await unauthorizedHandler(accessToken);
+      } catch {
+        // Preserve the API error even if local session cleanup fails.
+      }
+    }
+    throw error;
   }
 
   return (await response.json()) as T;

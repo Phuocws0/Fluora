@@ -12,3 +12,5 @@ mobile/dist-check/
 mobile/android/
 mobile/ios/
 backend/src/generated/prisma/
+.superpowers/
+docs/superpowers/
