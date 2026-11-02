@@ -15,7 +15,7 @@ Scrypt password hashes, bearer sessions, settings, placement attempts, and singl
 - **sessions:** Active device sign-ins with a SHA-256 token hash, device name, user agent, last use, and expiry. Learners can review and revoke them.
 - **auth_tokens:** Single-use email-verification and password-reset tokens (`purpose`), stored only as SHA-256 hashes with expiry and use time.
 - **placement_attempts:** Submitted placement answers, question-set version, suggested level, and skill baseline.
-- **data_export_requests:** Owner, request time, status, and expiry for user-initiated export previews/downloads.
+- **data_export_requests:** Owner, request time, status, and expiry for user-initiated export previews/downloads. The local demo assembles JSON from current owned records on download instead of copying those records into an export table.
 
 ```text
 User
@@ -77,18 +77,20 @@ User
 
 ## Practice data
 
-- **vocabulary_sets:** Curated read-only decks or learner-owned decks with full CRUD for owner-created sets.
+- **vocabulary_sets:** Learner-owned decks with full CRUD.
 - **vocabulary_cards:** Front/back terms, tags, and optional examples within a deck.
 - **bookmarks:** Learner bookmarks for vocabulary or stories, with optional editable note/tag.
 - **reading_progress:** Current position/completion for a story.
-- **review_items / review_schedule:** Learner-created review items and schedules; mistake-derived entries remain linked to immutable answer history.
+- **review_items:** Learner-created custom review items and persisted schedules for reviewed mistakes. Mistake entries reference their source exercise; recurring mistakes are derived from the learner's append-only `user_answers` and can be dismissed through `misconception_states`.
+- **review_outcomes:** Append-only correct/incorrect outcomes linked to a review item. The current next-review time is stored on `review_items`.
 - **offline downloads:** Device-local files, queue, and progress. Do not store downloaded binary content in PostgreSQL for the local demo.
 
 ```text
 User ── VocabularySet ── VocabularyCard
   ├── Bookmark → word or story
   ├── ReadingProgress ── Story
-  └── ReviewSchedule ── VocabularyCard / UserAnswer
+  └── ReviewItem ── ReviewOutcome
+             └── optional source Exercise ← UserAnswer
 ```
 
 Learner-owned decks/cards, bookmarks, reading position, review items, and planner entries support the CRUD operations documented in `API.md`.

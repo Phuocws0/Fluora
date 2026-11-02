@@ -1,6 +1,6 @@
 # API Contract
 
-This document records implemented auth/account/settings/placement, content, learning-activity, community, League, and rewards APIs, partial practice APIs, and planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoint status follows the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
+This document records implemented auth/account/settings/placement, content, learning-activity, practice/vocabulary/reading, community, League, and rewards APIs, plus the planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoint status follows the current source on the branch being reviewed. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -37,11 +37,11 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `PATCH /api/users/me/settings` | Implemented | Update any subset of the `settings` fields below, plus `onboardingCompleted:true`; omitted fields keep their values → `{settings}` | `400`, `401` |
 | `DELETE /api/users/me/settings` | Implemented | Reset preferences to defaults; keeps `courseLanguage`, `startingLevel`, and onboarding completion → `{settings}` | `401` |
 | `DELETE /api/users/me` | Implemented | Delete the account and its owned data after confirmation; `{confirmEmail}` (case-insensitive) → `{deleted:true}`. Owned study groups and hosted rooms are handed to another member first. | `400 CONFIRMATION_MISMATCH`, `401` |
-| `POST /api/users/me/data-exports` | Partial | Create an export job/preview → `{exportId,status}` | `401`, `500` |
-| `GET /api/users/me/data-exports` | Partial | List the learner's export jobs → `{exports:[...]}` | `401` |
-| `GET /api/users/me/data-exports/:exportId` | Partial | Read export status/details → `{export}` | `401`, `404` |
-| `GET /api/users/me/data-exports/:exportId/download` | Partial | Download the prepared local-demo JSON export | `401`, `404`, `409` |
-| `DELETE /api/users/me/data-exports/:exportId` | Partial | Cancel/delete an export job → `{deleted:true}` | `401`, `404` |
+| `POST /api/users/me/data-exports` | Implemented | Create a ready local export job → `{exportId,status:"ready"}` | `401`, `500` |
+| `GET /api/users/me/data-exports` | Implemented | List the learner's export jobs → `{exports:[...]}` | `401` |
+| `GET /api/users/me/data-exports/:exportId` | Implemented | Read export status/details → `{export}` | `400`, `401`, `404` |
+| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:1,generatedAt,user}` | `400`, `401`, `404`, `409` if not ready |
+| `DELETE /api/users/me/data-exports/:exportId` | Implemented | Cancel/delete an export job → `{deleted:true}` | `400`, `401`, `404` |
 
 Account deletion requires explicit confirmation and removes the user's personal records across every domain (sessions, settings, placement, support, exports, practice, activity, community, and wallet rows). It does not delete curated content or other learners' records. Before deleting, the backend promotes the earliest-joined other member of each group the learner owns (or deletes the group when nobody else is left) and gives the learner's hosted rooms to that group's owner.
 
@@ -57,6 +57,8 @@ Account deletion requires explicit confirmation and removes the user's personal 
 - **Google sign-in:** the account is matched by Google subject first, then linked to an existing account with the same email when Google reports the email as verified, otherwise a password-less account (`hasPassword:false`) with default settings is created.
 - **API-wide errors:** malformed JSON returns `400 VALIDATION_ERROR`, an oversized body returns `413 PAYLOAD_TOO_LARGE`, and an unknown `/api` path returns `404 NOT_FOUND`, all in the standard error shape.
 - There is no rate limiting for this local demo.
+
+Exports are marked ready immediately and assembled from current records when downloaded; no background job or external storage is used. A non-ready job returns `409 CONFLICT`.
 
 ### Learner settings
 
@@ -128,7 +130,7 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/practice` | Partial | Practice hub recommendations and due-item counts → `{suggestions,reviewDueCount}` | `401` |
+| `GET /api/practice` | Implemented | Read review due count and local story/review suggestions from the learner's answer and review data → `{reviewDueCount,suggestions:[{kind,id,title}]}` | `401` |
 | `GET /api/planner/entries` | Implemented | Read calendar/weekly plan → `{entries:[...]}` | `401` |
 | `POST /api/planner/entries` | Implemented | Create a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
 | `GET /api/planner/entries/:entryId` | Implemented | Read one learner-owned session → `{entry}` | `401`, `404` |
@@ -137,15 +139,15 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 | `GET /api/lessons/:lessonId/answers` | Implemented | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
 | `POST /api/exercises/:exerciseId/answers` | Implemented | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
 | `GET /api/exercises/:exerciseId/hints?step=` | Implemented | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
-| `GET /api/practice/review-items?kind=` | Partial | Read due vocabulary and recurring mistakes → `{items:[...]}` | `401` |
-| `GET /api/practice/review-items/:itemId` | Partial | Read one saved review item → `{item}` | `401`, `404` |
-| `POST /api/practice/review-items` | Partial | Create a learner-owned review item; `{front,back,kind?}` → `{item}` | `400`, `401` |
-| `PATCH /api/practice/review-items/:itemId` | Partial | Edit a custom review item or dismiss a derived mistake; changed fields → `{item}` | `400`, `401`, `404` |
-| `DELETE /api/practice/review-items/:itemId` | Partial | Delete a custom item or hide a derived mistake from this learner's queue → `{deleted:true}` | `401`, `404` |
-| `POST /api/practice/review-items/:itemId/answers` | Partial | Record recall/review outcome and update schedule → `{result,nextReviewAt}` | `400`, `401`, `404` |
-| `GET /api/study-tools` | Partial | List available curated study tools → `{tools:[...]}` | `401` |
-| `GET /api/study-tools/:toolId` | Partial | Read curated audio/waveform, pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit content → `{tool}` | `401`, `404` |
-| `GET /api/dictionary?query=` | Partial | Look up a selected word for the inline dictionary → `{entry}` | `400`, `401`, `404` |
+| `GET /api/practice/review-items?kind=` | Implemented | Read due custom items and recurring mistakes; optional `kind` is `custom` or `mistake` → `{items:[...]}` | `400`, `401` |
+| `GET /api/practice/review-items/:itemId` | Implemented | Read one owned custom item or active mistake-derived item → `{item}` | `401`, `404` |
+| `POST /api/practice/review-items` | Implemented | Create a learner-owned custom review item; `{front,back,kind?}` (`kind` must be `custom`) → `{item}` | `400`, `401` |
+| `PATCH /api/practice/review-items/:itemId` | Implemented | Edit custom `front`/`back`, or dismiss/restore a derived mistake with `{dismissed:boolean}` → `{item}` | `400`, `401`, `404` |
+| `DELETE /api/practice/review-items/:itemId` | Implemented | Delete a custom item or dismiss a derived mistake without changing answer history → `{deleted:true}` | `401`, `404` |
+| `POST /api/practice/review-items/:itemId/answers` | Implemented | Append a review outcome; `{correct:boolean}` → `{result,nextReviewAt}` | `400`, `401`, `404` |
+| `GET /api/study-tools` | Implemented | List the local demo's curated tool metadata → `{tools:[{id,title,kind}]}` | `401` |
+| `GET /api/study-tools/:toolId` | Implemented | Read one supported tool's curated metadata → `{tool:{id,title,kind}}` | `401`, `404` |
+| `GET /api/dictionary?query=` | Implemented | Look up one word in the local demo dictionary → `{entry:{word,definition,example}}` | `400`, `401`, `404` |
 
 Answer payloads use `{answer:{kind,...}}`: `choice` needs `optionId`; `sentence_tiles` needs `tokens`; `transcript_gap`/`dictation` need `text`; `matching` needs `pairs`; `speaking` needs a client-produced `transcript` and integer `score` from 0 to 100. Unknown fields, including raw audio, are rejected. Lesson completion requires at least one answer for every exercise. Its first response includes earned XP and `alreadyCompleted:false`; repeats return `xpEarned:0` and `alreadyCompleted:true`. Planner dates use `YYYY-MM-DD`, times use `HH:mm`, and durations are 1–480 minutes. Misconception cards appear after two incorrect answers for an exercise; dismiss/restore changes only the view state.
 
@@ -155,29 +157,29 @@ Recording Studio captures audio locally on the device. The demo answer may inclu
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/vocabulary/sets` | Partial | List learner decks and provided sets → `{sets:[...]}` | `401` |
-| `POST /api/vocabulary/sets` | Partial | Create a learner-owned deck; `{name}` → `{set}` | `400`, `401` |
-| `GET /api/vocabulary/sets/:setId` | Partial | Read a deck and its cards → `{set,cards:[...]}` | `401`, `404` |
-| `PATCH /api/vocabulary/sets/:setId` | Partial | Rename/update a learner deck; changed fields → `{set}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/sets/:setId` | Partial | Delete a learner-owned deck and its cards → `{deleted:true}` | `401`, `404` |
-| `GET /api/vocabulary/sets/:setId/cards` | Partial | List deck cards → `{cards:[...]}` | `401`, `404` |
-| `POST /api/vocabulary/sets/:setId/cards` | Partial | Add a card; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
-| `GET /api/vocabulary/cards/:cardId` | Partial | Read one card → `{card}` | `401`, `404` |
-| `PATCH /api/vocabulary/cards/:cardId` | Partial | Edit a card; changed fields → `{card}` | `400`, `401`, `404` |
-| `DELETE /api/vocabulary/cards/:cardId` | Partial | Remove a card → `{deleted:true}` | `401`, `404` |
-| `POST /api/vocabulary/import/preview` | Partial | Parse selected rows and column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
-| `POST /api/vocabulary/import` | Partial | Import approved rows into a deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
-| `GET /api/bookmarks` | Partial | List saved words/stories → `{bookmarks:[...]}` | `401` |
-| `POST /api/bookmarks` | Partial | Save a word or story; `{targetType,targetId}` → `{bookmark}` | `400`, `401`, `404`, `409` |
-| `PATCH /api/bookmarks/:bookmarkId` | Partial | Edit learner note/tag; changed fields → `{bookmark}` | `400`, `401`, `404` |
-| `DELETE /api/bookmarks/:bookmarkId` | Partial | Remove a saved item → `{deleted:true}` | `401`, `404` |
+| `GET /api/vocabulary/sets` | Implemented | List the learner's decks → `{sets:[...]}` | `401` |
+| `POST /api/vocabulary/sets` | Implemented | Create a learner-owned deck; `{name}` → `{set}` | `400`, `401` |
+| `GET /api/vocabulary/sets/:setId` | Implemented | Read an owned deck and its cards → `{set,cards:[...]}` | `401`, `404` |
+| `PATCH /api/vocabulary/sets/:setId` | Implemented | Rename an owned deck; `{name}` → `{set}` | `400`, `401`, `404` |
+| `DELETE /api/vocabulary/sets/:setId` | Implemented | Delete an owned deck and its cards → `{deleted:true}` | `401`, `404` |
+| `GET /api/vocabulary/sets/:setId/cards` | Implemented | List cards in an owned deck → `{cards:[...]}` | `401`, `404` |
+| `POST /api/vocabulary/sets/:setId/cards` | Implemented | Add a card to an owned deck; `{front,back,tag?,example?}` → `{card}` | `400`, `401`, `404` |
+| `GET /api/vocabulary/cards/:cardId` | Implemented | Read an owned card → `{card}` | `401`, `404` |
+| `PATCH /api/vocabulary/cards/:cardId` | Implemented | Edit an owned card; changed fields → `{card}` | `400`, `401`, `404` |
+| `DELETE /api/vocabulary/cards/:cardId` | Implemented | Remove an owned card → `{deleted:true}` | `401`, `404` |
+| `POST /api/vocabulary/import/preview` | Implemented | Validate up to 500 rows and a distinct front/back plus optional tag/example column mapping; `{filename,rows,mapping}` → `{validRows,errors}` | `400`, `401` |
+| `POST /api/vocabulary/import` | Implemented | Revalidate and import only valid mapped rows into an owned deck; `{destinationSetId,rows,mapping}` → `{importedCount,cards}` | `400`, `401`, `404` |
+| `GET /api/bookmarks` | Implemented | List the learner's saved dictionary words and stories → `{bookmarks:[...]}` | `401` |
+| `POST /api/bookmarks` | Implemented | Save a dictionary word or published story; `{targetType,targetId}` where `targetType` is `word` or `story` → `{bookmark}` | `400`, `401`, `404`, `409` |
+| `PATCH /api/bookmarks/:bookmarkId` | Implemented | Edit an owned bookmark's `note`/`tag` → `{bookmark}` | `400`, `401`, `404` |
+| `DELETE /api/bookmarks/:bookmarkId` | Implemented | Remove an owned bookmark → `{deleted:true}` | `401`, `404` |
 | `GET /api/stories` | Implemented | Story library → `{stories:[...]}` | `500` |
 | `GET /api/stories/:storyId` | Implemented | Read a story/article/dialogue and comprehension tree → `{story}` | `404` |
-| `GET /api/stories/:storyId/progress` | Partial | Read learner reading position → `{progress}` | `401`, `404` |
-| `PUT /api/stories/:storyId/progress` | Partial | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
-| `DELETE /api/stories/:storyId/progress` | Partial | Reset learner reading position → `{deleted:true}` | `401`, `404` |
+| `GET /api/stories/:storyId/progress` | Implemented | Read this learner's position for a published story → `{progress}` | `401`, `404` |
+| `PUT /api/stories/:storyId/progress` | Implemented | Create/update position or completion; `{position,completed?}` → `{progress}` | `400`, `401`, `404` |
+| `DELETE /api/stories/:storyId/progress` | Implemented | Reset this learner's reading position → `{deleted:true}` | `401`, `404` |
 
-The practice branch implements deck/card CRUD, story reads, story bookmarks, and reading progress. Private routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. Custom review items and scheduling, deck import preview/import, basic study-tool metadata, a small local dictionary, and story-based recommendations are implemented. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned; story challenge answers reuse issue #27.
+Practice, review, vocabulary, bookmark, and reading mutations are scoped to the authenticated learner. Due counts combine due custom review items with recurring mistakes derived from that learner's immutable answer history. Review outcomes append to `review_outcomes`; successful recall schedules the next review in 24 hours and an incorrect recall in 10 minutes. Mistakes can be dismissed/restored without editing their source answers. The current demo dictionary and study-tool responses are intentionally small curated datasets. Story content may include a `challenge` with a seeded `exerciseId`; clients submit its answer through `POST /api/exercises/:exerciseId/answers`, reusing the core learning API instead of adding a story-specific answer route.
 
 The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed.
 
@@ -304,14 +306,14 @@ Cursor lists (`discussion`, `comments`, `messages`, `notifications`) accept `?be
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/help/articles?category=` | Implemented | Read FAQ/help topics → `{articles:[...]}` | `400`, `500` |
-| `GET /api/support/requests` | Partial | Read the learner's own support requests → `{requests:[...]}` | `401` |
-| `POST /api/support/requests` | Partial | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
-| `PATCH /api/support/requests/:requestId` | Partial | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
-| `DELETE /api/support/requests/:requestId` | Partial | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
+| `GET /api/support/requests` | Implemented | Read the learner's own support requests → `{requests:[...]}` | `401` |
+| `POST /api/support/requests` | Implemented | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
+| `PATCH /api/support/requests/:requestId` | Implemented | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
+| `DELETE /api/support/requests/:requestId` | Implemented | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
 
 Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
 
-The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. Export downloads currently contain the public `User` fields and support requests (never credential columns); extend the payload as other learner-owned models are implemented.
+The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. The local export is generated as JSON when downloaded and includes the learner's current profile, settings, placement attempts, support requests, practice and reading data, answers, progress, planner entries, evidence, mission completions, and misconception view states. Credential hashes, bearer sessions, and one-time auth-token hashes are excluded.
 
 ## Flo AI Tutor
 

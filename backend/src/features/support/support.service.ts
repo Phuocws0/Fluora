@@ -62,7 +62,41 @@ export async function downloadExport(userId: string, id: string) {
   if (job.status !== "ready") throw new SupportConflictError("The export is not ready.");
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, displayName: true, createdAt: true, updatedAt: true, supportRequests: true },
+    select: {
+      id: true,
+      email: true,
+      displayName: true,
+      bio: true,
+      avatarUrl: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      updatedAt: true,
+      settings: true,
+      placementAttempts: { orderBy: { createdAt: "asc" } },
+      supportRequests: { orderBy: { createdAt: "asc" } },
+      vocabularySets: {
+        orderBy: { createdAt: "asc" },
+        include: { cards: { orderBy: { createdAt: "asc" } } },
+      },
+      bookmarks: { orderBy: { createdAt: "asc" } },
+      readingProgress: { orderBy: { createdAt: "asc" } },
+      reviewItems: {
+        orderBy: { createdAt: "asc" },
+        include: { outcomes: { orderBy: { createdAt: "asc" } } },
+      },
+      answers: { orderBy: { createdAt: "asc" } },
+      lessonCompletions: { orderBy: { completedAt: "asc" } },
+      plannerEntries: { orderBy: { createdAt: "asc" } },
+      learningEvidence: {
+        orderBy: { createdAt: "asc" },
+        include: { goal: { select: { slug: true, title: true, skill: true, description: true } } },
+      },
+      missionCompletions: {
+        orderBy: { completedAt: "asc" },
+        include: { mission: { select: { slug: true, title: true, description: true } } },
+      },
+      misconceptionStates: true,
+    },
   });
   if (!user) return null;
   return { version: 1, generatedAt: new Date().toISOString(), user };
