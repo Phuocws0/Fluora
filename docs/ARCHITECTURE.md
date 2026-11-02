@@ -5,8 +5,8 @@
 Fluora is an npm-workspaces monorepo. The implementation is an initial local-demo scaffold with one connected learning flow:
 
 - `mobile/` is an Expo SDK 57 React Native TypeScript app using Expo Router. It has the five logical tabs and reads published courses, units, lessons, lesson search results, and learning paths through a mobile service layer. The auth, practice, tutor, league, and profile feature UIs remain placeholders.
-- `backend/` is one Express 5 TypeScript app. It exposes `GET /health`, public learning-content, help, and story reads, plus partial support/export, vocabulary, import, review, bookmark, and reading-progress routes. Private routes require verified session identity from issue #3.
-- `backend/prisma/schema.prisma` contains `User`, curated learning-content models, support/export models, and vocabulary, story, bookmark, reading-progress, and review models with checked-in migrations. Authentication and learner-owned answer/lesson-progress data are not implemented.
+- `backend/` is one Express 5 TypeScript app. It exposes `GET /health`, public learning-content, help, and story reads, partial support/export, vocabulary, import, review, bookmark, and reading-progress routes, and account registration, login, logout, profile, password, and session management. An `authenticate` middleware resolves bearer sessions into `res.locals.userId` for every `/api` route; private routes return `401` without one. Shared HTTP helpers live in `backend/src/http/` (errors, validation, auth).
+- `backend/prisma/schema.prisma` contains `User` with identity models (sessions, settings, auth tokens, placement attempts), curated learning-content models, support/export models, and vocabulary, story, bookmark, reading-progress, and review models with checked-in migrations. Learner-owned answer/lesson-progress data is not implemented.
 - `backend/src/db/seed.ts` provides repeatable demo content seeding; apply it explicitly after migrations.
 - `docker-compose.yml` runs the backend and PostgreSQL. Expo runs directly on the host.
 - `.github/workflows/ci.yml` runs typecheck, Prisma validation, backend build, and Android bundle export on pull requests and pushes to `main`.
@@ -53,7 +53,7 @@ Offline course files and download-queue progress are device-local; the backend s
 ## Planned and optional work
 
 - **Implemented starter:** Logical five-tab navigation and the public learning-content read flow from Learning Home through course, unit, lesson preview, lesson search, and learning-path comparison.
-- **Planned:** Continue learner features from `docs/PRODUCT.md`; add authentication and learner progress before claiming a personalized continue-learning state.
+- **Planned:** Continue learner features from `docs/PRODUCT.md`; add learner progress before claiming a personalized continue-learning state.
 - **Optional future improvements:** Add structure or tooling only when a concrete implementation need appears. No additional infrastructure is currently required.
 
 See [API.md](API.md), [DATABASE.md](DATABASE.md), [ROUTES.md](ROUTES.md), and [TESTING.md](TESTING.md) for current contracts and guidance.

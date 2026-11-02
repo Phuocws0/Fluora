@@ -28,7 +28,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. Authentication, learner progress, and the remaining feature screens are still planned; unfinished destinations show a simple placeholder.
+The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. The backend supports account registration, login, and bearer sessions; the mobile account screens, learner progress, and the remaining feature screens are still planned. Unfinished destinations show a simple placeholder.
 
 ## Prerequisites
 
