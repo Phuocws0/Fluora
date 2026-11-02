@@ -96,8 +96,68 @@ export async function downloadExport(userId: string, id: string) {
         include: { mission: { select: { slug: true, title: true, description: true } } },
       },
       misconceptionStates: true,
+      sentFriendRequests: { orderBy: { createdAt: "asc" } },
+      receivedFriendRequests: { orderBy: { createdAt: "asc" } },
+      notifications: { orderBy: { createdAt: "asc" } },
+      groupMemberships: {
+        orderBy: { joinedAt: "asc" },
+        include: { group: { select: { id: true, name: true, goal: true, topic: true, visibility: true, createdAt: true } } },
+      },
+      groupPosts: {
+        orderBy: { createdAt: "asc" },
+        include: { group: { select: { id: true, name: true } } },
+      },
+      groupComments: { orderBy: { createdAt: "asc" } },
+      challengeParticipations: {
+        orderBy: { joinedAt: "asc" },
+        include: { challenge: { select: { id: true, title: true, metric: true, target: true, startsAt: true, endsAt: true } } },
+      },
+      hostedRooms: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          group: { select: { id: true, name: true } },
+          polls: {
+            orderBy: { createdAt: "asc" },
+            include: { choices: { orderBy: { order: "asc" } } },
+          },
+        },
+      },
+      roomParticipations: { orderBy: { joinedAt: "asc" } },
+      roomMessages: { orderBy: { createdAt: "asc" } },
+      pollVotes: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          poll: { select: { id: true, question: true } },
+          choice: { select: { id: true, label: true, order: true } },
+        },
+      },
+      peerReviewComments: {
+        orderBy: { createdAt: "asc" },
+        include: { submission: { select: { id: true, slug: true, title: true } } },
+      },
+      planTasks: {
+        orderBy: { createdAt: "asc" },
+        include: { group: { select: { id: true, name: true } } },
+      },
+      whiteboardNotes: {
+        orderBy: { createdAt: "asc" },
+        include: { group: { select: { id: true, name: true } } },
+      },
+      questClaims: {
+        orderBy: { claimedAt: "asc" },
+        include: { quest: { select: { slug: true, title: true, metric: true, target: true, rewardGems: true } } },
+      },
+      achievements: {
+        orderBy: { earnedAt: "asc" },
+        include: { achievement: { select: { slug: true, title: true, description: true, metric: true, target: true } } },
+      },
+      redemptions: {
+        orderBy: { createdAt: "asc" },
+        include: { reward: { select: { slug: true, name: true, description: true, kind: true, fulfillment: true } } },
+      },
+      walletTransactions: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!user) return null;
-  return { version: 1, generatedAt: new Date().toISOString(), user };
+  return { version: 2, generatedAt: new Date().toISOString(), user };
 }

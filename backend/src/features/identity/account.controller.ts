@@ -3,6 +3,7 @@ import { currentSessionId, currentUserId } from "../../http/auth.js";
 import { HttpError } from "../../http/errors.js";
 import {
   readBody,
+  readEmail,
   readNullableHttpUrl,
   readNullableText,
   readOptionalText,
@@ -56,4 +57,10 @@ export async function deleteSession(request: Request, response: Response): Promi
     throw new HttpError(404, "NOT_FOUND", "Session not found.");
   }
   response.json({ revoked: true });
+}
+
+export async function deleteMe(request: Request, response: Response): Promise<void> {
+  const body = readBody(request.body, ["confirmEmail"]);
+  await accountService.deleteAccount(currentUserId(response), readEmail(body, "confirmEmail"));
+  response.json({ deleted: true });
 }

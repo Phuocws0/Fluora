@@ -1,5 +1,7 @@
 import type { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../db/prisma.js";
+import { latestPlacementBaseline } from "../identity/placement.service.js";
+import { getWalletBalance } from "../league/wallet.service.js";
 
 export class ActivityError extends Error {
   constructor(readonly status: number, readonly code: string, message: string) { super(message); }
@@ -131,15 +133,28 @@ export async function completeLesson(userId: string, lessonId: string) {
 
 function day(date: Date): string { return date.toISOString().slice(0, 10); }
 
-export async function progress(userId: string) {
-  const completions = await prisma.lessonCompletion.findMany({ where: { userId }, select: { completedAt: true, xpEarned: true } });
-  const xp = completions.reduce((sum, item) => sum + item.xpEarned, 0);
-  const days = new Set(completions.map((item) => day(item.completedAt)));
+function streakFromDays(days: Set<string>): number {
   let currentStreak = 0;
   const cursor = new Date();
   if (!days.has(day(cursor))) cursor.setUTCDate(cursor.getUTCDate() - 1);
   while (days.has(day(cursor))) { currentStreak++; cursor.setUTCDate(cursor.getUTCDate() - 1); }
-  return { completedLessons: completions.length, currentStreak, xp, gems: 0 };
+  return currentStreak;
+}
+
+/** Consecutive UTC days with a lesson completion, ending today or yesterday. */
+export async function currentStreak(userId: string): Promise<number> {
+  const completions = await prisma.lessonCompletion.findMany({ where: { userId }, select: { completedAt: true } });
+  return streakFromDays(new Set(completions.map((item) => day(item.completedAt))));
+}
+
+export async function progress(userId: string) {
+  const [completions, gems] = await Promise.all([
+    prisma.lessonCompletion.findMany({ where: { userId }, select: { completedAt: true, xpEarned: true } }),
+    getWalletBalance(userId),
+  ]);
+  const xp = completions.reduce((sum, item) => sum + item.xpEarned, 0);
+  const currentStreak = streakFromDays(new Set(completions.map((item) => day(item.completedAt))));
+  return { completedLessons: completions.length, currentStreak, xp, gems };
 }
 
 export async function weeklyAnalytics(userId: string) {
@@ -166,7 +181,16 @@ export async function skillBaseline(userId: string) {
       exercise: { select: { lesson: { select: { skill: true, level: true } } } },
     },
   });
-  if (answers.length === 0) throw new ActivityError(404, "NOT_FOUND", "Complete an exercise to see a skill baseline.");
+  if (answers.length === 0) {
+    const placement = await latestPlacementBaseline(userId);
+    if (!placement) throw new ActivityError(404, "NOT_FOUND", "Complete an exercise or the placement test to see a skill baseline.");
+    const settings = await prisma.userSettings.findUnique({ where: { userId }, select: { startingLevel: true } });
+    return {
+      level: settings?.startingLevel ?? placement.level,
+      skills: placement.skills.map((item) => ({ skill: item.skill, confidence: item.score, attempts: item.total })),
+      source: "placement" as const,
+    };
+  }
   const grouped = new Map<string, { correct: number; total: number }>();
   for (const answer of answers) {
     const skill = answer.exercise.lesson.skill;
@@ -175,7 +199,7 @@ export async function skillBaseline(userId: string) {
     if (answer.isCorrect) row.correct++;
     grouped.set(skill, row);
   }
-  return { level: answers.at(-1)?.exercise.lesson.level ?? "A1", skills: [...grouped].map(([skill, row]) => ({ skill, confidence: Math.round(row.correct / row.total * 100), attempts: row.total })) };
+  return { level: answers.at(-1)?.exercise.lesson.level ?? "A1", skills: [...grouped].map(([skill, row]) => ({ skill, confidence: Math.round(row.correct / row.total * 100), attempts: row.total })), source: "answers" as const };
 }
 
 export async function home(userId: string) {

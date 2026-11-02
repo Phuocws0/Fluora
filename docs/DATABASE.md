@@ -4,9 +4,9 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; and learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons, two learning paths, one dialogue, two can-do goals, and one mission.
+The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`); and community, League, and rewards models (listed under "Community, rewards, and help"). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons (52 XP in total), two learning paths, one dialogue, two can-do goals, one mission, four daily quests, six achievements, four rewards, two peer-review samples, and three password-less demo learners (`demo.*@fluora.local`) with lesson completions in the current week.
 
-Scrypt password hashes and bearer sessions are implemented, and registration creates default settings. Settings, placement, and verification/reset-token tables exist, but their API flows remain in progress under issue #3. Exercise answers and lesson completions are persisted; progress and analytics are derived from them.
+Scrypt password hashes, bearer sessions, settings, placement attempts, and single-use verification/reset tokens are implemented. Exercise answers and lesson completions are persisted; progress, analytics, League tiers, quest progress, achievements, and the gem balance are derived from source records.
 
 ## Account and preferences
 
@@ -97,33 +97,47 @@ Learner-owned decks/cards, bookmarks, reading position, review items, and planne
 
 ## Community, rewards, and help
 
-- **friend_requests / friendships:** Pending connection requests and accepted learner relationships.
-- **study_groups / group_memberships:** Learner-created/owned groups, group membership, role, and lifecycle state.
-- **group_challenges / challenge_participants:** Group-owned challenge details and member participation; completion is derived from learning activity.
-- **group_posts / group_comments:** Group discussion posts and comments with author ownership and edit/delete timestamps.
-- **study_rooms / room_messages:** Group-managed rooms and member messages/replies; members can edit/delete their own messages.
-- **polls / poll_votes:** Host-managed poll definitions and participant votes that can be changed or withdrawn while open.
-- **peer_reviews:** Review assignment and learner-owned feedback comments.
-- **group_plan_tasks:** Shared tasks and their board lane/status.
-- **whiteboard_notes:** Shared note text/position and author.
-- **notifications:** Friend-request, quest, and reminder items with read state.
-- **quests / user_quest_progress:** Quest definitions and a learner's completion/claim state.
-- **achievements / user_achievements:** Achievement definitions and earned status.
-- **wallet_transactions / reward_redemptions:** Gem balance changes and redeemed rewards; treat balance as derived from transactions where practical.
+Implemented models (table names in parentheses):
+
+- **FriendRequest** (`friend_requests`): one row per learner pair, keyed by a unique `pairKey` (smaller UUID first). Status `pending`, `accepted`, or `declined`; an accepted request is the friendship.
+- **Notification** (`notifications`): system-created items with `type`, `title`, `body`, JSON `data`, `readAt`, and a `dedupeKey` unique per user, so the same event never notifies twice.
+- **StudyGroup / GroupMembership** (`study_groups`, `group_memberships`): learner-created groups with `visibility`, topic, and meetup fields; membership `role` is `owner` (exactly one) or `member`.
+- **GroupPost / GroupComment** (`group_posts`, `group_comments`): discussion with author ownership and `editedAt`.
+- **GroupChallenge / ChallengeParticipant** (`group_challenges`, `challenge_participants`): one challenge per group (`metric` `xp` or `lessons`, `target`, time window) and its participants. Progress is derived from `LessonCompletion`.
+- **StudyRoom / RoomParticipant / RoomMessage** (`study_rooms`, `room_participants`, `room_messages`): rooms hosted by a member (`hostId`), closable once (`closedAt`); messages can reply to another message in the same room.
+- **Poll / PollChoice / PollVote** (`polls`, `poll_choices`, `poll_votes`): host-managed polls; one vote per learner per poll, changeable or withdrawable while open.
+- **PeerReviewSubmission / PeerReviewComment** (`peer_review_submissions`, `peer_review_comments`): curated sample writing and learner-owned review comments.
+- **GroupPlanTask** (`group_plan_tasks`): shared tasks with `lane` (`todo`, `doing`, `done`) and `order`.
+- **WhiteboardNote** (`whiteboard_notes`): shared sticky notes with text, `x`/`y` position, color, and author.
+- **Quest / QuestClaim** (`quests`, `quest_claims`): curated daily quests; a claim is unique per `(user, quest, periodKey)`, where `periodKey` is the UTC date.
+- **Achievement / UserAchievement** (`achievements`, `user_achievements`): curated definitions; a row records the first time a learner qualified (`earnedAt`).
+- **Reward / RewardRedemption** (`rewards`, `reward_redemptions`): curated shop items (`instant` or `deferred` fulfillment) and redemptions (`fulfilled`, `pending`, `cancelled`) with the cost snapshot.
+- **WalletTransaction** (`wallet_transactions`): append-only gem ledger (`quest_reward`, `redemption`, `refund`). The balance is `SUM(amount)`; a redemption has at most one charge and one refund (`@@unique([redemptionId, reason])`).
 - **support_requests:** Learner-owned drafts/submissions, optional screenshot reference, device details, and response status; edits/cancellation are limited to open requests.
 
 ```text
-User ├── FriendRequest / Friendship
-     ├── GroupMembership ── StudyGroup ── GroupPlanTask / WhiteboardNote
-     ├── RoomMessage / PollVote / PeerReview
+User ├── FriendRequest (requester / addressee)
      ├── Notification
-     ├── GroupPost / GroupComment
-     ├── QuestProgress / UserAchievement
-     ├── WalletTransaction / RewardRedemption
+     ├── GroupMembership ── StudyGroup ── GroupPost ── GroupComment
+     │                        ├── GroupChallenge ── ChallengeParticipant
+     │                        ├── StudyRoom ── RoomParticipant / RoomMessage / Poll ── PollChoice / PollVote
+     │                        └── GroupPlanTask / WhiteboardNote
+     ├── PeerReviewComment ── PeerReviewSubmission
+     ├── QuestClaim ── Quest
+     ├── UserAchievement ── Achievement
+     ├── RewardRedemption ── Reward
+     ├── WalletTransaction → QuestClaim / RewardRedemption
      └── SupportRequest
 ```
 
-The product owner has approved the missing learner CRUD actions for this local demo. Keep group ownership/roles explicit. Notification records are system-created and user-deletable; groups and posts are user/group-managed rather than admin content. Account deletion removes the user's own data after confirmation.
+Integrity rules:
+
+- Every relation to `User` uses `onDelete: Cascade`, so deleting an account removes only that learner's rows. Before the delete, the account-deletion service hands each owned group to its earliest-joined other member (or deletes the group when it has no other members) and gives hosted rooms to the group's owner.
+- Curated parents (`Quest`, `Achievement`, `Reward`) use `onDelete: Restrict`, so a seed change can't silently delete earned history.
+- `WalletTransaction` links to its claim or redemption use `onDelete: NoAction`. PostgreSQL checks `NO ACTION` at the end of the statement, so an account-deletion cascade can remove the claim, redemption, and transactions together, while deleting a referenced claim or redemption on its own fails.
+- No API path updates or deletes `WalletTransaction` or `QuestClaim` rows; a cancellation appends a refund.
+
+The product owner has approved the missing learner CRUD actions for this local demo. Notification records are system-created and user-deletable; groups and posts are user/group-managed rather than admin content.
 
 ## Flo AI Tutor
 

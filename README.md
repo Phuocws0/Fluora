@@ -28,7 +28,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. The backend supports account registration, login, and bearer sessions; the mobile account screens, learner progress, and the remaining feature screens are still planned. Unfinished destinations show a simple placeholder.
+The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. The backend also supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, and rewards APIs. The mobile account screens, community screens, and the remaining feature screens are still planned. Unfinished destinations show a simple placeholder.
 
 ## Prerequisites
 
@@ -61,7 +61,15 @@ Seed the demonstration course after the backend and database are running:
 npm run db:seed --workspace @fluora/backend
 ```
 
-The seed command is safe to run again and does not reset the database. The learning-content API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
+The seed command is safe to run again and does not reset the database. Besides the course, it adds daily quests, achievements, reward-shop items, peer-review samples, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
+
+This local demo sends no email. Email-verification and password-reset tokens are written to the backend log instead; read them with:
+
+```sh
+docker compose logs -f backend
+```
+
+Each token appears once on a line starting with `[dev-mail]`. Google sign-in (`POST /api/auth/google`) stays disabled and returns `503` until you set `GOOGLE_CLIENT_IDS` in `.env` to your OAuth client IDs (comma-separated) and recreate the backend container.
 
 Start Expo in a second terminal:
 

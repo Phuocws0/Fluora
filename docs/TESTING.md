@@ -35,6 +35,10 @@ For learning activity, check each seeded exercise answer mode, reject raw audio 
 
 For practice, vocabulary, and reading, check owner-scoped deck/card CRUD, import preview mapping/row errors, and rejection of invalid imports. Verify custom and mistake review queues, append-only outcomes and due-time updates, dismissal without answer-history edits, word/story bookmark ownership, and reading progress save/resume/reset. Confirm story challenge choices use the linked exercise endpoint and never expose correctness flags in story content.
 
+For identity, check settings partial update/validation/reset (nothing is written when any field is invalid), onboarding completion staying stable, placement scoring with and without a session, single-use verification and reset tokens read from the `[dev-mail]` backend log lines (including parallel use of one token), that a password reset signs out every session, the Google `503` path without `GOOGLE_CLIENT_IDS`, and account deletion with a wrong and a correct confirmation email.
+
+For community, League, and rewards, use at least three registered learners plus the seeded demo learners. Change privacy and reminder preferences through `PATCH /api/users/me/settings`. Check search and profile privacy, every friend-request transition, owner/member/host/author permissions in groups and rooms, owner leave and ownership transfer, poll open/closed and vote-change rules, quest claims once per UTC day, parallel redemptions against a small balance (exactly one may succeed), that the wallet balance equals the ledger sum, and that deleting an account hands owned groups and hosted rooms to another member.
+
 For mutable user-owned resources, verify:
 
 - create/read/update/delete behavior for learner-owned resources and group-managed content in the approved CRUD baseline;
