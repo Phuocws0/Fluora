@@ -4,7 +4,7 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`); and community, League, and rewards models (listed under "Community, rewards, and help"). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons (52 XP in total), two learning paths, one dialogue, two can-do goals, one mission, four daily quests, six achievements, four rewards, two peer-review samples, and three password-less demo learners (`demo.*@fluora.local`) with lesson completions in the current week.
+The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`); and community, League, and rewards models (listed under "Community, rewards, and help"); and Flo Tutor models (`TutorScenario`, `TutorConversation`, `TutorMessage`, `TutorNote`). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons (52 XP in total), two learning paths, one dialogue, two can-do goals, one mission, four daily quests, six achievements, four rewards, two peer-review samples, three tutor role-play scenarios, and three password-less demo learners (`demo.*@fluora.local`) with lesson completions in the current week.
 
 Scrypt password hashes, bearer sessions, settings, placement attempts, and single-use verification/reset tokens are implemented. Exercise answers and lesson completions are persisted; progress, analytics, League tiers, quest progress, achievements, and the gem balance are derived from source records.
 
@@ -141,17 +141,25 @@ The product owner has approved the missing learner CRUD actions for this local d
 
 ## Flo AI Tutor
 
-- **tutor_conversations:** A saved tutor chat or role-play session, subject to the learner's chat-saving preference.
-- **tutor_messages:** Learner and tutor messages associated with a conversation.
-- **tutor_notes:** Saved phrase/pattern and the learner's optional personal example.
-- **role-play scenarios:** Curated branching prompts/turns; response feedback is attached to tutor messages and answer context.
+Implemented models (table names in parentheses):
+
+- **TutorScenario** (`tutor_scenarios`): curated role-play scenarios. `turns` is a JSON array of turns, each with a tutor line, a three-step hint ladder, and suggested replies (`label`, grading keywords, explanation, and the `next` turn key, or `null` to end). The seed validates the graph (start turn exists, every `next` exists, every turn is reachable). Three A1 scenarios are seeded: meeting someone new, ordering at a café, and asking for directions.
+- **TutorConversation** (`tutor_conversations`): a learner's chat (`kind: "chat"`) or role-play (`kind: "role_play"`). `saved` is copied from `user_settings.saveTutorHistory` when the chat is created. Role-play state is `currentTurnKey` plus `status` (`active`/`completed`). `lastActivityAt` drives the 60-minute lifetime of unsaved chats.
+- **TutorMessage** (`tutor_messages`): learner and tutor messages. A learner message stores its optional `context` (a kind plus exercise, answer, or message IDs only) and the role-play `turnKey` it answered. A tutor reply stores `feedback` (`verdict`, `correction`, `explanation`) and links to its learner message through a unique `replyToId`.
+- **TutorNote** (`tutor_notes`): learner-saved phrase, pattern, and optional personal example, with optional links to a conversation and message.
 
 ```text
-User ── TutorConversation ── TutorMessage
-  └── TutorNote ── optional source conversation
+User ── TutorConversation ── TutorMessage (learner) ── TutorMessage (tutor reply, replyToId)
+  │            └── TutorScenario (curated)
+  └── TutorNote ── optional TutorConversation / TutorMessage
 ```
 
-Clearing chat history should remove the learner's conversation data according to the chosen privacy behavior. Do not retain transcripts or voice samples beyond the documented user preference.
+Integrity rules:
+
+- `TutorConversation` and `TutorNote` cascade from `User`; messages cascade from their conversation, and a tutor reply cascades from its learner message.
+- `TutorConversation.scenarioId` uses `onDelete: Restrict`, like the other curated parents.
+- Note links use `onDelete: SetNull`, so deleting a chat or clearing history keeps the learner's notes.
+- Unsaved chats are deleted lazily, on the learner's next tutor request, once `lastActivityAt` is more than 60 minutes old. No audio or voice sample is stored; messages hold text only.
 
 ## Modeling guidance
 

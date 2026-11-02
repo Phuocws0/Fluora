@@ -61,7 +61,7 @@ Seed the demonstration course after the backend and database are running:
 npm run db:seed --workspace @fluora/backend
 ```
 
-The seed command is safe to run again and does not reset the database. Besides the course, it adds daily quests, achievements, reward-shop items, peer-review samples, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
+The seed command is safe to run again and does not reset the database. Besides the course, it adds daily quests, achievements, reward-shop items, peer-review samples, three Flo Tutor role-play scenarios, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
 
 This local demo sends no email. Email-verification and password-reset tokens are written to the backend log instead; read them with:
 
@@ -70,6 +70,8 @@ docker compose logs -f backend
 ```
 
 Each token appears once on a line starting with `[dev-mail]`.
+
+The Flo Tutor uses `TUTOR_PROVIDER=local` by default: an offline, rule-based demo tutor that needs no API key. Set `TUTOR_PROVIDER=off` in `.env` and recreate the backend container to check the "Flo is unavailable" state.
 
 Google sign-in uses a native module, so it needs a development build and does not run in Expo Go. Set the public web client ID in `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, and include that same ID in `GOOGLE_CLIENT_IDS` so the backend accepts the returned ID token. For Android, register package `com.fluora.mobile` and the development build's SHA-1 fingerprint in Google Cloud Console. For iOS, also set `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`; the app config uses it to register the callback URL scheme. These OAuth client IDs are public identifiers, not secrets. After changing `.env`, recreate the backend container.
 
