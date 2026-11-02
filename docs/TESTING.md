@@ -1,6 +1,6 @@
 # Testing and Verification
 
-Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks but no feature test suite yet; do not add a testing framework just because this plan exists.
+Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks plus focused mobile transport/Tutor-preview unit checks (see `TIEN_HANDOFF.md`); do not add a testing framework just because this plan exists.
 
 ## Current checks and CI
 

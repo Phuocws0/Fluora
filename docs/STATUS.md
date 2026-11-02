@@ -17,6 +17,8 @@
 
 ## In Progress
 
+- Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
+- Issue #22 Flo Tutor mobile UI is connected to the implemented Tutor API contract, with an explicit in-memory preview. It supports chats, role-play hints, message actions, notes, and history privacy controls. Live Android/backend acceptance remains.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
 - Mobile Google sign-in is implemented for native builds and connects to `POST /api/auth/google`. End-to-end sign-in requires a development build and valid Google OAuth client IDs.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
@@ -24,9 +26,9 @@
 
 ## Planned
 
-1. Integrate mobile account/onboarding (#4), profile/settings (#20), and League/community (#17) with the implemented APIs.
-2. Build the mobile Tutor tab (#22) against the implemented tutor API.
-3. Continue through the remaining practice, support, and tutor flows in `docs/PRODUCT.md`.
+1. Complete Android and live-backend acceptance for League/community (#17) and Tutor (#22).
+2. Integrate mobile account/onboarding (#4) and profile/settings (#20) with the implemented APIs.
+3. Continue through the remaining practice and learning flows in `docs/PRODUCT.md`.
 
 ## Known limitations
 
@@ -49,5 +51,4 @@
 ## Next Recommended Tasks
 
 - Connect mobile email sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
-- Build the League/community mobile screens (#17) against the implemented contracts.
-- Build the Tutor mobile screens (#22) against the implemented tutor contract, including the `503` unavailable state and temporary-chat `expiresAt`.
+- Complete end-to-end Android acceptance for the League/community and Tutor screens (#17, #22).

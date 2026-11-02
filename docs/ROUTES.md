@@ -33,7 +33,7 @@ learning-paths
 settings/[section]
 ```
 
-Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth/onboarding, settings, and the other four tabs currently render placeholders to establish destinations; they do not imply those features are implemented.
+Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth/onboarding, settings, Practice and Profile remain placeholders (apart from existing Google sign-in). League/community routes below now have a local UI implementation; Tutor has a UI with an explicit interface preview and planned API adapter. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
 
 ## Planned logical model
 
@@ -128,3 +128,15 @@ Examples:
 ## Data operations are separate from navigation
 
 Editing a profile, managing a group post, importing a vocabulary list, sending a friend request, voting in a poll, redeeming a reward, or clearing tutor history is an action within a flow; it does not require a new route for each operation. The product-approved CRUD baseline is in [API.md](API.md), and [FIGMA.md](FIGMA.md) distinguishes the 17 promoted Page 10 concepts from other drafts.
+
+
+## Local League/community implementation
+
+- `/community/friends` and `/community/users/[userId]`
+- `/community/groups` and `/community/groups/[groupId]`
+- `/community/groups/[groupId]/discussion` and `/community/groups/[groupId]/comments/[postId]`
+- `/community/groups/[groupId]/plan` (task lanes and whiteboard together)
+- `/community/rooms/[roomId]` (room details, messages and polls together)
+- `/community/rewards`, `/community/notifications`, `/community/peer-review`
+
+Tutor chat/history/notes are states within the Tutor tab; role-play turns, feedback and hints stay within the conversation. API mode and interface-preview mode are selected explicitly and never substitute for each other automatically.
