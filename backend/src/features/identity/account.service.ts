@@ -1,6 +1,7 @@
 import { prisma } from "../../db/prisma.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { HttpError } from "../../http/errors.js";
+import { releaseOwnedGroups } from "../groups/groups.service.js";
 import { hashPassword, verifyPassword } from "./credentials.js";
 
 export const publicUserSelect = {
@@ -85,4 +86,21 @@ export async function changePassword(
     prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
     prisma.session.deleteMany({ where: { userId, id: { not: currentSessionId } } }),
   ]);
+}
+
+/**
+ * Deletes the account after the learner retypes their email. Owned groups and hosted rooms are
+ * handed over first, then every user-owned row is removed by the `User` cascade.
+ */
+export async function deleteAccount(userId: string, confirmEmail: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+  if (!user) throw sessionGone();
+  if (user.email.toLowerCase() !== confirmEmail.toLowerCase()) {
+    throw new HttpError(400, "CONFIRMATION_MISMATCH", "The confirmation email does not match this account.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await releaseOwnedGroups(userId, tx);
+    await tx.user.delete({ where: { id: userId } });
+  });
 }

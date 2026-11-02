@@ -104,3 +104,83 @@ export function readPassword(body: JsonBody, key: string, min: number): string {
 
   return value;
 }
+
+export function validationError(message: string): HttpError {
+  return invalid(message);
+}
+
+export function readOptionalBoolean(body: JsonBody, key: string): boolean | undefined {
+  const value = body[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== "boolean") throw invalid(`${key} must be true or false.`);
+  return value;
+}
+
+type IntRule = { min: number; max: number };
+
+export function readOptionalInt(body: JsonBody, key: string, rule: IntRule): number | undefined {
+  const value = body[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < rule.min || value > rule.max) {
+    throw invalid(`${key} must be a whole number from ${rule.min} to ${rule.max}.`);
+  }
+  return value;
+}
+
+export function readInt(body: JsonBody, key: string, rule: IntRule): number {
+  const value = readOptionalInt(body, key, rule);
+  if (value === undefined) throw invalid(`${key} is required.`);
+  return value;
+}
+
+export function readNullableInt(body: JsonBody, key: string, rule: IntRule): number | null | undefined {
+  if (body[key] === null) return null;
+  return readOptionalInt(body, key, rule);
+}
+
+export function readOptionalEnum<T extends string>(body: JsonBody, key: string, values: readonly T[]): T | undefined {
+  const value = body[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== "string" || !(values as readonly string[]).includes(value)) {
+    throw invalid(`${key} must be one of: ${values.join(", ")}.`);
+  }
+  return value as T;
+}
+
+export function readNullableEnum<T extends string>(body: JsonBody, key: string, values: readonly T[]): T | null | undefined {
+  if (body[key] === null) return null;
+  return readOptionalEnum(body, key, values);
+}
+
+/** Reads a string that must match `pattern`, or `null`. */
+export function readNullablePattern(body: JsonBody, key: string, pattern: RegExp, description: string): string | null | undefined {
+  const value = body[key];
+  if (value === undefined || value === null) return value;
+  if (typeof value !== "string" || !pattern.test(value)) throw invalid(`${key} must be ${description}.`);
+  return value;
+}
+
+function parseDate(value: unknown, key: string): Date {
+  if (typeof value !== "string" || value.length > 40) throw invalid(`${key} must be an ISO 8601 date-time.`);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) throw invalid(`${key} must be an ISO 8601 date-time.`);
+  return date;
+}
+
+export function readOptionalDate(body: JsonBody, key: string): Date | undefined {
+  return body[key] === undefined ? undefined : parseDate(body[key], key);
+}
+
+export function readNullableDate(body: JsonBody, key: string): Date | null | undefined {
+  if (body[key] === null) return null;
+  return readOptionalDate(body, key);
+}
+
+/** Reads one optional query-string value. Repeated parameters are rejected. */
+export function readQueryText(query: unknown, key: string, rule: TextRule): string | undefined {
+  const record = (query ?? {}) as Record<string, unknown>;
+  const value = record[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") throw invalid(`${key} must be a single value.`);
+  return readOptionalText({ [key]: value }, key, rule);
+}
