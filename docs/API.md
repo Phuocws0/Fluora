@@ -36,11 +36,11 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `PATCH /api/users/me/settings` | Planned | Update languages, goals/time budget, learning promise, reminders, Flo style, privacy, accessibility/text size, focus mode, low-bandwidth, or wellbeing settings; changed fields → `{settings}` | `400`, `401` |
 | `DELETE /api/users/me/settings` | Planned | Reset preferences to defaults → `{settings}` | `401` |
 | `DELETE /api/users/me` | Planned | Delete the account and its owned data after confirmation; `{confirmEmail}` → `{deleted:true}` | `400`, `401`, `409` |
-| `POST /api/users/me/data-exports` | Partial | Create an export job/preview → `{exportId,status}` | `401`, `500` |
-| `GET /api/users/me/data-exports` | Partial | List the learner's export jobs → `{exports:[...]}` | `401` |
-| `GET /api/users/me/data-exports/:exportId` | Partial | Read export status/details → `{export}` | `401`, `404` |
-| `GET /api/users/me/data-exports/:exportId/download` | Partial | Download the prepared local-demo JSON export | `401`, `404`, `409` |
-| `DELETE /api/users/me/data-exports/:exportId` | Partial | Cancel/delete an export job → `{deleted:true}` | `401`, `404` |
+| `POST /api/users/me/data-exports` | Implemented | Create a ready local export job → `{exportId,status:"ready"}` | `401`, `500` |
+| `GET /api/users/me/data-exports` | Implemented | List the learner's export jobs → `{exports:[...]}` | `401` |
+| `GET /api/users/me/data-exports/:exportId` | Implemented | Read export status/details → `{export}` | `400`, `401`, `404` |
+| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:1,generatedAt,user}` | `400`, `401`, `404`, `409` if not ready |
+| `DELETE /api/users/me/data-exports/:exportId` | Implemented | Cancel/delete an export job → `{deleted:true}` | `400`, `401`, `404` |
 
 Account deletion requires explicit confirmation and removes the user's personal records. It does not delete curated content or other learners' records.
 
@@ -54,6 +54,8 @@ Account deletion requires explicit confirmation and removes the user's personal 
 - **Unverified email:** sign-in is allowed while `emailVerified` is `false`; email verification arrives with the remaining issue #3 work.
 - **API-wide errors:** malformed JSON returns `400 VALIDATION_ERROR`, an oversized body returns `413 PAYLOAD_TOO_LARGE`, and an unknown `/api` path returns `404 NOT_FOUND`, all in the standard error shape.
 - There is no rate limiting for this local demo.
+
+Exports are marked ready immediately and assembled from current records when downloaded; no background job or external storage is used. A non-ready job returns `409 CONFLICT`.
 
 ## Learning content and progress
 
@@ -264,14 +266,14 @@ Notifications are system-created; clients can read, update read state, and delet
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/help/articles?category=` | Implemented | Read FAQ/help topics → `{articles:[...]}` | `400`, `500` |
-| `GET /api/support/requests` | Partial | Read the learner's own support requests → `{requests:[...]}` | `401` |
-| `POST /api/support/requests` | Partial | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
-| `PATCH /api/support/requests/:requestId` | Partial | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
-| `DELETE /api/support/requests/:requestId` | Partial | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
+| `GET /api/support/requests` | Implemented | Read the learner's own support requests → `{requests:[...]}` | `401` |
+| `POST /api/support/requests` | Implemented | Create a request; `{message,screenshot?,deviceDetails}` → `{request}` | `400`, `401`, `413` |
+| `PATCH /api/support/requests/:requestId` | Implemented | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
+| `DELETE /api/support/requests/:requestId` | Implemented | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
 
 Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
 
-The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. Export downloads currently contain the public `User` fields and support requests (never credential columns); extend the payload as other learner-owned models are implemented.
+The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. The local export is generated as JSON when downloaded and includes the learner's current profile, settings, placement attempts, support requests, practice and reading data, answers, progress, planner entries, evidence, mission completions, and misconception view states. Credential hashes, bearer sessions, and one-time auth-token hashes are excluded.
 
 ## Flo AI Tutor
 

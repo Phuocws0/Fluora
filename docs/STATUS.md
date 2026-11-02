@@ -10,12 +10,12 @@
 - Issue #2 mobile navigation shell is implemented with five logical tabs and auth/onboarding/detail destinations; typecheck and Android bundle export pass.
 - Issue #27 core learning activity API records answers and idempotent completions, derives progress/analytics/skill confidence, and supports planner/evidence CRUD, mission passport/completion, hints, and misconception dismiss/restore. Private routes use verified bearer sessions.
 - Issue #39 practice/vocabulary/reading API: owner-scoped deck/card and bookmark operations, validated import, scheduled custom and mistake-derived review, reading progress, curated story challenge linked to the core exercise API, and demo study-tool/dictionary reads. Mistakes derive from immutable learner answers and can be dismissed without editing that history.
+- Issue #33 help articles, owner-scoped support-request CRUD, and local JSON exports of current learner-owned data are implemented. Exports omit passwords, bearer sessions, and authentication-token hashes.
 
 ## In Progress
 
 - Issue #3 identity backend, part 1 of 3 (see [plans/03-identity-onboarding-settings.md](plans/03-identity-onboarding-settings.md)): the identity schema and migration, scrypt password hashing, opaque bearer sessions, the `authenticate`/`requireUser` middleware, API-wide JSON 404/error handling, and register, login, logout, profile read/update, password change, and session list/revoke are implemented. A local Docker smoke check covered success, validation, ownership, revocation, and the support/practice integration. Settings, onboarding, placement (part 2), and email verification, password recovery, Google sign-in, and account deletion (part 3) remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes now use the issue #3 bearer session; exports include the public user fields and support requests.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 

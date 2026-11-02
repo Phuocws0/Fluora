@@ -15,7 +15,7 @@ Scrypt password hashes and bearer sessions are implemented, and registration cre
 - **sessions:** Active device sign-ins with a SHA-256 token hash, device name, user agent, last use, and expiry. Learners can review and revoke them.
 - **auth_tokens:** Single-use email-verification and password-reset tokens (`purpose`), stored only as SHA-256 hashes with expiry and use time.
 - **placement_attempts:** Submitted placement answers, question-set version, suggested level, and skill baseline.
-- **data_export_requests:** Owner, request time, status, and expiry for user-initiated export previews/downloads.
+- **data_export_requests:** Owner, request time, status, and expiry for user-initiated export previews/downloads. The local demo assembles JSON from current owned records on download instead of copying those records into an export table.
 
 ```text
 User

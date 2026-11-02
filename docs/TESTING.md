@@ -41,6 +41,7 @@ For mutable user-owned resources, verify:
 - owner checks, duplicate/conflict handling, and invalid IDs;
 - group-role checks for group/room/poll management and ownership checks for personal edits/deletes;
 - confirmation and authorization for account deletion, export cancellation, and other destructive actions;
+- personal-data export includes current learner-owned records while excluding password hashes, sessions, and one-time token hashes; verify owner isolation and the non-ready conflict response;
 - profile/privacy choices affect returned friend/community/tutor data;
 - reward/quest/progress totals change through recorded actions rather than arbitrary updates;
 - tutor history clearing and export behavior match settings/privacy choices.
