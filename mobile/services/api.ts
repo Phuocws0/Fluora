@@ -41,3 +41,14 @@ export function getJson<T>(path: string): Promise<T> {
 export function postJson<T>(path: string, body: unknown): Promise<T> {
   return requestJson<T>(path, { method: "POST", body: JSON.stringify(body) });
 }
+
+export function patchJson<T>(path: string, body: unknown): Promise<T> {
+  return requestJson<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export function deleteJson<T>(path: string, body?: unknown): Promise<T> {
+  return requestJson<T>(path, {
+    method: "DELETE",
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+}
