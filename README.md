@@ -69,15 +69,20 @@ This local demo sends no email. Email-verification and password-reset tokens are
 docker compose logs -f backend
 ```
 
-Each token appears once on a line starting with `[dev-mail]`. Google sign-in (`POST /api/auth/google`) stays disabled and returns `503` until you set `GOOGLE_CLIENT_IDS` in `.env` to your OAuth client IDs (comma-separated) and recreate the backend container.
+Each token appears once on a line starting with `[dev-mail]`.
 
-Start Expo in a second terminal:
+Google sign-in uses a native module, so it needs a development build and does not run in Expo Go. Set the public web client ID in `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, and include that same ID in `GOOGLE_CLIENT_IDS` so the backend accepts the returned ID token. For Android, register package `com.fluora.mobile` and the development build's SHA-1 fingerprint in Google Cloud Console. For iOS, also set `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`; the app config uses it to register the callback URL scheme. These OAuth client IDs are public identifiers, not secrets. After changing `.env`, recreate the backend container.
+
+Build and start the native Android app in a second terminal. From the repository root, load the environment values first so Expo receives the Google client IDs:
 
 ```sh
-npm run dev:mobile
+set -a
+. ./.env
+set +a
+npm run android --workspace @fluora/mobile
 ```
 
-For an Android emulator, use `npm run android --workspace @fluora/mobile` or press `a` in the Expo terminal. The app connects to the backend at `10.0.2.2:4000` on Android emulators and `localhost:4000` on iOS simulators and web. For a physical device or a different host, set `EXPO_PUBLIC_API_URL` to an address reachable from that device before starting Expo, for example `EXPO_PUBLIC_API_URL=http://192.168.1.20:4000 npm run dev:mobile`.
+The native Google module requires a development build; Expo Go cannot load it. `npm run ios --workspace @fluora/mobile` builds the iOS app when an iOS client ID is configured. For a physical device or a different backend host, set `EXPO_PUBLIC_API_URL` to an address reachable from that device before building or starting Metro, for example `EXPO_PUBLIC_API_URL=http://192.168.1.20:4000 npm run android --workspace @fluora/mobile`.
 
 Stop local containers while keeping the database volume:
 
