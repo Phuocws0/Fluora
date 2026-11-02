@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ApiError } from "../../services/api";
 import { clearAccessToken, getAccessToken } from "../../services/session";
 import {
   getCurrentUser,
@@ -62,19 +63,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
+      setToken(activeToken);
+
       const [currentUser, currentSettings] = await Promise.all([
         getCurrentUser(),
         getLearnerSettings(),
       ]);
 
       setUser(currentUser);
-      setToken(activeToken);
       setSettings(currentSettings);
-    } catch {
-      await clearAccessToken();
-      setUser(null);
-      setToken(null);
-      setSettings(null);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        await clearAccessToken();
+        setUser(null);
+        setToken(null);
+        setSettings(null);
+      }
     }
   }, []);
 
@@ -93,6 +97,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
+        if (isMounted) {
+          setToken(activeToken);
+        }
+
         const [currentUser, currentSettings] = await Promise.all([
           getCurrentUser(),
           getLearnerSettings(),
@@ -100,15 +108,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (isMounted) {
           setUser(currentUser);
-          setToken(activeToken);
           setSettings(currentSettings);
         }
-      } catch {
-        await clearAccessToken();
-        if (isMounted) {
-          setUser(null);
-          setToken(null);
-          setSettings(null);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          await clearAccessToken();
+          if (isMounted) {
+            setUser(null);
+            setToken(null);
+            setSettings(null);
+          }
         }
       } finally {
         if (isMounted) {
