@@ -9,6 +9,7 @@ import { communityRouter } from "./features/community/community.routes.js";
 import { groupsRouter } from "./features/groups/groups.routes.js";
 import { leagueRouter } from "./features/league/league.routes.js";
 import { roomsRouter } from "./features/rooms/rooms.routes.js";
+import { tutorRouter } from "./features/tutor/tutor.routes.js";
 import { authenticate } from "./http/auth.js";
 import { apiNotFound, jsonErrorHandler } from "./http/errors.js";
 
@@ -25,6 +26,7 @@ app.use("/api", communityRouter);
 app.use("/api", groupsRouter);
 app.use("/api", roomsRouter);
 app.use("/api", leagueRouter);
+app.use("/api", tutorRouter);
 app.use("/api", apiNotFound);
 
 app.get("/health", async (_request, response) => {

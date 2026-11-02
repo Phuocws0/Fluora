@@ -1,6 +1,6 @@
 # API Contract
 
-This document records implemented auth/account/settings/placement, content, learning-activity, practice/vocabulary/reading, community, League, and rewards APIs, plus the planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoint status follows the current source on the branch being reviewed. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
+This document records implemented auth/account/settings/placement, content, learning-activity, practice/vocabulary/reading, community, League, rewards, and Flo Tutor APIs, plus the planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoint status follows the current source on the branch being reviewed. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -40,17 +40,17 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `POST /api/users/me/data-exports` | Implemented | Create a ready local export job → `{exportId,status:"ready"}` | `401`, `500` |
 | `GET /api/users/me/data-exports` | Implemented | List the learner's export jobs → `{exports:[...]}` | `401` |
 | `GET /api/users/me/data-exports/:exportId` | Implemented | Read export status/details → `{export}` | `400`, `401`, `404` |
-| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:2,generatedAt,user}`; includes account, learning, practice, community, group, room, achievement, quest, reward, and wallet records owned by the learner | `400`, `401`, `404`, `409` if not ready |
+| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:3,generatedAt,user}`; includes account, learning, practice, community, group, room, achievement, quest, reward, wallet, and tutor records owned by the learner | `400`, `401`, `404`, `409` if not ready |
 | `DELETE /api/users/me/data-exports/:exportId` | Implemented | Cancel/delete an export job → `{deleted:true}` | `400`, `401`, `404` |
 
-Account deletion requires explicit confirmation and removes the user's personal records across every domain (sessions, settings, placement, support, exports, practice, activity, community, and wallet rows). It does not delete curated content or other learners' records. Before deleting, the backend promotes the earliest-joined other member of each group the learner owns (or deletes the group when nobody else is left) and gives the learner's hosted rooms to that group's owner.
+Account deletion requires explicit confirmation and removes the user's personal records across every domain (sessions, settings, placement, support, exports, practice, activity, community, wallet, and tutor rows). It does not delete curated content or other learners' records. Before deleting, the backend promotes the earliest-joined other member of each group the learner owns (or deletes the group when nobody else is left) and gives the learner's hosted rooms to that group's owner.
 
-Data exports exclude password hashes, Google subject IDs, sessions, and authentication-token hashes. Friend-request, notification, group, room, peer-review, achievement, quest, redemption, and wallet records are included for the requesting learner; shared content includes only the context needed to understand the learner's own record.
+Data exports exclude password hashes, Google subject IDs, sessions, and authentication-token hashes. Friend-request, notification, group, room, peer-review, achievement, quest, redemption, wallet, tutor chat/message, and tutor note records are included for the requesting learner; shared content includes only the context needed to understand the learner's own record.
 
 ### Implemented session and account behavior
 
 - **Session token:** `register` and `login` return an opaque random `token`. Send it as `Authorization: Bearer <token>`. The database stores only its SHA-256 hash. A session lasts 30 days and its expiry slides forward while it is used. Expired sessions are deleted when they are presented.
-- **Identity on every `/api` request:** the `authenticate` middleware resolves a valid bearer token into `res.locals.userId` and `res.locals.sessionId`. It never rejects a request, so public routes work even with a stale token. Private routes use `requireUser` and return `401 UNAUTHORIZED` without a valid session. Support/export, practice, learning-activity, community, groups, rooms, and League routes use this identity.
+- **Identity on every `/api` request:** the `authenticate` middleware resolves a valid bearer token into `res.locals.userId` and `res.locals.sessionId`. It never rejects a request, so public routes work even with a stale token. Private routes use `requireUser` and return `401 UNAUTHORIZED` without a valid session. Support/export, practice, learning-activity, community, groups, rooms, League, and tutor routes use this identity.
 - **`user` shape:** `{id,email,displayName,bio,avatarUrl,emailVerified,hasPassword,createdAt}`. Password hashes, token hashes, and Google subject IDs are never returned. `hasPassword` is `false` for future Google-only accounts.
 - **Input rules:** strings are trimmed; passwords are not. Emails are stored lowercase (≤254 chars). Passwords are 8–128 characters for register and change. `deviceName` is optional (≤80 chars) and appears in the session list together with the request's `User-Agent`. Unknown body fields return `400`.
 - **Login failures:** an unknown email, a wrong password, and an account without a password all return the same `401 INVALID_CREDENTIALS` message.
@@ -315,27 +315,62 @@ Cursor lists (`discussion`, `comments`, `messages`, `notifications`) accept `?be
 
 Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
 
-The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. The local export is generated as JSON when downloaded and includes the learner's current profile, settings, placement attempts, support requests, practice and reading data, answers, progress, planner entries, evidence, mission completions, and misconception view states. Credential hashes, bearer sessions, and one-time auth-token hashes are excluded.
+The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. The local export is generated as JSON when downloaded and includes the learner's current profile, settings, placement attempts, support requests, practice and reading data, answers, progress, planner entries, evidence, mission completions, and misconception view states, plus the community, League, wallet, and tutor records listed above. Credential hashes, bearer sessions, and one-time auth-token hashes are excluded.
 
 ## Flo AI Tutor
 
+All tutor routes require a session (`401` without one). Chats, messages, and notes are owner-scoped: another learner's IDs return `404`.
+
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/tutor/role-plays` | Planned | Read curated branching role-play scenarios → `{scenarios:[...]}` | `401` |
-| `GET /api/tutor/chats` | Planned | Read saved conversation list → `{chats:[...]}` | `401` |
-| `POST /api/tutor/chats` | Planned | Start chat/role-play; `{scenarioId?}` → `{chat}` | `400`, `401`, `404` |
-| `PATCH /api/tutor/chats/:chatId` | Planned | Rename a chat or update its save preference → `{chat}` | `400`, `401`, `404` |
-| `GET /api/tutor/chats/:chatId` | Planned | Read messages and saved-note links → `{chat,messages:[...]}` | `401`, `404` |
-| `POST /api/tutor/chats/:chatId/messages` | Planned | Send question, grammar/mistake context, or role-play response; `{message,context?}` → `{userMessage,tutorMessage,feedback?,nextTurn?}` | `400`, `401`, `404`, `500` |
-| `PATCH /api/tutor/chats/:chatId/messages/:messageId` | Planned | Edit own message and regenerate tutor feedback → `{userMessage,tutorMessage}` | `400`, `401`, `403`, `404` |
-| `DELETE /api/tutor/chats/:chatId/messages/:messageId` | Planned | Delete own message and linked response → `{deleted:true}` | `401`, `403`, `404` |
-| `DELETE /api/tutor/chats/:chatId` | Planned | Delete one chat after confirmation → `{deleted:true}` | `401`, `404` |
-| `DELETE /api/tutor/chats` | Planned | Clear all history after confirmation → `{deletedCount}` | `401` |
-| `GET /api/tutor/notes` | Planned | Read saved tutor notes → `{notes:[...]}` | `401` |
-| `POST /api/tutor/notes` | Planned | Save a phrase/pattern; `{chatId?,phrase,pattern,personalExample?}` → `{note}` | `400`, `401` |
-| `GET /api/tutor/notes/:noteId` | Planned | Read one saved note → `{note}` | `401`, `404` |
-| `PATCH /api/tutor/notes/:noteId` | Planned | Edit note/personal example; changed fields → `{note}` | `400`, `401`, `404` |
-| `DELETE /api/tutor/notes/:noteId` | Planned | Delete one saved note → `{deleted:true}` | `401`, `404` |
+| `GET /api/tutor/status` | Implemented | Whether Flo can reply right now → `{available,provider}` (`provider`: `local` or `off`) | `401` |
+| `GET /api/tutor/role-plays` | Implemented | Read curated branching role-play scenarios → `{scenarios:[{id,slug,title,description,level,turnCount}]}` | `401` |
+| `GET /api/tutor/chats?before=&limit=` | Implemented | Read the learner's chats, newest first: saved chats and still-active temporary ones → `{chats:[...],nextBefore}` | `400`, `401` |
+| `POST /api/tutor/chats` | Implemented | Start a chat or role-play; `{scenarioId?,title?}` → `201 {chat}`. A role-play stores Flo's opening line and returns `currentTurn`. Works while the tutor is unavailable. | `400`, `401`, `404` |
+| `PATCH /api/tutor/chats/:chatId` | Implemented | Rename a chat or change its save choice; `{title?,saved?}` → `{chat}` | `400`, `401`, `404`, `409 HISTORY_SAVING_OFF` (`saved:true` while `saveTutorHistory` is off) |
+| `GET /api/tutor/chats/:chatId?before=&limit=` | Implemented | Read the chat and a newest-first page of messages with saved-note links → `{chat,messages:[...],nextBefore}` | `400`, `401`, `404` |
+| `POST /api/tutor/chats/:chatId/messages` | Implemented | Send a question, exercise/mistake context, an explanation request, or a role-play reply; `{message,context?}` → `201 {userMessage,tutorMessage,feedback,nextTurn,chat}` | `400`, `401`, `404`, `409 ROLE_PLAY_COMPLETED`, `409 TURN_CHANGED`, `503 TUTOR_UNAVAILABLE` |
+| `PATCH /api/tutor/chats/:chatId/messages/:messageId` | Implemented | Edit your own message and regenerate Flo's linked reply in place; `{message}` → `{userMessage,tutorMessage,feedback,nextTurn,chat}` | `400`, `401`, `403 LEARNER_MESSAGES_ONLY`, `404`, `409 NOT_LATEST_TURN`, `409 TURN_CHANGED`, `503` |
+| `DELETE /api/tutor/chats/:chatId/messages/:messageId` | Implemented | Delete your own message and its linked reply → `{deleted:true}` | `400`, `401`, `403 LEARNER_MESSAGES_ONLY`, `404`, `409 NOT_LATEST_TURN` |
+| `GET /api/tutor/chats/:chatId/hints?step=` | Implemented | Hint ladder (steps 1–3) for the current role-play turn → `{step,text,lastStep}` | `400`, `401`, `404`, `409 NOT_ROLE_PLAY`, `409 ROLE_PLAY_COMPLETED` |
+| `DELETE /api/tutor/chats/:chatId` | Implemented | Delete one chat after confirmation in the app → `{deleted:true}` | `400`, `401`, `404` |
+| `DELETE /api/tutor/chats` | Implemented | Clear all history; `{confirm:true}` → `{deletedCount}` | `400 CONFIRMATION_REQUIRED`, `401` |
+| `GET /api/tutor/notes?before=&limit=` | Implemented | Read saved tutor notes, newest first → `{notes:[...],nextBefore}` | `400`, `401` |
+| `POST /api/tutor/notes` | Implemented | Save a phrase/pattern; `{chatId?,messageId?,phrase,pattern,personalExample?}` → `201 {note}`. `messageId` requires `chatId` and must be in that chat. | `400`, `401`, `404` |
+| `GET /api/tutor/notes/:noteId` | Implemented | Read one saved note → `{note}` | `400`, `401`, `404` |
+| `PATCH /api/tutor/notes/:noteId` | Implemented | Edit `phrase`, `pattern`, or `personalExample` → `{note}` | `400`, `401`, `404` |
+| `DELETE /api/tutor/notes/:noteId` | Implemented | Delete one saved note → `{deleted:true}` | `400`, `401`, `404` |
+
+### Shapes
+
+- **chat:** `{id,kind,title,saved,expiresAt,status,scenario:{id,slug,title,level}|null,currentTurn:{key,tutorLine,choices:[{key,label}]}|null,messageCount,lastActivityAt,createdAt,updatedAt}`. `kind` is `chat` or `role_play`; `status` is `active` or `completed`. `expiresAt` is set only for unsaved chats.
+- **message:** `{id,role,body,context,feedback,turnKey,replyToId,noteIds,editedAt,createdAt}`. `role` is `learner` or `tutor`. A tutor reply's `replyToId` is its learner message.
+- **feedback:** `{verdict,correction,explanation}`, where `verdict` is `correct`, `almost`, or `try_again`, and `correction` is the model answer or `null`.
+- **note:** `{id,phrase,pattern,personalExample,chatId,messageId,createdAt,updatedAt}`.
+- **Limits:** `message` 1–1000 characters, `title` 1–60, `phrase` 1–120, `pattern` 1–200, `personalExample` ≤300 or `null`. Lists use `?before=<ISO time>&limit=` (default 20, max 50) and return `nextBefore`.
+
+### Message context
+
+`context` is optional: `{kind, exerciseId?, answerId?, messageId?}`. Only IDs are stored; unknown fields return `400`.
+
+| `kind` | Needs | Allowed in | Flo replies with |
+| --- | --- | --- | --- |
+| `question` (default), `grammar` | — | chat | A short explanation and example |
+| `exercise` | `exerciseId` of a published exercise | chat | Guidance and the first hint, never the answer |
+| `mistake` | `answerId` of your own submitted answer | chat | Your answer, the expected answer, and the explanation, with `feedback` |
+| `explain` | `messageId` of a Flo reply with feedback in the same chat | chat, role-play | A longer explanation of that feedback |
+
+In a role-play, a message without `context` is a reply to the current turn. Flo grades it against the turn's suggested replies: `correct` or `almost` moves to the chosen branch (`nextTurn`), `try_again` stays on the turn. The last turn sets `status:"completed"` and `nextTurn:null`. Parallel replies to the same turn are serialized: one is graded, the other gets `409 TURN_CHANGED`.
+
+### Flo Tutor behavior
+
+- **Provider:** `TUTOR_PROVIDER` selects the tutor. `local` (default) is an offline, rule-based demo tutor with curated topics and role-play grading; it needs no key. `off`, or an unknown value, makes Flo unavailable. A real AI provider can be added later behind the same contract.
+- **Unavailable tutor:** sending or editing a message returns `503 TUTOR_UNAVAILABLE` and stores nothing, so mobile can keep the draft. Status, scenarios, chat history, creating chats, notes, lessons, and exercise hints keep working.
+- **Saved history:** a new chat's `saved` follows `saveTutorHistory`. Unsaved chats are temporary and are deleted, with their messages, 60 minutes after their last activity (checked on the learner's next tutor request; there is no scheduler). Turning the setting off does not delete existing saved chats; clear history for that. `PATCH {saved:false}` makes a chat temporary from that moment.
+- **Linked replies:** each learner message has at most one Flo reply. Editing the learner message regenerates that reply in place (same ID); deleting it deletes the reply. Flo's messages can't be edited or deleted directly. In a role-play only your latest message can be edited or deleted; deleting a role-play reply rewinds the chat to that turn.
+- **Clear history:** `DELETE /api/tutor/chats {confirm:true}` deletes every chat and message of the learner, saved or temporary. Saved notes are kept; their `chatId`/`messageId` become `null`, as when one chat is deleted.
+- **Privacy:** voice input is transcribed on the device and sent as text; no audio is accepted or stored. A provider receives only the message, up to the last 10 messages of that chat, the current role-play turn, and the referenced exercise or answer. It never receives the learner's email, name, or settings. Message text is not logged.
+- Tutor activity does not earn XP, gems, or quest progress.
 
 ## CRUD coverage and deliberate boundaries
 

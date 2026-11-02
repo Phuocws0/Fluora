@@ -39,6 +39,8 @@ For identity, check settings partial update/validation/reset (nothing is written
 
 For community, League, and rewards, use at least three registered learners plus the seeded demo learners. Change privacy and reminder preferences through `PATCH /api/users/me/settings`. Check search and profile privacy, every friend-request transition, owner/member/host/author permissions in groups and rooms, owner leave and ownership transfer, poll open/closed and vote-change rules, quest claims once per UTC day, parallel redemptions against a small balance (exactly one may succeed), that the wallet balance equals the ledger sum, and that deleting an account hands owned groups and hosted rooms to another member.
 
+For the Flo Tutor, use at least two registered learners. Check question, exercise, mistake, and explain contexts (exercise help never shows the answer; another learner's answer or chat returns `404`); every role-play branch, `almost`/`try_again` grading, completion, and the hint ladder; that editing a learner message regenerates the same reply and deleting it removes the reply, with only the latest role-play message changeable; parallel replies to one turn (only one is graded); that `saveTutorHistory:false` makes chats temporary and an expired one (set `lastActivityAt` back with `psql`) is purged; that clear-history needs `{confirm:true}` and keeps notes; note CRUD and link checks; that audio fields are rejected; and, with `TUTOR_PROVIDER=off`, that send/edit return `503` and store nothing while history, notes, and lessons keep working.
+
 For mutable user-owned resources, verify:
 
 - create/read/update/delete behavior for learner-owned resources and group-managed content in the approved CRUD baseline;

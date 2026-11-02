@@ -156,8 +156,28 @@ export async function downloadExport(userId: string, id: string) {
         include: { reward: { select: { slug: true, name: true, description: true, kind: true, fulfillment: true } } },
       },
       walletTransactions: { orderBy: { createdAt: "asc" } },
+      tutorConversations: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          kind: true,
+          title: true,
+          saved: true,
+          status: true,
+          currentTurnKey: true,
+          lastActivityAt: true,
+          createdAt: true,
+          updatedAt: true,
+          scenario: { select: { slug: true, title: true } },
+          messages: {
+            orderBy: { createdAt: "asc" },
+            select: { id: true, role: true, body: true, context: true, feedback: true, turnKey: true, replyToId: true, editedAt: true, createdAt: true },
+          },
+        },
+      },
+      tutorNotes: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!user) return null;
-  return { version: 2, generatedAt: new Date().toISOString(), user };
+  return { version: 3, generatedAt: new Date().toISOString(), user };
 }
