@@ -1,8 +1,18 @@
 import { useLocalSearchParams } from "expo-router";
-import { DestinationPlaceholder } from "../../components/DestinationPlaceholder";
+import { SessionGate } from "../../features/shared/feature-ui";
+import { Analytics, EditProfile, General, Preferences, Security } from "../../features/profile/settings-screens";
+import { Exports, Help, Support } from "../../features/profile/support-screens";
 
 export default function SettingsScreen() {
   const { section = "general" } = useLocalSearchParams<{ section: string }>();
-  const title = section.replaceAll("-", " ");
-  return <DestinationPlaceholder title={`${title.charAt(0).toLocaleUpperCase()}${title.slice(1)} settings`} description="Settings sections will be implemented in the profile and settings issue." />;
+  return <SessionGate feature="Profile and settings">{() => {
+    if (section === "general") return <General />;
+    if (section === "edit-profile") return <EditProfile />;
+    if (section === "analytics") return <Analytics />;
+    if (section === "security") return <Security />;
+    if (section === "help") return <Help />;
+    if (section === "support") return <Support />;
+    if (section === "exports") return <Exports />;
+    return <Preferences section={section} />;
+  }}</SessionGate>;
 }

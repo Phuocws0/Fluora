@@ -17,6 +17,8 @@
 
 ## In Progress
 
+- Issue #20 profile/settings/help/support/export mobile screens are implemented against the existing identity, support, and activity APIs. They include profile editing, learning analytics (weekly breakdown), accessibility (text size live preview, reduced motion, captions), focus and low-bandwidth modes, wellbeing timer, Flo companion, daily goals/promise, privacy controls with confirmed tutor chat history clearing, settings reset, account security and deletion, help articles with category filter and search, open/closed support requests (create, edit, cancel), and local JSON export sharing with status/cancellation. Typecheck passes; physical-device acceptance remains.
+
 - Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
 - Issue #22 Flo Tutor mobile UI is connected to the implemented Tutor API contract, with an explicit in-memory preview. It supports chats, role-play hints, message actions, notes, and history privacy controls. Live Android/backend acceptance remains.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
@@ -27,7 +29,7 @@
 ## Planned
 
 1. Complete Android and live-backend acceptance for League/community (#17) and Tutor (#22).
-2. Integrate mobile account/onboarding (#4) and profile/settings (#20) with the implemented APIs.
+2. Complete mobile account/onboarding (#4) and physical-device acceptance for profile/settings (#20).
 3. Continue through the remaining practice and learning flows in `docs/PRODUCT.md`.
 
 ## Known limitations
@@ -50,5 +52,5 @@
 
 ## Next Recommended Tasks
 
-- Connect mobile email sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
+- Connect mobile email sign-in, onboarding, and placement screens (#4); verify profile/settings (#20) on a connected Android device.
 - Complete end-to-end Android acceptance for the League/community and Tutor screens (#17, #22).
