@@ -1,6 +1,6 @@
 # API Contract
 
-This document records the implemented runtime health, learning-content reads, story reads, partial practice API, and planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoints are marked **Planned** until implemented in the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
+This document records implemented auth, content, and learning-activity APIs, partial practice APIs, and planned learner-facing API for Page 09 and the 17 Page 10 concepts promoted into scope by the product owner. Endpoint status follows the current source. The API includes a practical CRUD baseline for learner-owned and group-managed data, including controls omitted from draft frames. It does not add admin content-management APIs.
 
 Use REST/JSON under `/api`. Authenticated calls use `Authorization: Bearer <token>`; register, login, Google sign-in, email verification, and password recovery are public. Keep errors consistent:
 
@@ -47,7 +47,7 @@ Account deletion requires explicit confirmation and removes the user's personal 
 ### Implemented session and account behavior
 
 - **Session token:** `register` and `login` return an opaque random `token`. Send it as `Authorization: Bearer <token>`. The database stores only its SHA-256 hash. A session lasts 30 days and its expiry slides forward while it is used. Expired sessions are deleted when they are presented.
-- **Identity on every `/api` request:** the `authenticate` middleware resolves a valid bearer token into `res.locals.userId` and `res.locals.sessionId`. It never rejects a request, so public routes work even with a stale token. Private routes use `requireUser` and return `401 UNAUTHORIZED` without a valid session. The support/export and practice routes use this identity.
+- **Identity on every `/api` request:** the `authenticate` middleware resolves a valid bearer token into `res.locals.userId` and `res.locals.sessionId`. It never rejects a request, so public routes work even with a stale token. Private routes use `requireUser` and return `401 UNAUTHORIZED` without a valid session. Support/export, practice, and learning-activity routes use this identity.
 - **`user` shape:** `{id,email,displayName,bio,avatarUrl,emailVerified,hasPassword,createdAt}`. Password hashes, token hashes, and Google subject IDs are never returned. `hasPassword` is `false` for future Google-only accounts.
 - **Input rules:** strings are trimmed; passwords are not. Emails are stored lowercase (≤254 chars). Passwords are 8–128 characters for register and change. `deviceName` is optional (≤80 chars) and appears in the session list together with the request's `User-Agent`. Unknown body fields return `400`.
 - **Login failures:** an unknown email, a wrong password, and an account without a password all return the same `401 INVALID_CREDENTIALS` message.
@@ -61,7 +61,7 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/home` | Planned | Home cards and continue-learning summary → `{course,progress,streak,wallet}` | `401` |
+| `GET /api/home` | Partial | Home cards and continue-learning summary → `{course,progress,streak,wallet}` | `401` |
 | `GET /api/courses` | Implemented | Published course catalog → `{courses:[{id,slug,title,description,language,level,estimatedMinutes,unitCount,lessonCount,learningPaths}]}` | `500` |
 | `GET /api/courses/:courseId` | Implemented | Course overview and ordered syllabus units/lessons → `{course:{...,units:[...],learningPaths:[...]}}` | `400`, `404`, `500` |
 | `GET /api/courses/:courseId/units` | Implemented | Ordered unit catalog with lesson counts → `{units:[{id,slug,title,description,order,lessonCount}]}` | `400`, `404`, `500` |
@@ -76,19 +76,21 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `DELETE /api/enrollments/:enrollmentId` | Planned | Unenroll from a course → `{deleted:true}` | `401`, `404` |
 | `GET /api/placement/attempts` | Planned | Read placement history and baseline → `{attempts:[...]}` | `401` |
 | `POST /api/placement/attempts` | Planned | Submit the optional placement answers; `{answers:[...]}` → `{level,skillBaseline}` | `400`; session optional if placement precedes registration |
-| `GET /api/progress` | Planned | Read completion, XP, streak, and gems → `{completedLessons,currentStreak,xp,gems}` | `401` |
-| `POST /api/lessons/:lessonId/complete` | Planned | Record lesson completion → `{lessonId,completedAt,xpEarned}` | `401`, `404`, `409` |
-| `GET /api/learning/skill-baseline` | Planned | Read placement level and confidence by skill → `{level,skills:[...]}` | `401`, `404` |
-| `GET /api/analytics/weekly` | Planned | Weekly XP/activity chart → `{days:[...],summary}` | `401` |
-| `GET /api/learning/evidence` | Planned | Read can-do goals and attached samples → `{goals:[...]}` | `401` |
-| `POST /api/learning/evidence` | Planned | Attach a completed learning sample; `{goalId,kind,summary,reference?}` → `{evidence}` | `400`, `401`, `404` |
-| `PATCH /api/learning/evidence/:evidenceId` | Planned | Edit a learner-owned evidence sample; changed fields → `{evidence}` | `400`, `401`, `404` |
-| `DELETE /api/learning/evidence/:evidenceId` | Planned | Remove a learner-attached sample → `{deleted:true}` | `401`, `404` |
-| `GET /api/missions/passport` | Planned | Read mission passport and earned stamps → `{missions:[...]}` | `401` |
-| `GET /api/missions/:missionId` | Planned | Read curated mission instructions → `{mission}` | `404` |
-| `POST /api/missions/:missionId/complete` | Planned | Record completed mission evidence; progress is derived → `{completion}` | `400`, `401`, `404`, `409` |
-| `GET /api/learning/misconceptions` | Planned | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
-| `PATCH /api/learning/misconceptions/:itemId` | Planned | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
+| `GET /api/progress` | Partial | Read completion, XP, streak, and gems → `{completedLessons,currentStreak,xp,gems}` | `401` |
+| `POST /api/lessons/:lessonId/complete` | Implemented | Record lesson completion → `{lessonId,completedAt,xpEarned}` | `401`, `404`, `409` |
+| `GET /api/learning/skill-baseline` | Partial | Read placement level and confidence by skill → `{level,skills:[...]}` | `401`, `404` |
+| `GET /api/analytics/weekly` | Implemented | Weekly XP/activity chart → `{days:[...],summary}` | `401` |
+| `GET /api/learning/evidence` | Implemented | Read can-do goals and attached samples → `{goals:[...]}` | `401` |
+| `POST /api/learning/evidence` | Implemented | Attach a completed learning sample; `{goalId,kind,summary,reference?}` → `{evidence}` | `400`, `401`, `404` |
+| `PATCH /api/learning/evidence/:evidenceId` | Implemented | Edit a learner-owned evidence sample; changed fields → `{evidence}` | `400`, `401`, `404` |
+| `DELETE /api/learning/evidence/:evidenceId` | Implemented | Remove a learner-attached sample → `{deleted:true}` | `401`, `404` |
+| `GET /api/missions/passport` | Implemented | Read mission passport and earned stamps → `{missions:[...]}` | `401` |
+| `GET /api/missions/:missionId` | Implemented | Read curated mission instructions → `{mission}` | `404` |
+| `POST /api/missions/:missionId/complete` | Implemented | Record completed mission evidence; progress is derived → `{completion}` | `400`, `401`, `404`, `409` |
+| `GET /api/learning/misconceptions` | Implemented | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
+| `PATCH /api/learning/misconceptions/:itemId` | Implemented | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
+
+Issue #27 implements core learning activity persistence. Private routes use the verified bearer session from issue #3 and return `401` without one. `GET /api/home` uses the first published course, XP/streak from completions, and a zero-gem placeholder until enrollments and rewards exist. Skill confidence is derived from recorded answers until placement data from #3 is available.
 
 The implemented course, unit, lesson, and learning-path reads are public curated content and do not require authentication. The course detail response is the course syllabus. Lesson responses omit exercise answer keys, correctness flags, and feedback explanations; those remain server-side until an answer is submitted.
 
@@ -97,14 +99,14 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
 | `GET /api/practice` | Partial | Practice hub recommendations and due-item counts → `{suggestions,reviewDueCount}` | `401` |
-| `GET /api/planner/entries` | Planned | Read calendar/weekly plan → `{entries:[...]}` | `401` |
-| `POST /api/planner/entries` | Planned | Create a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
-| `GET /api/planner/entries/:entryId` | Planned | Read one learner-owned session → `{entry}` | `401`, `404` |
-| `PATCH /api/planner/entries/:entryId` | Planned | Move or edit a planned session; changed fields → `{entry}` | `400`, `401`, `404` |
-| `DELETE /api/planner/entries/:entryId` | Planned | Remove a planned session → `{deleted:true}` | `401`, `404` |
-| `GET /api/lessons/:lessonId/answers` | Planned | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
-| `POST /api/exercises/:exerciseId/answers` | Planned | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
-| `GET /api/exercises/:exerciseId/hints?step=` | Planned | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
+| `GET /api/planner/entries` | Implemented | Read calendar/weekly plan → `{entries:[...]}` | `401` |
+| `POST /api/planner/entries` | Implemented | Create a planned study session; `{date,time,durationMinutes,label?}` → `{entry}` | `400`, `401` |
+| `GET /api/planner/entries/:entryId` | Implemented | Read one learner-owned session → `{entry}` | `401`, `404` |
+| `PATCH /api/planner/entries/:entryId` | Implemented | Move or edit a learner-owned session; changed fields → `{entry}` | `400`, `401`, `404` |
+| `DELETE /api/planner/entries/:entryId` | Implemented | Remove a learner-owned session → `{deleted:true}` | `401`, `404` |
+| `GET /api/lessons/:lessonId/answers` | Implemented | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
+| `POST /api/exercises/:exerciseId/answers` | Implemented | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
+| `GET /api/exercises/:exerciseId/hints?step=` | Implemented | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
 | `GET /api/practice/review-items?kind=` | Partial | Read due vocabulary and recurring mistakes → `{items:[...]}` | `401` |
 | `GET /api/practice/review-items/:itemId` | Partial | Read one saved review item → `{item}` | `401`, `404` |
 | `POST /api/practice/review-items` | Partial | Create a learner-owned review item; `{front,back,kind?}` → `{item}` | `400`, `401` |
@@ -114,6 +116,8 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 | `GET /api/study-tools` | Partial | List available curated study tools → `{tools:[...]}` | `401` |
 | `GET /api/study-tools/:toolId` | Partial | Read curated audio/waveform, pronunciation, writing, vocabulary/word-map, grammar, conjugation, or city/café/transit content → `{tool}` | `401`, `404` |
 | `GET /api/dictionary?query=` | Partial | Look up a selected word for the inline dictionary → `{entry}` | `400`, `401`, `404` |
+
+Answer payloads use `{answer:{kind,...}}`: `choice` needs `optionId`; `sentence_tiles` needs `tokens`; `transcript_gap`/`dictation` need `text`; `matching` needs `pairs`; `speaking` needs a client-produced `transcript` and integer `score` from 0 to 100. Unknown fields, including raw audio, are rejected. Lesson completion requires at least one answer for every exercise. Its first response includes earned XP and `alreadyCompleted:false`; repeats return `xpEarned:0` and `alreadyCompleted:true`. Planner dates use `YYYY-MM-DD`, times use `HH:mm`, and durations are 1–480 minutes. Misconception cards appear after two incorrect answers for an exercise; dismiss/restore changes only the view state.
 
 Recording Studio captures audio locally on the device. The demo answer may include a client-produced transcript/score for the speaking scorecard; do not upload or persist raw voice samples on the backend. Tutor feedback and branching role-play use the existing chat/message contract.
 

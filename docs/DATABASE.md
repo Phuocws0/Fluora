@@ -4,9 +4,9 @@ This document separates the current Prisma model from the conceptual model for t
 
 ## Current implementation
 
-The schema contains `User`, identity models (`Session`, `AuthToken`, `UserSettings`, and `PlacementAttempt`), curated learning-content models (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, and `LearningPath`), support/export models, and `VocabularySet`, `VocabularyCard`, `Story`, `Bookmark`, `ReadingProgress`, `ReviewItem`, and `ReviewOutcome` for the partial practice backend. The checked-in migrations cover these models. The seed command creates one sample English course, two ordered units, four lessons, two learning paths, and one short dialogue.
+The schema contains `User`; identity models (`Session`, `AuthToken`, `UserSettings`, `PlacementAttempt`); curated learning content (`Course`, `Unit`, `Lesson`, `Exercise`, `ExerciseOption`, `LearningPath`); support/export and practice models; and learner activity models (`UserAnswer`, `LessonCompletion`, `PlannerEntry`, `CanDoGoal`, `LearningEvidence`, `Mission`, `MissionCompletion`, `MisconceptionState`). Checked-in migrations cover these models. The seed command creates one English course with two units and four lessons, two learning paths, one dialogue, two can-do goals, and one mission.
 
-Passwords (scrypt hashes) and bearer sessions are implemented. Registration creates a default `user_settings` row. The settings, placement, and verification/reset-token tables exist, but their API flows are still in progress under issue #3. Learner answers and lesson progress are not implemented yet.
+Scrypt password hashes and bearer sessions are implemented, and registration creates default settings. Settings, placement, and verification/reset-token tables exist, but their API flows remain in progress under issue #3. Exercise answers and lesson completions are persisted; progress and analytics are derived from them.
 
 ## Account and preferences
 

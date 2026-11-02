@@ -1,6 +1,6 @@
 # Fluora Agent Instructions
 
-This file defines how coding, implementation, review, and audit agents should work in this repository. The repository has an initial runnable scaffold but no learner features yet; treat planned architecture and contracts in `docs/` as plans until code confirms them.
+This file defines how coding, implementation, review, and audit agents should work in this repository. The repository has a runnable scaffold and partial learner features; treat planned architecture and contracts in `docs/` as plans until code confirms them.
 
 ## Required reading order
 

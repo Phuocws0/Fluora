@@ -8,6 +8,7 @@
 - Repository is public and `main` is protected: pull requests, one approval, and passing CI are required; only the owner can update or merge into `main`.
 - Issue #6 learning-content schema, seed data, and read APIs are implemented; a seeded PostgreSQL API smoke check passed.
 - Issue #2 mobile navigation shell is implemented with five logical tabs and auth/onboarding/detail destinations; typecheck and Android bundle export pass.
+- Issue #27 core learning activity API records answers and idempotent completions, derives progress/analytics/skill confidence, and supports planner/evidence CRUD, mission passport/completion, hints, and misconception dismiss/restore. Private routes use verified bearer sessions.
 
 ## In Progress
 
@@ -20,14 +21,15 @@
 
 ## Planned
 
-1. Finish backend identity (#3 parts 2–3) and implement core learning (#27).
-2. Integrate the matching FE flows when their API contracts are available; mobile sign-in (#4) can start against the implemented auth endpoints.
+1. Finish backend identity (#3 parts 2–3), including settings and placement.
+2. Integrate mobile sign-in (#4) and lesson/progress UI (#7) with the implemented APIs.
 3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Known limitations
 
 - Login has no rate limiting in this local demo.
 - Existing feature controllers (`learning`, `support`, `practice`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
+- Enrollment-aware home selection, placement-based baseline, and real gem/reward accounting belong to later domain work.
 
 ## Blocked
 
@@ -36,4 +38,4 @@
 ## Next Recommended Tasks
 
 - Issue #3 part 2: settings, onboarding resume, and placement endpoints.
-- Issue #27 core-learning APIs can now use `requireUser` and `res.locals.userId`.
+- Connect mobile sign-in and lesson/progress screens to the bearer-session and learning-activity APIs.

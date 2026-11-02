@@ -29,6 +29,12 @@ model User {
   bookmarks Bookmark[]
   readingProgress ReadingProgress[]
   reviewItems ReviewItem[]
+  answers UserAnswer[]
+  lessonCompletions LessonCompletion[]
+  plannerEntries PlannerEntry[]
+  learningEvidence LearningEvidence[]
+  missionCompletions MissionCompletion[]
+  misconceptionStates MisconceptionState[]
 }
 
 model Session {
@@ -282,6 +288,8 @@ model Lesson {
   order           Int        @default(0)
   unit            Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
   exercises       Exercise[]
+  completions     LessonCompletion[]
+  missions        Mission[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
@@ -303,6 +311,8 @@ model Exercise {
   order       Int               @default(0)
   lesson      Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   options     ExerciseOption[]
+  answers     UserAnswer[]
+  misconceptionStates MisconceptionState[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -344,4 +354,114 @@ model LearningPath {
   @@index([courseId, order])
   @@index([isPublished, order])
   @@map("learning_paths")
+}
+
+model UserAnswer {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  exerciseId String @db.Uuid
+  answer Json
+  isCorrect Boolean
+  score Int?
+  feedback String @db.Text
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, exerciseId])
+  @@map("user_answers")
+}
+
+model LessonCompletion {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  lessonId String @db.Uuid
+  xpEarned Int
+  completedAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, completedAt])
+  @@map("lesson_completions")
+}
+
+model PlannerEntry {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  date String
+  time String
+  durationMinutes Int
+  label String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("planner_entries")
+}
+
+model CanDoGoal {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique
+  title String
+  skill String
+  description String @db.Text
+  evidence LearningEvidence[]
+
+  @@map("can_do_goals")
+}
+
+model LearningEvidence {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  goalId String @db.Uuid
+  kind String
+  summary String @db.Text
+  reference String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal CanDoGoal @relation(fields: [goalId], references: [id], onDelete: Restrict)
+
+  @@index([userId, goalId])
+  @@map("learning_evidence")
+}
+
+model Mission {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique
+  title String
+  description String @db.Text
+  requiredLessonId String? @db.Uuid
+  requiredLesson Lesson? @relation(fields: [requiredLessonId], references: [id], onDelete: SetNull)
+  completions MissionCompletion[]
+
+  @@map("missions")
+}
+
+model MissionCompletion {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  missionId String @db.Uuid
+  completedAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+  @@index([userId, completedAt])
+  @@map("mission_completions")
+}
+
+model MisconceptionState {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  exerciseId String @db.Uuid
+  dismissed Boolean @default(false)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
+  @@map("misconception_states")
 }
