@@ -17,6 +17,7 @@
 ## In Progress
 
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
+- Mobile Google sign-in is implemented for native builds and connects to `POST /api/auth/google`. End-to-end sign-in requires a development build and valid Google OAuth client IDs.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
@@ -44,5 +45,5 @@
 
 ## Next Recommended Tasks
 
-- Connect mobile sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
+- Connect mobile email sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
 - Build the League/community mobile screens (#17) against the implemented contracts.
