@@ -8,7 +8,7 @@ export function ScreenContainer({ children, scroll = true }: Props) {
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {scroll ? (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {children}
         </ScrollView>
       ) : (

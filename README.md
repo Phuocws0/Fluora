@@ -28,7 +28,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. The backend also supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, and rewards APIs. The mobile account screens, community screens, and the remaining feature screens are still planned. Unfinished destinations show a simple placeholder.
+The mobile app has the five-tab navigation shell, a learning flow backed by course/unit/lesson APIs, League/community screens, and a Flo Tutor screen connected to the Tutor API with a separate in-memory preview. The backend supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, rewards, and Tutor APIs. The main mobile account screens and remaining practice/profile features are still planned. See [the handoff](docs/TIEN_HANDOFF.md) for screen coverage and outstanding device/backend acceptance checks. Other unfinished destinations show a simple placeholder.
 
 ## Prerequisites
 
@@ -109,7 +109,7 @@ npm run build
 npm run check:mobile
 ```
 
-GitHub Actions runs these checks on pull requests and pushes to `main`. There are no feature tests yet.
+GitHub Actions runs these checks on pull requests and pushes to `main`. Focused mobile transport and Tutor-preview unit checks can be run with `node --experimental-vm-modules --test scripts/mobile-features.test.mjs`; live API/device acceptance remains separate.
 
 The public `main` branch requires a pull request, one approval, and passing CI. Only the repository owner can update or merge into `main`; collaborators can push work to feature branches.
 
