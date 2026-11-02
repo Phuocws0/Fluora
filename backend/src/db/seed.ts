@@ -1,4 +1,5 @@
 import type { Prisma } from "../generated/prisma/client.js";
+import { assertScenarioGraph, type RolePlayTurn } from "../features/tutor/role-play.js";
 import { prisma } from "./prisma.js";
 
 type OptionSeed = { label: string; value: string; isCorrect: boolean };
@@ -435,9 +436,297 @@ async function seedCommunityAndLeague() {
   console.log("Seeded quests, achievements, rewards, peer-review samples, and demo learners.");
 }
 
+type ScenarioSeed = {
+  slug: string;
+  title: string;
+  description: string;
+  level: string;
+  startTurnKey: string;
+  closingLine: string;
+  order: number;
+  turns: RolePlayTurn[];
+};
+
+/** Curated A1 role-plays that match the seeded lessons. Each `next: null` choice ends the scenario. */
+const tutorScenarioSeeds: ScenarioSeed[] = [
+  {
+    slug: "meeting-someone-new",
+    title: "Meeting someone new",
+    description: "Greet Flo, say your name, and answer “How are you?”.",
+    level: "A1",
+    startTurnKey: "greet",
+    closingLine: "I'm great, thanks! It was lovely to meet you. See you soon!",
+    order: 1,
+    turns: [
+      {
+        key: "greet",
+        tutorLine: "Hi there! I'm Flo. Nice to meet you!",
+        hints: [
+          "Greet Flo back.",
+          "Start with “Hello” or “Hi”, then say it's nice to meet Flo too.",
+          "Try: “Hello! Nice to meet you too.”",
+        ],
+        choices: [
+          {
+            key: "hello",
+            label: "Hello! Nice to meet you too.",
+            accept: ["hello", "hi", "nice to meet you"],
+            explanation: "Answer a greeting with a greeting. Add “too” when you return the same wish.",
+            next: "name",
+          },
+        ],
+      },
+      {
+        key: "name",
+        tutorLine: "What's your name?",
+        hints: [
+          "Tell Flo your name.",
+          "Use “My name is…” or the shorter “I'm…”.",
+          "Try: “My name is Mia.”",
+        ],
+        choices: [
+          {
+            key: "my-name",
+            label: "My name is Mia.",
+            accept: ["my name is", "my name's", "i'm", "i am", "name"],
+            explanation: "Use “My name is…” or “I'm…” to introduce yourself.",
+            next: "how-are-you",
+          },
+        ],
+      },
+      {
+        key: "how-are-you",
+        tutorLine: "What a lovely name! How are you today?",
+        hints: [
+          "Say how you feel.",
+          "Start with “I'm…” and add a feeling word, like “fine” or “tired”.",
+          "Try: “I'm fine, thank you. And you?”",
+        ],
+        choices: [
+          {
+            key: "fine",
+            label: "I'm fine, thank you. And you?",
+            accept: ["fine", "good", "well", "great"],
+            explanation: "Answer “How are you?” with “I'm fine/good”, then ask back with “And you?”.",
+            next: null,
+          },
+          {
+            key: "tired",
+            label: "I'm a bit tired, but OK.",
+            accept: ["tired", "ok", "okay", "not bad"],
+            explanation: "It's fine to be honest: “I'm a bit tired” is a natural answer.",
+            next: null,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "ordering-at-a-cafe",
+    title: "Ordering at a café",
+    description: "Order a drink politely, choose the details, and pay.",
+    level: "A1",
+    startTurnKey: "order",
+    closingLine: "Here you are. Enjoy your drink and have a nice day!",
+    order: 2,
+    turns: [
+      {
+        key: "order",
+        tutorLine: "Good morning! Welcome to Bloom Café. What can I get you?",
+        hints: [
+          "Ask for a drink.",
+          "Use the polite pattern “Could I have…, please?”.",
+          "Try: “Could I have a coffee, please?”",
+        ],
+        choices: [
+          {
+            key: "coffee",
+            label: "Could I have a coffee, please?",
+            accept: ["coffee", "latte", "espresso"],
+            explanation: "“Could I have…, please?” is a polite way to order.",
+            next: "size",
+          },
+          {
+            key: "tea",
+            label: "Could I have a tea, please?",
+            accept: ["tea"],
+            explanation: "“Could I have…, please?” is a polite way to order.",
+            next: "milk",
+          },
+        ],
+      },
+      {
+        key: "size",
+        tutorLine: "Sure! What size would you like, small or large?",
+        hints: [
+          "Choose a size.",
+          "Say the size and add “please”.",
+          "Try: “A small one, please.”",
+        ],
+        choices: [
+          {
+            key: "small",
+            label: "A small one, please.",
+            accept: ["small"],
+            explanation: "“One” replaces the noun, so you don't repeat “coffee”.",
+            next: "pay",
+          },
+          {
+            key: "large",
+            label: "A large one, please.",
+            accept: ["large", "big"],
+            explanation: "“One” replaces the noun, so you don't repeat “coffee”.",
+            next: "pay",
+          },
+        ],
+      },
+      {
+        key: "milk",
+        tutorLine: "Of course. Would you like milk with your tea?",
+        hints: [
+          "Answer yes or no.",
+          "Say “Yes, with milk, please” or “No, thank you”.",
+          "Try: “No, thank you.”",
+        ],
+        choices: [
+          {
+            key: "milk-yes",
+            label: "Yes, with milk, please.",
+            accept: ["yes", "with milk"],
+            explanation: "Add “please” to make a short answer polite.",
+            next: "pay",
+          },
+          {
+            key: "milk-no",
+            label: "No, thank you.",
+            accept: ["no", "without"],
+            explanation: "“No, thank you” is a polite way to refuse.",
+            next: "pay",
+          },
+        ],
+      },
+      {
+        key: "pay",
+        tutorLine: "That's three dollars. Would you like to pay by card or in cash?",
+        hints: [
+          "Choose how to pay.",
+          "Say “By card” or “In cash”, then “please”.",
+          "Try: “By card, please.”",
+        ],
+        choices: [
+          {
+            key: "card",
+            label: "By card, please.",
+            accept: ["card"],
+            explanation: "We say “pay by card” but “pay in cash”.",
+            next: null,
+          },
+          {
+            key: "cash",
+            label: "In cash, please.",
+            accept: ["cash"],
+            explanation: "We say “pay in cash” but “pay by card”.",
+            next: null,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "asking-for-directions",
+    title: "Asking for directions",
+    description: "Ask a local the way, follow the directions, and say thank you.",
+    level: "A1",
+    startTurnKey: "ask",
+    closingLine: "You're welcome! Enjoy your visit.",
+    order: 3,
+    turns: [
+      {
+        key: "ask",
+        tutorLine: "Hello! You look a little lost. Can I help you?",
+        hints: [
+          "Ask where a place is.",
+          "Start with “Excuse me, where is…?”.",
+          "Try: “Excuse me, where is the museum?”",
+        ],
+        choices: [
+          {
+            key: "museum",
+            label: "Excuse me, where is the museum?",
+            accept: ["museum"],
+            explanation: "“Excuse me, where is…?” is a polite way to ask for a place.",
+            next: "directions",
+          },
+          {
+            key: "station",
+            label: "Excuse me, where is the station?",
+            accept: ["station"],
+            explanation: "“Excuse me, where is…?” is a polite way to ask for a place.",
+            next: "directions",
+          },
+        ],
+      },
+      {
+        key: "directions",
+        tutorLine: "Go straight on, then turn left at the traffic lights. It's on your right.",
+        hints: [
+          "Thank the person, or ask them to repeat.",
+          "Say “Thank you” or “Could you repeat that, please?”.",
+          "Try: “Thank you very much!”",
+        ],
+        choices: [
+          {
+            key: "thanks",
+            label: "Thank you very much!",
+            accept: ["thank", "thanks"],
+            explanation: "“Thank you very much” is a warm way to thank someone.",
+            next: null,
+          },
+          {
+            key: "repeat",
+            label: "Sorry, could you repeat that, please?",
+            accept: ["repeat", "again", "sorry"],
+            explanation: "“Could you repeat that, please?” is a polite way to ask someone to say it again.",
+            next: "repeat",
+          },
+        ],
+      },
+      {
+        key: "repeat",
+        tutorLine: "Of course. Straight on, then left at the traffic lights. It's on your right.",
+        hints: [
+          "Thank the person.",
+          "Say “Thank you” and add “very much” to sound warmer.",
+          "Try: “Thank you very much!”",
+        ],
+        choices: [
+          {
+            key: "thanks",
+            label: "Thank you very much!",
+            accept: ["thank", "thanks"],
+            explanation: "“Thank you very much” is a warm way to thank someone.",
+            next: null,
+          },
+        ],
+      },
+    ],
+  },
+];
+
+async function seedTutor() {
+  for (const { turns, ...scenario } of tutorScenarioSeeds) {
+    assertScenarioGraph(scenario.slug, scenario.startTurnKey, turns);
+    const data = { ...scenario, turns: turns as unknown as Prisma.InputJsonArray };
+    await prisma.tutorScenario.upsert({ where: { slug: scenario.slug }, create: data, update: data });
+  }
+
+  console.log("Seeded Flo Tutor role-play scenarios.");
+}
+
 async function seed() {
   await seedLearningContent();
   await seedCommunityAndLeague();
+  await seedTutor();
 }
 
 seed()

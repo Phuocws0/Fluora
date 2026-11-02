@@ -53,6 +53,8 @@ model User {
   achievements            UserAchievement[]
   redemptions             RewardRedemption[]
   walletTransactions      WalletTransaction[]
+  tutorConversations      TutorConversation[]
+  tutorNotes              TutorNote[]
 }
 
 model Session {
@@ -868,4 +870,82 @@ model WalletTransaction {
   @@unique([redemptionId, reason])
   @@index([userId, createdAt])
   @@map("wallet_transactions")
+}
+
+model TutorScenario {
+  id            String              @id @default(uuid()) @db.Uuid
+  slug          String              @unique
+  title         String
+  description   String              @db.Text
+  level         String
+  startTurnKey  String
+  closingLine   String              @db.Text
+  turns         Json
+  order         Int                 @default(0)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  conversations TutorConversation[]
+
+  @@map("tutor_scenarios")
+}
+
+model TutorConversation {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @db.Uuid
+  scenarioId     String?        @db.Uuid
+  kind           String
+  title          String
+  saved          Boolean
+  status         String         @default("active")
+  currentTurnKey String?
+  lastActivityAt DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario       TutorScenario? @relation(fields: [scenarioId], references: [id], onDelete: Restrict)
+  messages       TutorMessage[]
+  notes          TutorNote[]
+
+  @@index([userId, createdAt])
+  @@index([userId, saved, lastActivityAt])
+  @@map("tutor_conversations")
+}
+
+model TutorMessage {
+  id             String            @id @default(uuid()) @db.Uuid
+  conversationId String            @db.Uuid
+  role           String
+  body           String            @db.Text
+  context        Json?
+  feedback       Json?
+  turnKey        String?
+  replyToId      String?           @unique @db.Uuid
+  editedAt       DateTime?
+  createdAt      DateTime          @default(now())
+  conversation   TutorConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  replyTo        TutorMessage?     @relation("TutorReply", fields: [replyToId], references: [id], onDelete: Cascade)
+  reply          TutorMessage?     @relation("TutorReply")
+  notes          TutorNote[]
+
+  @@index([conversationId, createdAt])
+  @@map("tutor_messages")
+}
+
+model TutorNote {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @db.Uuid
+  conversationId  String?            @db.Uuid
+  messageId       String?            @db.Uuid
+  phrase          String
+  pattern         String
+  personalExample String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation    TutorConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  message         TutorMessage?      @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([messageId])
+  @@map("tutor_notes")
 }
