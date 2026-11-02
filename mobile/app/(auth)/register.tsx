@@ -21,9 +21,7 @@ export default function RegisterScreen() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,10 +48,6 @@ export default function RegisterScreen() {
     }
     if (password.length > 128) {
       return "Password must be 128 characters or fewer.";
-    }
-
-    if (password !== confirmPassword) {
-      return "Passwords do not match.";
     }
 
     return null;
@@ -104,8 +98,16 @@ export default function RegisterScreen() {
       <Text style={styles.eyebrow}>FLUORA</Text>
       <Text style={styles.title}>Create your account</Text>
       <Text style={styles.description}>
-        Join Fluora to cultivate your vocabulary and track your learning journey.
+        Save your progress and learn across your devices.
       </Text>
+
+      <View style={styles.progressLabelRow}>
+        <Text style={styles.progressLabelActive}>01 Account</Text>
+        <Text style={styles.progressLabel}>/ 02 Verify / 03 Learn</Text>
+      </View>
+      <View style={styles.progressTrack}>
+        <View style={styles.progressFill} />
+      </View>
 
       {error ? (
         <View style={styles.errorContainer} accessibilityRole="alert">
@@ -190,39 +192,9 @@ export default function RegisterScreen() {
           </View>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Confirm Password</Text>
-          <View style={styles.passwordWrapper}>
-            <TextInput
-              accessibilityLabel="Confirm Password"
-              autoCapitalize="none"
-              autoComplete="new-password"
-              autoCorrect={false}
-              editable={!isSubmitting}
-              onChangeText={(val) => {
-                setConfirmPassword(val);
-                if (error) setError(null);
-              }}
-              placeholder="Re-enter your password"
-              placeholderTextColor="#8a9a90"
-              secureTextEntry={!showConfirmPassword}
-              style={styles.passwordInput}
-              value={confirmPassword}
-            />
-            <Pressable
-              accessibilityLabel={showConfirmPassword ? "Hide password" : "Show password"}
-              accessibilityRole="button"
-              disabled={isSubmitting}
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={styles.eyeButton}
-            >
-              <Ionicons
-                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color="#65766c"
-              />
-            </Pressable>
-          </View>
+        <View style={styles.termsPill}>
+          <Ionicons name="checkmark-circle" size={16} color="#236c19" />
+          <Text style={styles.termsText}>Agree to Terms & Privacy</Text>
         </View>
 
         <Pressable
@@ -279,6 +251,35 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 8,
   },
+  progressLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 18,
+  },
+  progressLabelActive: {
+    color: "#236c19",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  progressLabel: {
+    color: "#65766c",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  progressTrack: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#dfe8dc",
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  progressFill: {
+    width: "34%",
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#58cc02",
+  },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -299,7 +300,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   form: {
-    marginTop: 24,
+    marginTop: 14,
     gap: 16,
   },
   field: {
@@ -339,22 +340,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+  termsPill: {
+    minHeight: 36,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 18,
+    backgroundColor: "#eaf8de",
+    paddingHorizontal: 12,
+  },
+  termsText: {
+    color: "#236c19",
+    fontSize: 12,
+    fontWeight: "700",
+  },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#236c19",
-    borderRadius: 14,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
     justifyContent: "center",
-    marginTop: 8,
-    minHeight: 52,
+    marginTop: 10,
+    minHeight: 56,
     paddingHorizontal: 20,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: "#20352b",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   disabled: {
     opacity: 0.55,

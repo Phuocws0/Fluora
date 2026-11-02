@@ -18,6 +18,7 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -66,38 +67,66 @@ export default function ForgotPasswordScreen() {
           <View style={styles.successIconWrapper}>
             <Ionicons name="mail-open-outline" size={68} color="#236c19" />
           </View>
-          <Text style={styles.successTitle}>Reset Token Dispatched</Text>
+          <Text style={styles.successTitle}>Reset request received</Text>
           <Text style={styles.successDescription}>
-            If an account exists for <Text style={styles.boldText}>{email.trim()}</Text>, a reset token has been issued.
+            If an account exists for <Text style={styles.boldText}>{email.trim()}</Text>, a reset token has been created.
           </Text>
 
           <View style={styles.devCallout}>
             <View style={styles.devCalloutHeader}>
-              <Ionicons name="terminal-outline" size={18} color="#155e75" />
-              <Text style={styles.devCalloutTitle}>Local Demo Notice</Text>
+              <Ionicons name="mail-outline" size={18} color="#236c19" />
+              <Text style={styles.devCalloutTitle}>Local demo email</Text>
             </View>
             <Text style={styles.devCalloutBody}>
-              In this local demo, check the backend server logs for the{" "}
-              <Text style={styles.devCalloutCode}>[dev-mail]</Text> reset token line.
+              Email delivery is disabled. Copy the reset token from the backend terminal line prefixed with{" "}
+              <Text style={styles.devCalloutCode}>[dev-mail]</Text>.
             </Text>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Reset token</Text>
+            <TextInput
+              accessibilityLabel="Reset token from backend log"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onChangeText={setResetToken}
+              placeholder="Paste the token here"
+              placeholderTextColor="#8a9a90"
+              selectTextOnFocus
+              style={styles.input}
+              value={resetToken}
+            />
+          </View>
+
+          <View style={styles.stepsCard}>
+            <Text style={styles.stepsTitle}>What happens next?</Text>
+            <Text style={styles.stepsText}>1 · Check the backend log</Text>
+            <Text style={styles.stepsText}>2 · Enter the secure token above</Text>
+            <Text style={styles.stepsText}>3 · Choose a new password</Text>
           </View>
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push("/(auth)/reset-password")}
+            accessibilityState={{ disabled: !resetToken.trim() }}
+            disabled={!resetToken.trim()}
+            onPress={() => router.push({ pathname: "/(auth)/reset-password", params: { token: resetToken.trim() } })}
             style={({ pressed }) => [
               styles.primaryButton,
               pressed ? styles.primaryButtonPressed : null,
+              !resetToken.trim() && styles.disabled,
               styles.fullWidth,
             ]}
           >
-            <Text style={styles.primaryButtonText}>Enter Reset Token</Text>
-            <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+            <Text style={styles.primaryButtonText}>Choose a new password</Text>
+            <Ionicons name="arrow-forward" size={18} color="#20352b" />
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => setIsSubmitted(false)}
+            onPress={() => {
+              setResetToken("");
+              setIsSubmitted(false);
+            }}
             style={({ pressed }) => [
               styles.secondaryButton,
               pressed ? styles.secondaryButtonPressed : null,
@@ -129,22 +158,22 @@ export default function ForgotPasswordScreen() {
         <Ionicons name="arrow-back" size={22} color="#20352b" />
       </Pressable>
 
-      <Text style={styles.eyebrow}>RECOVERY</Text>
-      <Text style={styles.title}>Reset your password</Text>
+      <Text style={styles.title}>Recover your account</Text>
       <Text style={styles.description}>
-        Enter the email associated with your Fluora account and we'll issue a password reset token.
+        Enter your email to get a password reset link.
       </Text>
 
-      {/* Dev-mail local demo callout */}
-      <View style={styles.devCallout}>
-        <View style={styles.devCalloutHeader}>
-          <Ionicons name="terminal-outline" size={18} color="#155e75" />
-          <Text style={styles.devCalloutTitle}>Local Demo Notice</Text>
-        </View>
-        <Text style={styles.devCalloutBody}>
-          In this local development demo, reset tokens are logged to your backend console with{" "}
-          <Text style={styles.devCalloutCode}>[dev-mail]</Text>.
-        </Text>
+      <View style={styles.recoveryCard}>
+        <Text style={styles.recoveryLabel}>RECOVERY EMAIL</Text>
+        <Text style={styles.recoveryAt}>@</Text>
+        <Text style={styles.recoveryCaption}>A private link, just for you.</Text>
+      </View>
+
+      <View style={styles.stepsCard}>
+        <Text style={styles.stepsTitle}>What happens next?</Text>
+        <Text style={styles.stepsText}>1 · Submit your account email</Text>
+        <Text style={styles.stepsText}>2 · Copy the token from the backend log</Text>
+        <Text style={styles.stepsText}>3 · Choose a new password</Text>
       </View>
 
       {error ? (
@@ -156,7 +185,7 @@ export default function ForgotPasswordScreen() {
 
       <View style={styles.form}>
         <View style={styles.field}>
-          <Text style={styles.label}>Email Address</Text>
+          <Text style={styles.label}>Where should we send the link?</Text>
           <TextInput
             accessibilityLabel="Email address"
             autoCapitalize="none"
@@ -187,9 +216,9 @@ export default function ForgotPasswordScreen() {
           ]}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#20352b" />
           ) : (
-            <Text style={styles.primaryButtonText}>Send Reset Token</Text>
+            <Text style={styles.primaryButtonText}>Send reset link</Text>
           )}
         </Pressable>
       </View>
@@ -228,10 +257,53 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 8,
   },
+  recoveryCard: {
+    width: 240,
+    height: 160,
+    alignSelf: "center",
+    justifyContent: "center",
+    backgroundColor: "#eaf8de",
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 24,
+  },
+  recoveryLabel: {
+    color: "#236c19",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  recoveryAt: {
+    color: "#236c19",
+    fontSize: 34,
+    fontWeight: "900",
+    marginTop: 6,
+  },
+  recoveryCaption: {
+    color: "#65766c",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  stepsCard: {
+    gap: 6,
+    marginTop: 22,
+    marginBottom: 12,
+  },
+  stepsTitle: {
+    color: "#236c19",
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 2,
+  },
+  stepsText: {
+    color: "#65766c",
+    fontSize: 13,
+    lineHeight: 19,
+  },
   devCallout: {
-    backgroundColor: "#ecfeff",
-    borderColor: "#a5f3fc",
-    borderRadius: 14,
+    backgroundColor: "#eaf8de",
+    borderColor: "#d5edc5",
+    borderRadius: 16,
     borderWidth: 1,
     padding: 14,
     marginTop: 18,
@@ -243,19 +315,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   devCalloutTitle: {
-    color: "#155e75",
+    color: "#236c19",
     fontSize: 13,
     fontWeight: "700",
   },
   devCalloutBody: {
-    color: "#164e63",
+    color: "#52625d",
     fontSize: 13,
     lineHeight: 19,
   },
   devCalloutCode: {
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     fontWeight: "700",
-    color: "#0891b2",
+    color: "#236c19",
   },
   errorContainer: {
     flexDirection: "row",
@@ -300,22 +372,22 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#236c19",
-    borderRadius: 14,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
     marginTop: 8,
-    minHeight: 52,
+    minHeight: 56,
     paddingHorizontal: 20,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: "#20352b",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   secondaryButton: {
     alignItems: "center",
@@ -348,9 +420,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   successContainer: {
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "center",
-    paddingTop: 36,
+    paddingTop: 20,
     paddingHorizontal: 8,
   },
   successIconWrapper: {
@@ -360,14 +432,14 @@ const styles = StyleSheet.create({
     color: "#20352b",
     fontSize: 26,
     fontWeight: "900",
-    textAlign: "center",
+    textAlign: "left",
   },
   successDescription: {
     color: "#65766c",
     fontSize: 15,
     lineHeight: 22,
     marginTop: 10,
-    textAlign: "center",
+    textAlign: "left",
     marginBottom: 8,
   },
   boldText: {

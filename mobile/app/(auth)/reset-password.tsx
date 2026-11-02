@@ -7,7 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import { resetPassword } from "../../services/auth";
@@ -15,8 +15,10 @@ import { ScreenContainer } from "../../components/ScreenContainer";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ token?: string | string[] }>();
+  const routeToken = Array.isArray(params.token) ? params.token[0] ?? "" : params.token ?? "";
 
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(routeToken);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -113,7 +115,9 @@ export default function ResetPasswordScreen() {
       <Text style={styles.eyebrow}>SECURITY</Text>
       <Text style={styles.title}>Choose a new password</Text>
       <Text style={styles.description}>
-        Enter the reset token from your terminal logs along with your new password.
+        {routeToken
+          ? "Enter and confirm your new password."
+          : "Enter the reset token from your local demo log, then choose a new password."}
       </Text>
 
       {error ? (
@@ -124,23 +128,26 @@ export default function ResetPasswordScreen() {
       ) : null}
 
       <View style={styles.form}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Reset Token</Text>
-          <TextInput
-            accessibilityLabel="Reset Token"
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!isSubmitting}
-            onChangeText={(val) => {
-              setToken(val);
-              if (error) setError(null);
-            }}
-            placeholder="Paste reset token here"
-            placeholderTextColor="#8a9a90"
-            style={styles.input}
-            value={token}
-          />
-        </View>
+        {!routeToken ? (
+          <View style={styles.field}>
+            <Text style={styles.label}>Reset token</Text>
+            <TextInput
+              accessibilityLabel="Reset token"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isSubmitting}
+              onChangeText={(val) => {
+                setToken(val);
+                if (error) setError(null);
+              }}
+              placeholder="Paste reset token here"
+              placeholderTextColor="#8a9a90"
+              selectTextOnFocus
+              style={styles.input}
+              value={token}
+            />
+          </View>
+        ) : null}
 
         <View style={styles.field}>
           <Text style={styles.label}>New Password</Text>
@@ -224,7 +231,7 @@ export default function ResetPasswordScreen() {
           ]}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#20352b" />
           ) : (
             <Text style={styles.primaryButtonText}>Reset Password</Text>
           )}
@@ -327,20 +334,20 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#236c19",
-    borderRadius: 14,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
     justifyContent: "center",
     marginTop: 8,
-    minHeight: 52,
+    minHeight: 56,
     paddingHorizontal: 20,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: "#20352b",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   disabled: {
     opacity: 0.55,

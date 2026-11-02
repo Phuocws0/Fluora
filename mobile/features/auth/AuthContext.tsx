@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ApiError } from "../../services/api";
+import { ApiError, setUnauthorizedHandler } from "../../services/api";
 import { clearAccessToken, getAccessToken } from "../../services/session";
 import {
   getCurrentUser,
@@ -18,9 +18,14 @@ import {
 } from "../../services/auth";
 import {
   getLearnerSettings,
+  getDeviceTimeZone,
+  submitPlacementAttempt,
   updateLearnerSettings,
 } from "../onboarding/onboarding.service";
-import { clearOnboardingDraft } from "../onboarding/onboarding.storage";
+import {
+  clearOnboardingDraft,
+  saveOnboardingDraft,
+} from "../onboarding/onboarding.storage";
 import type { LearnerSettings, OnboardingDraft } from "../onboarding/onboarding.types";
 
 export type AuthContextValue = {
@@ -53,6 +58,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [settings, setSettings] = useState<LearnerSettings | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  useEffect(
+    () =>
+      setUnauthorizedHandler(async (rejectedToken) => {
+        const activeToken = await getAccessToken();
+        if (activeToken !== rejectedToken) return;
+
+        try {
+          await clearAccessToken();
+        } finally {
+          setUser(null);
+          setToken(null);
+          setSettings(null);
+        }
+      }),
+    [],
+  );
+
   const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const activeToken = await getAccessToken();
@@ -73,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(currentUser);
       setSettings(currentSettings);
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
+      if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
         await clearAccessToken();
         setUser(null);
         setToken(null);
@@ -111,7 +133,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSettings(currentSettings);
         }
       } catch (error) {
-        if (error instanceof ApiError && error.status === 401) {
+        if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
           await clearAccessToken();
           if (isMounted) {
             setUser(null);
@@ -162,13 +184,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (draft) {
         try {
-          const { placementAttempt: _discarded, ...draftSettings } = draft;
-          const updatedSettings = await updateLearnerSettings({
-            ...draftSettings,
-            onboardingCompleted: true,
-          });
-          setSettings(updatedSettings);
-          await clearOnboardingDraft();
+          await syncOnboardingDraft(draft, true, setSettings);
         } catch {
           try {
             const defaultSettings = await getLearnerSettings();
@@ -195,22 +211,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await logoutSession();
     } finally {
-      await clearAccessToken();
-      setUser(null);
-      setToken(null);
-      setSettings(null);
+      try {
+        await clearAccessToken();
+      } finally {
+        setUser(null);
+        setToken(null);
+        setSettings(null);
+      }
     }
   }, []);
 
   const completeOnboarding = useCallback(
     async (draft: OnboardingDraft): Promise<void> => {
-      const { placementAttempt: _discarded, ...draftSettings } = draft;
-      const updatedSettings = await updateLearnerSettings({
-        ...draftSettings,
-        onboardingCompleted: true,
-      });
-      setSettings(updatedSettings);
-      await clearOnboardingDraft();
+      await syncOnboardingDraft(draft, true, setSettings);
     },
     [],
   );
@@ -242,6 +255,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+async function syncOnboardingDraft(
+  draft: OnboardingDraft,
+  onboardingCompleted: boolean,
+  setCurrentSettings: (settings: LearnerSettings) => void,
+): Promise<void> {
+  let currentDraft = draft;
+  if (
+    draft.placementAttempt?.attemptId === null &&
+    draft.placementAnswers?.length
+  ) {
+    const attempt = await submitPlacementAttempt(draft.placementAnswers);
+    currentDraft = {
+      ...draft,
+      placementAttempt: attempt,
+      placementAnswers: null,
+    };
+    await saveOnboardingDraft(currentDraft);
+  }
+
+  const {
+    placementAttempt: _placementAttempt,
+    placementAnswers: _placementAnswers,
+    ...draftSettings
+  } = currentDraft;
+  const updatedSettings = await updateLearnerSettings({
+    ...draftSettings,
+    timezone: currentDraft.timezone || getDeviceTimeZone(),
+    onboardingCompleted,
+  });
+  setCurrentSettings(updatedSettings);
+  await clearOnboardingDraft();
 }
 
 export function useAuth(): AuthContextValue {

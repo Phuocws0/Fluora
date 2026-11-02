@@ -14,19 +14,17 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../../services/api";
-import {
-  loadOnboardingDraft,
-  saveOnboardingDraft,
-} from "./onboarding.storage";
+import { getDeviceTimeZone } from "./onboarding.service";
+import { loadOnboardingDraft, saveOnboardingDraft } from "./onboarding.storage";
 import type {
   OnboardingDraft,
   PlacementAttemptResult,
 } from "./onboarding.types";
 import { PlacementTestModal } from "./PlacementTestModal";
 
-type StepNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type StepNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const COURSE_LANGUAGES = [
   {
@@ -52,40 +50,36 @@ const APP_LANGUAGES = [
 
 const MOTIVATIONS = [
   {
+    id: "people",
+    label: "People",
+    icon: "people-outline" as const,
+    desc: "Everyday conversations",
+    color: "#236c19",
+    backgroundColor: "#eaf8de",
+  },
+  {
     id: "career",
-    label: "Career & Work",
+    label: "Career",
     icon: "briefcase-outline" as const,
-    desc: "Unlock new promotions, interviews & global workplace roles",
+    desc: "Study and work",
+    color: "#2876bd",
+    backgroundColor: "#f7faf6",
   },
   {
-    id: "travel",
-    label: "Travel & Exploration",
-    icon: "airplane-outline" as const,
-    desc: "Navigate cities, order local food, and connect easily abroad",
+    id: "explore",
+    label: "Explore",
+    icon: "compass-outline" as const,
+    desc: "Travel and discovery",
+    color: "#236c19",
+    backgroundColor: "#f7faf6",
   },
   {
-    id: "brain",
-    label: "Brain Training",
-    icon: "fitness-outline" as const,
-    desc: "Keep your mind sharp, build memory, and strengthen focus",
-  },
-  {
-    id: "school",
-    label: "Education & Studies",
-    icon: "school-outline" as const,
-    desc: "Excel in exams, academic research, and degree requirements",
-  },
-  {
-    id: "culture",
-    label: "Culture & Connection",
-    icon: "heart-outline" as const,
-    desc: "Connect with family heritage, friends, cinema, and music",
-  },
-  {
-    id: "other",
-    label: "Personal Growth & Other",
-    icon: "sparkles-outline" as const,
-    desc: "Learn for curiosity, mindful daily practice, or a fun hobby",
+    id: "curiosity",
+    label: "Curiosity",
+    icon: "leaf-outline" as const,
+    desc: "A love of languages",
+    color: "#2876bd",
+    backgroundColor: "#f7faf6",
   },
 ];
 
@@ -134,35 +128,18 @@ const STARTING_LEVELS: Array<{
 ];
 
 const DAILY_GOALS = [
-  {
-    minutes: 5,
-    label: "Casual",
-    time: "5 min / day",
-    icon: "leaf-outline" as const,
-    desc: "Quick, bite-sized practice to stay in steady flow.",
-  },
-  {
-    minutes: 15,
-    label: "Regular",
-    time: "15 min / day",
-    icon: "flower-outline" as const,
-    desc: "Steady, sustainable daily progress (Recommended).",
-    isRecommended: true,
-  },
-  {
-    minutes: 30,
-    label: "Serious",
-    time: "30 min / day",
-    icon: "flame-outline" as const,
-    desc: "Accelerated growth with deeper lesson immersion.",
-  },
-  {
-    minutes: 60,
-    label: "Intense",
-    time: "60 min / day",
-    icon: "rocket-outline" as const,
-    desc: "Maximum momentum for dedicated fluency seekers.",
-  },
+  { minutes: 5, label: "5 min" },
+  { minutes: 10, label: "10 min" },
+  { minutes: 15, label: "15 min" },
+  { minutes: 20, label: "20 min" },
+];
+
+const DAILY_TIME_BUDGETS = [5, 10, 15, 20, 30];
+
+const STUDY_TIME_OPTIONS = [
+  { label: "Morning", time: "08:00" },
+  { label: "Lunch", time: "12:30" },
+  { label: "Evening", time: "20:00" },
 ];
 
 const REMINDER_TIME_PRESETS = ["07:30", "08:30", "12:30", "18:00", "20:00", "21:30"];
@@ -217,14 +194,16 @@ const PROMISE_PRESETS = [
 const DEFAULT_DRAFT: OnboardingDraft = {
   appLanguage: "en",
   courseLanguage: "en",
-  motivation: "career",
+  motivation: "people",
   startingLevel: "A1",
   placementAttempt: null,
+  placementAnswers: null,
   dailyGoalMinutes: 15,
   dailyTimeBudgetMinutes: 15,
   reminderEnabled: true,
   reminderTime: "20:00",
   reminderDays: [0, 1, 2, 3, 4, 5, 6],
+  timezone: getDeviceTimeZone(),
   learningPromise: "I promise to spend a few minutes each day cultivating my skills.",
   floCompanion: "flo-sprout",
 };
@@ -251,8 +230,11 @@ export function OnboardingWizard() {
           ...saved,
           courseLanguage: saved.courseLanguage || prev.courseLanguage,
           appLanguage: saved.appLanguage || prev.appLanguage,
-          motivation: saved.motivation || prev.motivation,
+          motivation: MOTIVATIONS.some((item) => item.id === saved.motivation)
+            ? saved.motivation
+            : prev.motivation,
           startingLevel: saved.startingLevel || prev.startingLevel,
+          placementAnswers: saved.placementAnswers ?? null,
           dailyGoalMinutes: saved.dailyGoalMinutes || prev.dailyGoalMinutes,
           dailyTimeBudgetMinutes:
             saved.dailyTimeBudgetMinutes || prev.dailyTimeBudgetMinutes,
@@ -261,6 +243,7 @@ export function OnboardingWizard() {
             saved.reminderDays && saved.reminderDays.length > 0
               ? saved.reminderDays
               : prev.reminderDays,
+          timezone: saved.timezone || getDeviceTimeZone(),
           learningPromise: saved.learningPromise || prev.learningPromise,
           floCompanion: saved.floCompanion || prev.floCompanion,
         }));
@@ -300,10 +283,10 @@ export function OnboardingWizard() {
 
   function handleNext() {
     setError(null);
-    if (step === 5) {
+    if (step === 6) {
       // Validate time format before proceeding
       const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-      const effectiveTime = draft.reminderTime ?? customTimeInput;
+      const effectiveTime = customTimeInput;
       if (draft.reminderEnabled && !timeRegex.test(effectiveTime)) {
         setError("Please enter a valid reminder time in HH:MM format (e.g. 20:00).");
         return;
@@ -318,11 +301,13 @@ export function OnboardingWizard() {
   function handlePlacementAccepted(
     level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
     attemptResult: PlacementAttemptResult,
+    answers: Array<{ questionId: string; optionId: string }>,
   ) {
     updateDraft((prev) => ({
       ...prev,
       startingLevel: level,
       placementAttempt: attemptResult,
+      placementAnswers: answers.length > 0 ? answers : null,
     }));
   }
 
@@ -527,12 +512,12 @@ export function OnboardingWizard() {
         {/* STEP 2: MOTIVATION */}
         {step === 2 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Why are you learning?</Text>
+            <Text style={styles.stepTitle}>What brings you here?</Text>
             <Text style={styles.stepSubtitle}>
-              Flo tailors your lesson scenarios and practical drills to your goals.
+              We'll shape your learning around what matters to you.
             </Text>
 
-            <View style={styles.cardsColumn}>
+            <View style={styles.motivationGrid}>
               {MOTIVATIONS.map((item) => {
                 const isSelected = draft.motivation === item.id;
                 return (
@@ -548,47 +533,29 @@ export function OnboardingWizard() {
                       }))
                     }
                     style={({ pressed }) => [
-                      styles.selectionCard,
-                      isSelected && styles.selectionCardSelected,
+                      styles.motivationCard,
+                      { backgroundColor: isSelected ? "#eaf8de" : item.backgroundColor },
                       pressed && styles.selectionCardPressed,
                     ]}
                   >
                     <View
-                      style={[
-                        styles.motivationIconCircle,
-                        isSelected && styles.motivationIconCircleSelected,
-                      ]}
+                      style={[styles.motivationIconCircle, { backgroundColor: item.color }]}
                     >
                       <Ionicons
                         name={item.icon}
-                        size={20}
-                        color={isSelected ? "#236c19" : "#556b5d"}
+                        size={17}
+                        color="#ffffff"
                       />
                     </View>
-                    <View style={styles.cardTextContainer}>
-                      <Text
-                        style={[
-                          styles.cardTitle,
-                          isSelected && styles.cardTitleSelected,
-                        ]}
-                      >
-                        {item.label}
-                      </Text>
-                      <Text style={styles.cardDesc}>{item.desc}</Text>
-                    </View>
-                    <Ionicons
-                      name={
-                        isSelected
-                          ? "checkmark-circle"
-                          : "ellipse-outline"
-                      }
-                      size={22}
-                      color={isSelected ? "#236c19" : "#a1b1a7"}
-                    />
+                    <Text style={styles.motivationTitle}>{item.label}</Text>
+                    <Text style={styles.motivationDescription}>{item.desc}</Text>
                   </Pressable>
                 );
               })}
             </View>
+            <Text style={styles.motivationHint}>
+              Choose what you want to do with {draft.courseLanguage === "es" ? "Spanish" : "English"}.
+            </Text>
           </View>
         )}
 
@@ -712,71 +679,103 @@ export function OnboardingWizard() {
           </View>
         )}
 
-        {/* STEP 4: DAILY GOAL & TIME BUDGET */}
+        {/* STEP 4: DAILY GOAL */}
         {step === 4 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Daily Goal & Time Budget</Text>
-            <Text style={styles.stepSubtitle}>
-              Consistency is key. Choose a daily target that fits naturally into your routine.
-            </Text>
+            <Text style={styles.stepTitle}>A little, every day</Text>
+            <Text style={styles.stepSubtitle}>Choose a daily goal that fits your schedule.</Text>
 
-            <View style={styles.cardsColumn}>
+            <View style={styles.minuteRing} accessibilityLabel={`${draft.dailyGoalMinutes} minutes per day`}>
+              <View style={styles.minuteRingInner}>
+                <Text style={styles.minuteRingValue}>{draft.dailyGoalMinutes}</Text>
+                <Text style={styles.minuteRingCaption}>minutes / day</Text>
+              </View>
+            </View>
+
+            <Text style={styles.minuteMotto}>A steady little habit</Text>
+            <View style={styles.minutesOptionsRow}>
               {DAILY_GOALS.map((goal) => {
-                const isSelected = draft.dailyGoalMinutes === goal.minutes;
+                const selected = draft.dailyGoalMinutes === goal.minutes;
                 return (
                   <Pressable
                     key={goal.minutes}
                     accessibilityRole="radio"
-                    accessibilityState={{ selected: isSelected }}
-                    accessibilityLabel={`${goal.label}: ${goal.time}`}
-                    onPress={() =>
-                      updateDraft((prev) => ({
-                        ...prev,
-                        dailyGoalMinutes: goal.minutes,
-                        dailyTimeBudgetMinutes: goal.minutes,
-                      }))
-                    }
-                    style={({ pressed }) => [
-                      styles.selectionCard,
-                      isSelected && styles.selectionCardSelected,
-                      pressed && styles.selectionCardPressed,
-                    ]}
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={`${goal.minutes} minutes per day`}
+                    onPress={() => updateDraft((prev) => ({ ...prev, dailyGoalMinutes: goal.minutes }))}
+                    style={[styles.minuteOption, selected && styles.minuteOptionSelected]}
                   >
-                    <View
-                      style={[
-                        styles.motivationIconCircle,
-                        isSelected && styles.motivationIconCircleSelected,
-                      ]}
-                    >
-                      <Ionicons
-                        name={goal.icon}
-                        size={20}
-                        color={isSelected ? "#236c19" : "#556b5d"}
-                      />
-                    </View>
+                    <Text style={[styles.minuteOptionText, selected && styles.minuteOptionTextSelected]}>{goal.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text style={styles.weekPreviewTitle}>YOUR WEEK AT THIS PACE</Text>
+            <View style={styles.weekPreview}>
+              {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => (
+                <View key={`${day}-${index}`} style={styles.weekPreviewDay}>
+                  <View style={[styles.weekPreviewBar, { height: 42 + (index % 3) * 8 }]} />
+                  <Text style={styles.weekPreviewLabel}>{day}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* STEP 5: DAILY TIME BUDGET */}
+        {step === 5 && (
+          <View style={styles.stepContainer}>
+            <Text style={styles.stepTitle}>Daily time budget</Text>
+            <Text style={styles.stepSubtitle}>Choose a rhythm you can keep alongside your daily goal.</Text>
+
+            <View style={styles.budgetRing} accessibilityLabel={`${draft.dailyTimeBudgetMinutes} minutes daily time budget`}>
+              <View style={styles.budgetRingInner}>
+                <Text style={styles.budgetRingValue}>{draft.dailyTimeBudgetMinutes}</Text>
+                <Text style={styles.budgetRingCaption}>minutes / day</Text>
+              </View>
+            </View>
+
+            <Text style={styles.sectionLabel}>Choose your time budget</Text>
+            <View style={styles.minutesOptionsRow}>
+              {DAILY_TIME_BUDGETS.map((minutes) => {
+                const selected = draft.dailyTimeBudgetMinutes === minutes;
+                return (
+                  <Pressable
+                    key={minutes}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={`${minutes} minutes daily time budget`}
+                    onPress={() => updateDraft((prev) => ({ ...prev, dailyTimeBudgetMinutes: minutes }))}
+                    style={[styles.minuteOption, selected && styles.minuteOptionSelected]}
+                  >
+                    <Text style={[styles.minuteOptionText, selected && styles.minuteOptionTextSelected]}>{minutes} min</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text style={[styles.sectionLabel, { marginTop: 24 }]}>Choose a time of day</Text>
+            <View style={styles.cardsColumn}>
+              {STUDY_TIME_OPTIONS.map((option) => {
+                const selected = draft.reminderTime === option.time;
+                return (
+                  <Pressable
+                    key={option.label}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={`${option.label}, ${option.time}`}
+                    onPress={() => {
+                      setCustomTimeInput(option.time);
+                      updateDraft((prev) => ({ ...prev, reminderTime: option.time }));
+                    }}
+                    style={({ pressed }) => [styles.timeOfDayCard, selected && styles.selectionCardSelected, pressed && styles.selectionCardPressed]}
+                  >
                     <View style={styles.cardTextContainer}>
-                      <View style={styles.goalTitleRow}>
-                        <Text
-                          style={[
-                            styles.cardTitle,
-                            isSelected && styles.cardTitleSelected,
-                          ]}
-                        >
-                          {goal.label}
-                        </Text>
-                        <Text style={styles.goalTimeBadge}>{goal.time}</Text>
-                      </View>
-                      <Text style={styles.cardDesc}>{goal.desc}</Text>
+                      <Text style={[styles.cardTitle, selected && styles.cardTitleSelected]}>{option.label}</Text>
+                      <Text style={styles.cardDesc}>{selected ? "Selected" : `Tap to choose · ${option.time}`}</Text>
                     </View>
-                    <Ionicons
-                      name={
-                        isSelected
-                          ? "checkmark-circle"
-                          : "ellipse-outline"
-                      }
-                      size={22}
-                      color={isSelected ? "#236c19" : "#a1b1a7"}
-                    />
+                    {selected ? <Ionicons name="checkmark-circle" size={22} color="#236c19" /> : null}
                   </Pressable>
                 );
               })}
@@ -784,8 +783,8 @@ export function OnboardingWizard() {
           </View>
         )}
 
-        {/* STEP 5: STUDY REMINDER */}
-        {step === 5 && (
+        {/* STEP 6: STUDY REMINDER */}
+        {step === 6 && (
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Build Your Study Habit</Text>
             <Text style={styles.stepSubtitle}>
@@ -929,8 +928,8 @@ export function OnboardingWizard() {
           </View>
         )}
 
-        {/* STEP 6: LEARNING PROMISE & FLO COMPANION */}
-        {step === 6 && (
+        {/* STEP 7: LEARNING PROMISE & FLO COMPANION */}
+        {step === 7 && (
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Learning Promise & Companion</Text>
             <Text style={styles.stepSubtitle}>
@@ -1070,8 +1069,8 @@ export function OnboardingWizard() {
           </View>
         )}
 
-        {/* STEP 7: REVIEW & COMPLETION */}
-        {step === 7 && (
+        {/* STEP 8: REVIEW & COMPLETION */}
+        {step === 8 && (
           <View style={styles.stepContainer}>
             <View style={styles.reviewHeaderBadge}>
               <Ionicons name="sparkles" size={28} color="#236c19" />
@@ -1113,10 +1112,16 @@ export function OnboardingWizard() {
 
               <View style={styles.summaryItem}>
                 <Ionicons name="time-outline" size={18} color="#236c19" />
-                <Text style={styles.summaryLabel}>Daily Commitment:</Text>
+                <Text style={styles.summaryLabel}>Daily Goal:</Text>
                 <Text style={styles.summaryValue}>
                   {draft.dailyGoalMinutes} minutes / day
                 </Text>
+              </View>
+
+              <View style={styles.summaryItem}>
+                <Ionicons name="hourglass-outline" size={18} color="#236c19" />
+                <Text style={styles.summaryLabel}>Time Budget:</Text>
+                <Text style={styles.summaryValue}>{draft.dailyTimeBudgetMinutes} minutes / day</Text>
               </View>
 
               <View style={styles.summaryItem}>
@@ -1304,7 +1309,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 32,
   },
@@ -1370,6 +1375,133 @@ const styles = StyleSheet.create({
     color: "#65766c",
     lineHeight: 18,
   },
+  minuteRing: {
+    alignSelf: "center",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 14,
+    borderColor: "#58cc02",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  minuteRingInner: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  minuteRingValue: {
+    color: "#236c19",
+    fontSize: 34,
+    fontWeight: "800",
+  },
+  minuteRingCaption: {
+    color: "#65766c",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  minuteMotto: {
+    alignSelf: "center",
+    color: "#236c19",
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 14,
+    marginBottom: 14,
+  },
+  minutesOptionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  minuteOption: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 38,
+    borderRadius: 20,
+    backgroundColor: "#f4f8f1",
+  },
+  minuteOptionSelected: {
+    backgroundColor: "#eaf8de",
+  },
+  minuteOptionText: {
+    color: "#20352b",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  minuteOptionTextSelected: {
+    color: "#236c19",
+    fontWeight: "800",
+  },
+  weekPreviewTitle: {
+    color: "#65766c",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    marginTop: 26,
+    marginBottom: 10,
+  },
+  weekPreview: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    minHeight: 76,
+  },
+  weekPreviewDay: {
+    alignItems: "center",
+    gap: 6,
+  },
+  weekPreviewBar: {
+    width: 28,
+    borderRadius: 8,
+    backgroundColor: "#58cc02",
+  },
+  weekPreviewLabel: {
+    color: "#65766c",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  timeOfDayCard: {
+    minHeight: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#d8e8d0",
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  budgetRing: {
+    alignSelf: "center",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: "#eaf8de",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  budgetRingInner: {
+    width: 142,
+    height: 142,
+    borderRadius: 71,
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  budgetRingValue: {
+    color: "#236c19",
+    fontSize: 34,
+    fontWeight: "800",
+  },
+  budgetRingCaption: {
+    color: "#65766c",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 2,
+  },
   languagesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1399,15 +1531,45 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   motivationIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#f5f8f4",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 2,
   },
-  motivationIconCircleSelected: {
-    backgroundColor: "#d5edd0",
+  motivationGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 14,
+  },
+  motivationCard: {
+    width: "48.25%",
+    height: 146,
+    borderRadius: 16,
+    padding: 14,
+    justifyContent: "flex-start",
+  },
+  motivationTitle: {
+    color: "#236c19",
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 22,
+    marginTop: 2,
+  },
+  motivationDescription: {
+    color: "#65766c",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  motivationHint: {
+    color: "#65766c",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 28,
   },
   placementCalloutCard: {
     backgroundColor: "#f2faee",

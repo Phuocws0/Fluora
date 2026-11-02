@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -128,8 +129,18 @@ export default function LoginScreen() {
       <Text style={styles.eyebrow}>FLUORA</Text>
       <Text style={styles.title}>Welcome back</Text>
       <Text style={styles.description}>
-        Sign in to continue your learning plan and keep your progress together.
+        Sign in to continue your learning journey.
       </Text>
+
+      <View style={styles.gardenCard}>
+        <Image
+          accessibilityLabel="Flo waiting in the Fluora garden"
+          resizeMode="contain"
+          source={require("../../assets/fluora-welcome-garden.png")}
+          style={styles.gardenIllustration}
+        />
+        <Text style={styles.gardenCaption}>Your garden is waiting</Text>
+      </View>
 
       {error ? (
         <View style={styles.errorContainer} accessibilityRole="alert">
@@ -199,23 +210,6 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isBusy, busy: isSubmitting }}
-          disabled={isBusy}
-          onPress={handleEmailSignIn}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && !isBusy ? styles.primaryButtonPressed : null,
-            isBusy && styles.disabled,
-          ]}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Sign In</Text>
-          )}
-        </Pressable>
       </View>
 
       <View style={styles.dividerRow}>
@@ -251,6 +245,24 @@ export default function LoginScreen() {
       {unavailableMessage ? (
         <Text style={styles.helper}>{unavailableMessage}</Text>
       ) : null}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isBusy, busy: isSubmitting }}
+        disabled={isBusy}
+        onPress={handleEmailSignIn}
+        style={({ pressed }) => [
+          styles.primaryButton,
+          pressed && !isBusy ? styles.primaryButtonPressed : null,
+          isBusy && styles.disabled,
+        ]}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="#20352b" />
+        ) : (
+          <Text style={styles.primaryButtonText}>Sign In</Text>
+        )}
+      </Pressable>
 
       <View style={styles.links}>
         <View style={styles.registerRow}>
@@ -294,6 +306,26 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 8,
   },
+  gardenCard: {
+    minHeight: 106,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: "#eaf8de",
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    marginTop: 18,
+  },
+  gardenIllustration: {
+    width: 86,
+    height: 86,
+  },
+  gardenCaption: {
+    flex: 1,
+    color: "#20352b",
+    fontSize: 17,
+    fontWeight: "800",
+  },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -314,7 +346,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   form: {
-    marginTop: 24,
+    marginTop: 20,
     gap: 16,
   },
   field: {
@@ -366,20 +398,20 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#236c19",
-    borderRadius: 14,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
     justifyContent: "center",
-    marginTop: 8,
-    minHeight: 52,
+    marginTop: 18,
+    minHeight: 56,
     paddingHorizontal: 20,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: "#20352b",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   disabled: {
     opacity: 0.55,

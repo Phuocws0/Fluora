@@ -14,7 +14,7 @@
 - Issue #39 practice/vocabulary/reading API: owner-scoped deck/card and bookmark operations, validated import, scheduled custom and mistake-derived review, reading progress, curated story challenge linked to the core exercise API, and demo study-tool/dictionary reads. Mistakes derive from immutable learner answers and can be dismissed without editing that history.
 - Issue #33 help articles, owner-scoped support-request CRUD, and local JSON exports of current learner-owned data are implemented. Exports omit passwords, bearer sessions, and authentication-token hashes.
 - Issue #32 Flo Tutor backend: provider status, three curated A1 role-play scenarios with branching turns and a hint ladder, owner-scoped chats with question/exercise/mistake/explain context and feedback, learner-message edit/delete that regenerates or removes the linked reply, saved notes CRUD, temporary chats when `saveTutorHistory` is off, and confirmed clear-history. The default `local` provider is an offline, rule-based demo tutor; `TUTOR_PROVIDER=off` returns `503` without blocking lessons. Exports (`version:3`) and account deletion include tutor data. A scripted Docker smoke test covered 34 success, validation, ownership, privacy, concurrency, provider-off, export, and deletion checks; the #35 and auth smoke tests still pass.
-- Issue #4 mobile account and onboarding experience is implemented: mobile Welcome, Register, Login, Email verification, Password recovery/reset (forgot & reset password), Profile sign-out, Onboarding wizard (language selection, motivation, starting level, placement test modal with questions and attempt submission, daily goal & time budget, notification reminders, learning promise, and Flo companion intro), session/storage synchronization via SecureStore and AsyncStorage with 401 purge and resilient network retry, and smart initial routing. Typecheck and Android bundle export pass.
+- Issue #4 mobile account and onboarding experience is implemented: Welcome, Register, Login, local email verification and password recovery/reset, Profile progress and sign-out, and an onboarding wizard for languages, motivation, level/placement, independent daily goal and time budget, reminders, learning promise, and Flo companion. Auth tokens and onboarding drafts use SecureStore; invalid private sessions are cleared on `UNAUTHORIZED` responses without treating invalid login credentials as an expired session. Guest placement answers are submitted after registration, and the device time zone is saved with settings. Local verification/reset tokens remain opaque and are read from `[dev-mail]` backend log lines. Typecheck and Android bundle export pass.
 
 ## In Progress
 
@@ -28,7 +28,7 @@
 ## Planned
 
 1. Complete Android and live-backend acceptance for League/community (#17) and Tutor (#22).
-2. Integrate mobile account/onboarding (#4) and profile/settings (#20) with the implemented APIs.
+2. Complete Android acceptance for mobile account/onboarding (#4), then implement profile/settings flows (#20).
 3. Continue through the remaining practice and learning flows in `docs/PRODUCT.md`.
 
 ## Known limitations
@@ -51,5 +51,5 @@
 
 ## Next Recommended Tasks
 
-- Connect mobile email sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
+- Complete Android acceptance for mobile email sign-in, onboarding, placement, and account profile (#4); implement remaining settings flows (#20).
 - Complete end-to-end Android acceptance for the League/community and Tutor screens (#17, #22).

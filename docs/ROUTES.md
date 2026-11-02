@@ -33,7 +33,7 @@ learning-paths
 settings/[section]
 ```
 
-Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth/onboarding, settings, Practice and Profile remain placeholders (apart from existing Google sign-in). League/community routes below now have a local UI implementation; Tutor has a UI with an explicit interface preview and planned API adapter. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
+Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth and onboarding screens use the identity APIs, while Profile shows account and progress data from the learning APIs. Settings and Practice remain placeholders. League/community routes below have a local UI implementation; Tutor has a UI with an explicit interface preview and planned API adapter. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
 
 ## Planned logical model
 

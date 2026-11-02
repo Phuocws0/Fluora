@@ -27,6 +27,7 @@ export type PlacementTestModalProps = {
   onAcceptLevel: (
     level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
     result: PlacementAttemptResult,
+    answers: Array<{ questionId: string; optionId: string }>,
   ) => void;
 };
 
@@ -180,7 +181,15 @@ export function PlacementTestModal({
 
   function handleAccept() {
     if (!result) return;
-    onAcceptLevel(result.level, result);
+    const submittedAnswers = questions.flatMap((question) => {
+      const optionId = answers[question.id];
+      return optionId ? [{ questionId: question.id, optionId }] : [];
+    });
+    onAcceptLevel(
+      result.level,
+      result,
+      result.attemptId === null ? submittedAnswers : [],
+    );
     handleResetAndClose();
   }
 

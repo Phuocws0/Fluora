@@ -9,6 +9,14 @@ export async function getPlacementQuestions(): Promise<PlacementQuestionsRespons
   return getJson<PlacementQuestionsResponse>("/placement/questions");
 }
 
+export function getDeviceTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 export async function submitPlacementAttempt(
   answers: Array<{ questionId: string; optionId: string }>,
 ): Promise<PlacementAttemptResult> {

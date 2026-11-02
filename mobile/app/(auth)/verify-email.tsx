@@ -117,8 +117,12 @@ export default function VerifyEmailScreen() {
               styles.fullWidth,
             ]}
           >
-            <Text style={styles.primaryButtonText}>Continue to Learning Home</Text>
-            <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+            <Text style={styles.primaryButtonText}>
+              {isAuthenticated && !settings?.onboardingCompleted
+                ? "Continue setup"
+                : "Continue learning"}
+            </Text>
+            <Ionicons name="arrow-forward" size={18} color="#20352b" />
           </Pressable>
         </View>
       </ScreenContainer>
@@ -136,23 +140,22 @@ export default function VerifyEmailScreen() {
         <Ionicons name="arrow-back" size={22} color="#20352b" />
       </Pressable>
 
-      <Text style={styles.eyebrow}>VERIFICATION</Text>
+      <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
       <Text style={styles.title}>Verify your email</Text>
       <Text style={styles.description}>
         {user?.email
-          ? `We sent a confirmation token to ${user.email}. Enter it below to finish setting up your account.`
-          : "Enter the verification token sent to your email to confirm your account."}
+          ? `Enter the local verification token for ${user.email} to finish setting up your account.`
+          : "Enter your local verification token to confirm your account."}
       </Text>
 
-      {/* Dev-mail local demo callout */}
       <View style={styles.devCallout}>
         <View style={styles.devCalloutHeader}>
-          <Ionicons name="terminal-outline" size={18} color="#155e75" />
-          <Text style={styles.devCalloutTitle}>Local Demo Notice</Text>
+          <Ionicons name="mail-outline" size={18} color="#236c19" />
+          <Text style={styles.devCalloutTitle}>Local demo email</Text>
         </View>
         <Text style={styles.devCalloutBody}>
-          In this local development demo, no real emails are dispatched. Look in your backend terminal console for lines prefixed with{" "}
-          <Text style={styles.devCalloutCode}>[dev-mail]</Text> to find your token.
+          Email delivery is disabled. Copy the verification token from the backend terminal line prefixed with{" "}
+          <Text style={styles.devCalloutCode}>[dev-mail]</Text>.
         </Text>
       </View>
 
@@ -184,7 +187,8 @@ export default function VerifyEmailScreen() {
             }}
             placeholder="Paste verification token here"
             placeholderTextColor="#8a9a90"
-            style={styles.input}
+            selectTextOnFocus
+            style={[styles.input, styles.tokenInput]}
             value={token}
           />
         </View>
@@ -201,7 +205,7 @@ export default function VerifyEmailScreen() {
           ]}
         >
           {isVerifying ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#20352b" />
           ) : (
             <Text style={styles.primaryButtonText}>Verify Email</Text>
           )}
@@ -224,6 +228,15 @@ export default function VerifyEmailScreen() {
             <Text style={styles.secondaryButtonText}>Resend Verification Token</Text>
           )}
         </Pressable>
+      </View>
+
+      <View style={styles.securityCard}>
+        <Ionicons name="shield-checkmark-outline" size={22} color="#236c19" />
+        <View style={styles.securityCardCopy}>
+          <Text style={styles.securityCardTitle}>Keep your account safe</Text>
+          <Text style={styles.securityCardBody}>Never share this token with anyone.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#236c19" />
       </View>
 
       <View style={styles.footerRow}>
@@ -261,9 +274,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   devCallout: {
-    backgroundColor: "#ecfeff",
-    borderColor: "#a5f3fc",
-    borderRadius: 14,
+    backgroundColor: "#eaf8de",
+    borderColor: "#d5edc5",
+    borderRadius: 16,
     borderWidth: 1,
     padding: 14,
     marginTop: 18,
@@ -275,19 +288,44 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   devCalloutTitle: {
-    color: "#155e75",
+    color: "#236c19",
     fontSize: 13,
     fontWeight: "700",
   },
   devCalloutBody: {
-    color: "#164e63",
+    color: "#52625d",
     fontSize: 13,
     lineHeight: 19,
   },
   devCalloutCode: {
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     fontWeight: "700",
-    color: "#0891b2",
+    color: "#236c19",
+  },
+  securityCard: {
+    minHeight: 76,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderColor: "#d8e8d0",
+    borderWidth: 1,
+    borderRadius: 16,
+    backgroundColor: "#ffffff",
+    padding: 16,
+    marginTop: 16,
+  },
+  securityCardCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  securityCardTitle: {
+    color: "#20352b",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  securityCardBody: {
+    color: "#65766c",
+    fontSize: 13,
   },
   errorContainer: {
     flexDirection: "row",
@@ -349,24 +387,31 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 16,
   },
+  tokenInput: {
+    backgroundColor: "#eaf8de",
+    borderColor: "#eaf8de",
+    minHeight: 58,
+    fontSize: 13,
+    letterSpacing: 0.4,
+  },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#236c19",
-    borderRadius: 14,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
     marginTop: 6,
-    minHeight: 52,
+    minHeight: 56,
     paddingHorizontal: 20,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#ffffff",
+    color: "#20352b",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   secondaryButton: {
     alignItems: "center",

@@ -63,11 +63,13 @@ export type OnboardingDraft = {
   motivation: string | null;
   startingLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null;
   placementAttempt: PlacementAttemptResult | null;
+  placementAnswers: Array<{ questionId: string; optionId: string }> | null;
   dailyGoalMinutes: number;
   dailyTimeBudgetMinutes: number;
   reminderEnabled: boolean;
   reminderTime: string | null;
   reminderDays: number[];
+  timezone: string;
   learningPromise: string;
   floCompanion: string | null;
 };
