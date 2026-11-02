@@ -72,16 +72,16 @@ export async function completeMission(userId: string, id: string) {
   }
 }
 
-async function misconceptionRows(userId: string) {
+export async function misconceptionRows(userId: string) {
   const counts = await prisma.userAnswer.groupBy({ by: ["exerciseId"], where: { userId, isCorrect: false }, _count: { _all: true }, having: { exerciseId: { _count: { gte: 2 } } } });
   const ids = counts.map((item) => item.exerciseId);
   const [exercises, states] = await Promise.all([
-    prisma.exercise.findMany({ where: { id: { in: ids } }, select: { id: true, prompt: true, type: true, lesson: { select: { title: true, skill: true } } } }),
+    prisma.exercise.findMany({ where: { id: { in: ids } }, select: { id: true, prompt: true, type: true, explanation: true, lesson: { select: { title: true, skill: true } } } }),
     prisma.misconceptionState.findMany({ where: { userId, exerciseId: { in: ids } } }),
   ]);
   const countsById = new Map(counts.map((item) => [item.exerciseId, item._count._all]));
   const dismissedById = new Map(states.map((item) => [item.exerciseId, item.dismissed]));
-  return exercises.map((exercise) => ({ id: exercise.id, exerciseId: exercise.id, prompt: exercise.prompt, type: exercise.type, lesson: exercise.lesson, mistakeCount: countsById.get(exercise.id) ?? 0, dismissed: dismissedById.get(exercise.id) ?? false }));
+  return exercises.map((exercise) => ({ id: exercise.id, exerciseId: exercise.id, prompt: exercise.prompt, type: exercise.type, explanation: exercise.explanation, lesson: exercise.lesson, mistakeCount: countsById.get(exercise.id) ?? 0, dismissed: dismissedById.get(exercise.id) ?? false }));
 }
 export async function misconceptions(userId: string) { return { items: await misconceptionRows(userId) }; }
 export async function setMisconceptionDismissed(userId: string, exerciseId: string, dismissed: boolean) {

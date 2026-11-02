@@ -1,4 +1,21 @@
 import { prisma } from "../../db/prisma.js";
+import { misconceptionRows, setMisconceptionDismissed } from "../activity/insights.service.js";
+
+type MistakeRow = Awaited<ReturnType<typeof misconceptionRows>>[number];
+
+function asMistakeReview(userId: string, row: MistakeRow, nextReviewAt = new Date()) {
+  return {
+    id: row.exerciseId,
+    userId,
+    sourceExerciseId: row.exerciseId,
+    front: row.prompt,
+    back: row.explanation ?? `Review ${row.lesson.title}.`,
+    kind: "mistake",
+    mistakeCount: row.mistakeCount,
+    dismissed: row.dismissed,
+    nextReviewAt,
+  };
+}
 
 export async function listSets(userId: string) {
   return { sets: await prisma.vocabularySet.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, include: { _count: { select: { cards: true } } } }) };
@@ -88,10 +105,14 @@ export async function listBookmarks(userId: string) {
   return { bookmarks: await prisma.bookmark.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }) };
 }
 
-export async function createBookmark(userId: string, storyId: string) {
-  const story = await prisma.story.findFirst({ where: { id: storyId, isPublished: true }, select: { id: true } });
-  if (!story) return null;
-  const bookmark = await prisma.bookmark.create({ data: { userId, targetType: "story", targetId: storyId } });
+export async function createBookmark(userId: string, targetType: "story" | "word", targetId: string) {
+  if (targetType === "story") {
+    const story = await prisma.story.findFirst({ where: { id: targetId, isPublished: true }, select: { id: true } });
+    if (!story) return null;
+  } else if (!dictionary.some((item) => item.word === targetId)) {
+    return null;
+  }
+  const bookmark = await prisma.bookmark.create({ data: { userId, targetType, targetId } });
   return { bookmark };
 }
 
@@ -133,38 +154,84 @@ export function lookupWord(query: string) {
 }
 
 export async function getPractice(userId: string) {
-  const [reviewDueCount, story] = await Promise.all([
-    prisma.reviewItem.count({ where: { userId, nextReviewAt: { lte: new Date() } } }),
+  const [review, story] = await Promise.all([
+    listReviewItems(userId),
     prisma.story.findFirst({ where: { isPublished: true }, orderBy: { title: "asc" }, select: { id: true, title: true } }),
   ]);
-  return { reviewDueCount, suggestions: story ? [{ kind: "story", id: story.id, title: story.title }] : [] };
+  const reviewSuggestion = review.items[0]
+    ? { kind: review.items[0].kind === "mistake" ? "mistake-review" : "vocabulary-review", id: review.items[0].id, title: review.items[0].front }
+    : null;
+  return {
+    reviewDueCount: review.items.length,
+    suggestions: [
+      ...(reviewSuggestion ? [reviewSuggestion] : []),
+      ...(story ? [{ kind: "story", id: story.id, title: story.title }] : []),
+    ],
+  };
 }
 
 export async function listReviewItems(userId: string, kind?: string) {
-  return { items: await prisma.reviewItem.findMany({ where: { userId, nextReviewAt: { lte: new Date() }, ...(kind ? { kind } : {}) }, orderBy: { nextReviewAt: "asc" } }) };
+  const now = new Date();
+  const [customItems, rows] = await Promise.all([
+    kind === "mistake" ? [] : prisma.reviewItem.findMany({ where: { userId, kind: "custom", nextReviewAt: { lte: now } }, orderBy: { nextReviewAt: "asc" } }),
+    kind === "custom" ? [] : misconceptionRows(userId),
+  ]);
+  const activeMistakes = rows.filter((row) => !row.dismissed);
+  const savedMistakes = activeMistakes.length
+    ? await prisma.reviewItem.findMany({
+      where: { userId, kind: "mistake", sourceExerciseId: { in: activeMistakes.map((row) => row.exerciseId) } },
+      select: { sourceExerciseId: true, nextReviewAt: true },
+    })
+    : [];
+  const savedByExercise = new Map(savedMistakes.map((item) => [item.sourceExerciseId, item.nextReviewAt]));
+  const mistakeItems = activeMistakes
+    .filter((row) => !savedByExercise.has(row.exerciseId) || savedByExercise.get(row.exerciseId)! <= now)
+    .map((row) => asMistakeReview(userId, row, savedByExercise.get(row.exerciseId) ?? now));
+  return { items: [...customItems, ...mistakeItems].sort((left, right) => left.nextReviewAt.getTime() - right.nextReviewAt.getTime()) };
 }
 export async function getReviewItem(userId: string, id: string) {
-  const item = await prisma.reviewItem.findFirst({ where: { id, userId } });
-  return item ? { item } : null;
+  const item = await prisma.reviewItem.findFirst({ where: { id, userId, kind: "custom" } });
+  if (item) return { item };
+  const mistake = (await misconceptionRows(userId)).find((row) => row.exerciseId === id && !row.dismissed);
+  if (!mistake) return null;
+  const saved = await prisma.reviewItem.findFirst({ where: { userId, kind: "mistake", sourceExerciseId: id }, select: { nextReviewAt: true } });
+  return { item: asMistakeReview(userId, mistake, saved?.nextReviewAt ?? new Date()) };
 }
 export async function createReviewItem(userId: string, input: { front: string; back: string; kind: string }) {
   return { item: await prisma.reviewItem.create({ data: { userId, ...input } }) };
 }
-export async function updateReviewItem(userId: string, id: string, input: { front?: string; back?: string }) {
+export async function updateReviewItem(userId: string, id: string, input: { front?: string; back?: string } | { dismissed: boolean }) {
+  if ("dismissed" in input) {
+    const result = await setMisconceptionDismissed(userId, id, input.dismissed);
+    const saved = await prisma.reviewItem.findFirst({ where: { userId, kind: "mistake", sourceExerciseId: id }, select: { nextReviewAt: true } });
+    return { item: asMistakeReview(userId, result.item, saved?.nextReviewAt ?? new Date()) };
+  }
   const result = await prisma.reviewItem.updateMany({ where: { id, userId, kind: "custom" }, data: input });
   return result.count ? { item: await prisma.reviewItem.findUniqueOrThrow({ where: { id } }) } : null;
 }
 export async function deleteReviewItem(userId: string, id: string) {
   const result = await prisma.reviewItem.deleteMany({ where: { id, userId, kind: "custom" } });
-  return result.count ? { deleted: true } : null;
+  if (result.count) return { deleted: true };
+  const mistake = (await misconceptionRows(userId)).find((row) => row.exerciseId === id && !row.dismissed);
+  if (!mistake) return null;
+  await setMisconceptionDismissed(userId, id, true);
+  return { deleted: true };
 }
 export async function answerReviewItem(userId: string, id: string, correct: boolean) {
-  const item = await prisma.reviewItem.findFirst({ where: { id, userId } });
-  if (!item) return null;
+  let item = await prisma.reviewItem.findFirst({ where: { id, userId, kind: "custom" } });
+  if (!item) {
+    const mistake = (await misconceptionRows(userId)).find((row) => row.exerciseId === id && !row.dismissed);
+    if (!mistake) return null;
+    item = await prisma.reviewItem.upsert({
+      where: { userId_sourceExerciseId: { userId, sourceExerciseId: id } },
+      create: { userId, sourceExerciseId: id, front: mistake.prompt, back: mistake.explanation ?? `Review ${mistake.lesson.title}.`, kind: "mistake" },
+      update: { front: mistake.prompt, back: mistake.explanation ?? `Review ${mistake.lesson.title}.` },
+    });
+  }
   const nextReviewAt = new Date(Date.now() + (correct ? 24 * 60 : 10) * 60 * 1000);
   await prisma.$transaction([
-    prisma.reviewOutcome.create({ data: { itemId: id, correct } }),
-    prisma.reviewItem.update({ where: { id }, data: { nextReviewAt } }),
+    prisma.reviewOutcome.create({ data: { itemId: item.id, correct } }),
+    prisma.reviewItem.update({ where: { id: item.id }, data: { nextReviewAt } }),
   ]);
   return { result: { correct }, nextReviewAt };
 }

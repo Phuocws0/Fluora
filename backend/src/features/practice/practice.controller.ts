@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { currentUserId } from "../../http/auth.js";
+import { ActivityError } from "../activity/activity.service.js";
 import * as service from "./practice.service.js";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -36,6 +37,10 @@ async function run(response: Response, operation: () => Promise<unknown>, status
     if (!result) { error(response, 404, "NOT_FOUND", "Resource not found."); return; }
     response.status(status).json(result);
   } catch (cause) {
+    if (cause instanceof ActivityError) {
+      error(response, cause.status, cause.code, cause.message);
+      return;
+    }
     if (typeof cause === "object" && cause !== null && "code" in cause && cause.code === "P2002") {
       error(response, 409, "CONFLICT", "This item already exists.");
       return;
@@ -142,9 +147,19 @@ export function resetProgress(request: Request, response: Response) {
 export function bookmarks(_request: Request, response: Response) { return run(response, () => service.listBookmarks(userId(response))); }
 export function createBookmark(request: Request, response: Response) {
   const body = object(request.body);
-  if (body?.targetType !== "story") { error(response, 400, "VALIDATION_ERROR", "Only story bookmarks are available currently."); return; }
-  const storyId = id(body.targetId, response);
-  return storyId ? run(response, () => service.createBookmark(userId(response), storyId), 201) : undefined;
+  if (!body || Object.keys(body).some((key) => !["targetType", "targetId"].includes(key))) {
+    error(response, 400, "VALIDATION_ERROR", "Provide a story or dictionary word to bookmark."); return;
+  }
+  if (body.targetType === "story") {
+    const storyId = id(body.targetId, response);
+    return storyId ? run(response, () => service.createBookmark(userId(response), "story", storyId), 201) : undefined;
+  }
+  if (body.targetType === "word") {
+    const word = text(body.targetId, 100);
+    if (!word) { error(response, 400, "VALIDATION_ERROR", "Provide a dictionary word to bookmark."); return; }
+    return run(response, () => service.createBookmark(userId(response), "word", word.toLowerCase()), 201);
+  }
+  error(response, 400, "VALIDATION_ERROR", "Bookmark targetType must be story or word.");
 }
 export function updateBookmark(request: Request, response: Response) {
   const bookmarkId = id(request.params.bookmarkId, response);
@@ -179,7 +194,7 @@ export function dictionary(request: Request, response: Response) {
 
 export function reviewItems(request: Request, response: Response) {
   const kind = request.query.kind;
-  if (kind !== undefined && (typeof kind !== "string" || kind.length > 40)) {
+  if (kind !== undefined && (typeof kind !== "string" || !["custom", "mistake"].includes(kind))) {
     error(response, 400, "VALIDATION_ERROR", "Invalid review kind."); return;
   }
   return run(response, () => service.listReviewItems(userId(response), kind));
@@ -201,6 +216,10 @@ export function updateReviewItem(request: Request, response: Response) {
   const itemId = id(request.params.itemId, response);
   if (!itemId) return;
   const body = object(request.body);
+  if (body && Object.keys(body).length === 1 && Object.keys(body)[0] === "dismissed") {
+    if (typeof body.dismissed !== "boolean") { error(response, 400, "VALIDATION_ERROR", "dismissed must be a boolean."); return; }
+    return run(response, () => service.updateReviewItem(userId(response), itemId, { dismissed: body.dismissed as boolean }));
+  }
   if (!body || Object.keys(body).length === 0 || Object.keys(body).some((key) => !["front", "back"].includes(key))) {
     error(response, 400, "VALIDATION_ERROR", "Provide front or back to update."); return;
   }
@@ -226,6 +245,9 @@ function importPreview(value: unknown) {
   const mapping = object(body?.mapping);
   if (!body || !mapping || typeof mapping.front !== "string" || typeof mapping.back !== "string" ||
       !Array.isArray(body.rows) || body.rows.length === 0 || body.rows.length > 500 ||
+      Object.keys(mapping).some((key) => !["front", "back", "tag", "example"].includes(key)) ||
+      Object.values(mapping).some((column) => typeof column !== "string" || column.trim().length === 0) ||
+      new Set(Object.values(mapping)).size !== Object.values(mapping).length ||
       ["tag", "example"].some((key) => mapping[key] !== undefined && typeof mapping[key] !== "string")) return null;
   const validRows: Array<{ front: string; back: string; tag?: string; example?: string }> = [];
   const errors: Array<{ row: number; message: string }> = [];

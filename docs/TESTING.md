@@ -33,6 +33,8 @@ For the learning-content API, seed the local database and check the course catal
 
 For learning activity, check each seeded exercise answer mode, reject raw audio payloads, require lesson answers before completion, and confirm a repeated completion earns zero additional XP. Verify answer history ownership, UTC streak/weekly totals, planner/evidence ownership, mission eligibility, and misconception dismiss/restore without changing answer history.
 
+For practice, vocabulary, and reading, check owner-scoped deck/card CRUD, import preview mapping/row errors, and rejection of invalid imports. Verify custom and mistake review queues, append-only outcomes and due-time updates, dismissal without answer-history edits, word/story bookmark ownership, and reading progress save/resume/reset. Confirm story challenge choices use the linked exercise endpoint and never expose correctness flags in story content.
+
 For mutable user-owned resources, verify:
 
 - create/read/update/delete behavior for learner-owned resources and group-managed content in the approved CRUD baseline;
