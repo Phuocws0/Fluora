@@ -1,4 +1,4 @@
-// Provisional UI response types for planned backend #32. See docs/TIEN_HANDOFF.md.
+// Tutor UI types. tutor.service.ts maps the implemented backend contract into these view models.
 export type RoleChoice = { id: string; label: string; branchId: string };
 export type Turn = {
   id: string;
@@ -7,7 +7,7 @@ export type Turn = {
   choices: RoleChoice[];
   completed?: boolean;
 };
-export type Scenario = { id: string; title: string; description: string };
+export type Scenario = { id: string; title: string; description: string; level?: string };
 export type Feedback = {
   summary: string;
   explanation?: string;
@@ -19,6 +19,8 @@ export type TutorMessage = {
   content: string;
   createdAt: string;
   replyToId?: string;
+  canEdit?: boolean;
+  canDelete?: boolean;
   feedback?: Feedback;
 };
 export type Chat = {
@@ -30,7 +32,8 @@ export type Chat = {
 };
 export type TutorNote = {
   id: string;
-  chatId?: string;
+  chatId?: string | null;
+  messageId?: string | null;
   phrase: string;
   pattern: string;
   personalExample?: string;
@@ -47,6 +50,7 @@ export type SendResult = {
   tutorMessage: TutorMessage;
   feedback?: Feedback;
   nextTurn?: Turn | null;
+  chat?: Chat;
 };
 export interface TutorService {
   scenarios(): Promise<{ scenarios: Scenario[] }>;
@@ -55,6 +59,7 @@ export interface TutorService {
   chat(chatId: string): Promise<ChatDetail>;
   rename(chatId: string, title: string): Promise<unknown>;
   setChatSaving(chatId: string, saveHistory: boolean): Promise<unknown>;
+  hint?(chatId: string, step: number): Promise<{ step: number; text: string; lastStep: boolean }>;
   send(
     chatId: string,
     message: string,

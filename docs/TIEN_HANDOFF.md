@@ -1,6 +1,6 @@
 # League/community and Flo Tutor mobile handoff
 
-Base: `5932b8469f1ecd8f3e12e2f546e72bce3ed0e49d` (`main`). This working copy has no commit or push.
+This handoff summarizes the League/community and Tutor mobile work in PR #53, rebased on the merged Tutor backend in PR #52.
 
 ## Implemented mobile code
 
@@ -18,22 +18,13 @@ Base: `5932b8469f1ecd8f3e12e2f546e72bce3ed0e49d` (`main`). This working copy has
 
 The main email-login screen is still outside this work. A small email sign-in gate for the two private feature entries uses `/auth/login` and the existing SecureStore session. Users need an existing registered account. No authentication bypass or hard-coded token is supplied. Auth checks keep active chats mounted on tab refocus; invalid sessions clear the private workspace. Preview does not require an account.
 
-## Tutor boundary: backend issue #32 remains unfinished
+## Tutor API integration
 
-The Tutor API adapter calls only planned paths in `docs/API.md`. Its response types in `mobile/features/tutor/tutor.types.ts` are a **proposed UI handoff**, not a verified backend contract: the current API document leaves fields such as chat/message/branch internals unspecified.
+The Tutor service maps the implemented backend contract into the screen's view types. It translates `saved` to `saveHistory`, `currentTurn` to the UI turn shape, and `learner`/`body` messages to `user`/`content`. The service uses `{saved}` when updating chat history and sends `{confirm:true}` when clearing all chats. Role-play hints use the backend hint endpoint. Editing/deleting is reloaded from the server; only the latest learner role-play message is editable in API mode.
 
-Coordinate these fields with the backend owner before live integration:
+The preview is still separate: it uses deterministic sample data in memory and does not call an AI, backend, or device persistence. API failures do not switch into preview silently. The live backend's default `local` provider is rule-based, not a real AI provider; see [API.md](API.md#flo-ai-tutor).
 
-- Chat: `id`, `title`, `scenarioId?`, `saveHistory`, `nextTurn?`. Rename PATCH uses `{title}`; per-chat saving PATCH uses `{saveHistory}`.
-- Message: `id`, `role: user|tutor`, `content`, `createdAt`, optional `replyToId` and `feedback`.
-- Feedback: `summary`, optional `explanation`, `hints:string[]`. No extra hint endpoint is invented.
-- Turn: `id`, `branchId`, `prompt`, `choices:[{id,label,branchId}]`, `completed?`.
-- Sending preserves `context.turnId`, `context.branchId`, and optional `context.choiceId`/`context.topic`; server returns authoritative `nextTurn`. Editing/deleting reloads the conversation to avoid stale branches.
-- Editing/deleting an earlier learner turn must reconcile its linked response and later branch state. The preview discards later turns and restores the previous turn snapshot.
-- Privacy in preview: the global switch applies to new chats; an existing chat can be explicitly saved/unsaved, and saving is refused while global saving is off. Existing saved history is not deleted by turning the global switch off. Confirm this policy with #32.
-- Preview clear-history removes conversations/messages, retaining independently saved notes. Confirm note-link deletion behavior with #32. No raw audio, provider keys, persistent preview database, or fake live AI response is introduced.
-
-The preview is deterministic sample data, **not an AI integration**. It is fresh per preview workspace and disappears on exit/restart. API failures never fall back silently to preview. Learning remains available when Tutor fails.
+The preview is deterministic sample data, **not an AI integration**. It is fresh per preview workspace and disappears on exit/restart. Learning remains available when Tutor fails.
 
 ## Verification
 
@@ -50,7 +41,7 @@ node --experimental-vm-modules --test scripts/mobile-features.test.mjs
 
 The focused tests use Node's built-in runner and existing TypeScript; they cover tea-branch preservation/reopening, stale/completed-turn rejection, response invalidation on earlier edits, message deletion/branch rollback, privacy/new-chat behavior, per-chat saving, notes/history isolation and CRUD, snapshot isolation, and the real shared HTTP transport's Android host/bearer/PATCH/DELETE/error paths. The VM-modules warning is expected in this test command. These are unit checks, not live backend or device tests.
 
-This environment has no Docker daemon/CLI or Android emulator. Database-backed community flows, actual native layout/keyboard/back behavior, and end-to-end provider behavior still need the following manual checks. The UI follows existing repository colors/components; exact Figma visual parity has not been verified.
+The isolated Docker Tutor smoke flow passed against a fresh temporary database. Android device/emulator acceptance, live community flows on device, keyboard/back behavior, and exact Figma visual parity have not been verified.
 
 ## Android acceptance checklist
 
@@ -62,5 +53,5 @@ This environment has no Docker daemon/CLI or Android emulator. Database-backed c
 6. Create/edit/join/leave a challenge; create/move/rename/delete tasks as distinct roles; create/move/edit/delete whiteboard notes. Confirm other members may move tasks but cannot edit another author's note.
 7. Read/unread/delete/clear notifications and load older pages; submit/edit/delete a peer review.
 8. Open Tutor interface preview, choose tea, reopen from history, finish the size turn, edit the earlier answer, and verify branch consistency. Exercise notes and both history switches, cancel and confirm deletion/clear. Exit/re-enter preview and verify data is gone.
-9. Switch to Tutor API with #32 absent: show unavailable/error/retry, return to Learn without a crash. After #32 is ready, reconcile the types above, then repeat the Tutor checks against real authenticated sessions and privacy settings.
+9. Use Tutor API with the local backend: create a chat and role-play, verify the local provider response, hints, edit/delete rules, notes, history saving, confirmed clear-history, and the `503` state with `TUTOR_PROVIDER=off`.
 10. Disconnect network, expire a bearer token, dismiss a modal, use Android Back and the keyboard, rotate or change text size, tap Send twice, and test cursor loading with more than 20 rows.

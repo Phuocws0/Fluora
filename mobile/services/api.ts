@@ -59,6 +59,9 @@ export function patchJson<T>(path: string, body: unknown): Promise<T> {
   return requestJson<T>(path, { method: "PATCH", body: JSON.stringify(body) });
 }
 
-export function deleteJson<T>(path: string): Promise<T> {
-  return requestJson<T>(path, { method: "DELETE" });
+export function deleteJson<T>(path: string, body?: unknown): Promise<T> {
+  return requestJson<T>(path, {
+    method: "DELETE",
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
 }

@@ -61,8 +61,9 @@ export default function TutorScreen() {
         />
       </View>
       <Copy>
-        The Tutor backend is still planned. Interface preview uses fixed
-        examples in memory; it does not call an AI or save real account data.
+        Tutor API uses the local backend and its configured demo provider.
+        Interface preview uses fixed examples in memory and saves no account
+        data.
       </Copy>
     </Page>
   );
@@ -86,6 +87,7 @@ function TutorWorkspace({
   const [topic, setTopic] = useState("");
   const [editor, setEditor] = useState<EditorSpec | null>(null);
   const [hintSteps, setHintSteps] = useState<Record<string, number>>({});
+  const [liveHints, setLiveHints] = useState<Record<string, string[]>>({});
   const a = useAction();
   const r = useResource(
     useCallback(async () => {
@@ -131,6 +133,7 @@ function TutorWorkspace({
       setMessage("");
       setTopic("");
       setHintSteps({});
+      setLiveHints({});
       setTab("chat");
       await r.refresh();
     }, "");
@@ -140,6 +143,7 @@ function TutorWorkspace({
       setMessage("");
       setTopic("");
       setHintSteps({});
+      setLiveHints({});
       setTab("chat");
     }, "");
   const send = (choice?: RoleChoice) => {
@@ -158,10 +162,32 @@ function TutorWorkspace({
         ...result.tutorMessage,
         feedback: result.tutorMessage.feedback ?? result.feedback,
       };
+      const nextMessages = [...current.messages, result.userMessage, tutorMessage];
+      const latestLearnerMessageId = [...nextMessages].reverse().find((item) => item.role === "user")?.id;
       setActive({
-        chat: { ...current.chat, nextTurn: result.nextTurn ?? null },
-        messages: [...current.messages, result.userMessage, tutorMessage],
+        chat: {
+          ...current.chat,
+          ...(result.chat
+            ? {
+                title: result.chat.title,
+                saveHistory: result.chat.saveHistory,
+                scenarioId: result.chat.scenarioId,
+              }
+            : {}),
+          nextTurn: result.nextTurn ?? null,
+        },
+        messages: nextMessages.map((item) =>
+          current.chat.scenarioId && item.role === "user"
+            ? {
+                ...item,
+                canEdit: item.id === latestLearnerMessageId,
+                canDelete: item.id === latestLearnerMessageId,
+              }
+            : item,
+        ),
       });
+      setHintSteps({});
+      setLiveHints({});
       setMessage("");
       await r.refresh();
     }, "Reply received.");
@@ -173,8 +199,8 @@ function TutorWorkspace({
         {
           key: "phrase",
           label: "Phrase",
-          value: note?.phrase ?? source?.content,
-          max: 1000,
+          value: note?.phrase ?? source?.content.slice(0, 120),
+          max: 120,
           required: true,
           multiline: true,
         },
@@ -182,7 +208,7 @@ function TutorWorkspace({
           key: "pattern",
           label: "Pattern / meaning",
           value: note?.pattern,
-          max: 1000,
+          max: 200,
           required: true,
           multiline: true,
         },
@@ -190,7 +216,7 @@ function TutorWorkspace({
           key: "personalExample",
           label: "Your own example",
           value: note?.personalExample,
-          max: 1000,
+          max: 300,
           multiline: true,
         },
       ],
@@ -199,14 +225,14 @@ function TutorWorkspace({
           phrase: v.phrase,
           pattern: v.pattern,
           personalExample: v.personalExample,
-          ...(note?.chatId
-            ? { chatId: note.chatId }
-            : source && active?.chat.saveHistory
-              ? { chatId: active.chat.id }
-              : {}),
         };
         if (note) await service.editNote(note.id, input);
-        else await service.saveNote(input);
+        else {
+          const link = source && active?.chat.saveHistory
+            ? { chatId: active.chat.id, messageId: source.id }
+            : {};
+          await service.saveNote({ ...input, ...link });
+        }
         await r.refresh();
       },
     });
@@ -377,7 +403,7 @@ function TutorWorkspace({
                                 label: "Title",
                                 value: active.chat.title,
                                 required: true,
-                                max: 100,
+                                      max: 60,
                               },
                             ],
                             save: async (v) => {
@@ -436,7 +462,7 @@ function TutorWorkspace({
                           disabled={a.busy}
                           onPress={() => noteEditor(undefined, m)}
                         />
-                        {m.role === "user" && (
+                        {m.role === "user" && m.canEdit !== false && (
                           <>
                             <Button
                               label="Edit"
@@ -450,7 +476,7 @@ function TutorWorkspace({
                                       label: "Message",
                                       value: m.content,
                                       required: true,
-                                      max: 4000,
+                                      max: 1000,
                                       multiline: true,
                                     },
                                   ],
@@ -464,6 +490,7 @@ function TutorWorkspace({
                                       await service.chat(active.chat.id),
                                     );
                                     setHintSteps({});
+                                    setLiveHints({});
                                     await r.refresh();
                                   },
                                 })
@@ -487,6 +514,7 @@ function TutorWorkspace({
                                         await service.chat(active.chat.id),
                                       );
                                       setHintSteps({});
+                                      setLiveHints({});
                                       await r.refresh();
                                     }, "Message and linked response removed."),
                                 )
@@ -513,16 +541,41 @@ function TutorWorkspace({
                           onPress={() => send(choice)}
                         />
                       ))}
+                      {!preview && !active.chat.nextTurn.completed && (
+                        <>
+                          {(liveHints[active.chat.id] ?? []).map((hint, index) => (
+                            <Copy key={`${active.chat.id}-hint-${index}`}>
+                              Hint {index + 1}: {hint}
+                            </Copy>
+                          ))}
+                          <Button
+                            label="Next hint"
+                            disabled={a.busy || !service.hint || (hintSteps[active.chat.id] ?? 0) >= 3}
+                            onPress={() =>
+                              void a.run(async () => {
+                                if (!service.hint) return;
+                                const step = (hintSteps[active.chat.id] ?? 0) + 1;
+                                const hint = await service.hint(active.chat.id, step);
+                                setHintSteps((v) => ({ ...v, [active.chat.id]: hint.step }));
+                                setLiveHints((v) => ({
+                                  ...v,
+                                  [active.chat.id]: [...(v[active.chat.id] ?? []), hint.text],
+                                }));
+                              }, "Hint ready.")
+                            }
+                          />
+                        </>
+                      )}
                     </Card>
                   )}
                   {!active.chat.nextTurn?.completed && (
                     <>
                       <TextInput
                         accessibilityLabel="Prompt context"
-                        placeholder="Optional context: topic or mistake to discuss"
+                        placeholder="Optional topic to focus your question on"
                         value={topic}
                         onChangeText={setTopic}
-                        maxLength={1000}
+                        maxLength={200}
                         style={ui.input}
                         editable={!a.busy}
                       />
@@ -532,7 +585,7 @@ function TutorWorkspace({
                         multiline
                         value={message}
                         onChangeText={setMessage}
-                        maxLength={4000}
+                        maxLength={1000}
                         style={ui.input}
                         editable={!a.busy}
                       />

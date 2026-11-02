@@ -28,7 +28,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app now has the five-tab navigation shell and a first learning flow backed by the curated course, unit, lesson, search, and learning-path APIs. The backend also supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, and rewards APIs. The main mobile account screens and remaining practice/profile features are still planned. This local working copy adds League/community UI and a Tutor API adapter plus explicit interface preview; see [the handoff](docs/TIEN_HANDOFF.md) for coverage and unverified device/backend checks. Unfinished destinations show a simple placeholder.
+The mobile app has the five-tab navigation shell, a learning flow backed by course/unit/lesson APIs, League/community screens, and a Flo Tutor screen connected to the Tutor API with a separate in-memory preview. The backend supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, rewards, and Tutor APIs. The main mobile account screens and remaining practice/profile features are still planned. See [the handoff](docs/TIEN_HANDOFF.md) for screen coverage and outstanding device/backend acceptance checks. Other unfinished destinations show a simple placeholder.
 
 ## Prerequisites
 

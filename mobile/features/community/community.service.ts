@@ -177,6 +177,10 @@ export function postFeed(
         : "comments";
   return {
     list: async (cursor?: string | null) => {
+      if (kind === "reviews") {
+        const result = await community.submission(parentId);
+        return { items: result.submission.comments, nextBefore: null };
+      }
       const result = await getJson<
         Partial<Record<"posts" | "messages" | "comments", Post[]>> & Cursor
       >(`${path}${before(cursor)}`);
