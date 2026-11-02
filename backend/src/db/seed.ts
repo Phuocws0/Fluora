@@ -284,13 +284,29 @@ async function seedLearningContent() {
     });
   }
 
+  const storyLesson = await prisma.lesson.findFirst({
+    where: { slug: "greetings-and-introductions", unit: { courseId: course.id } },
+    select: {
+      id: true,
+      exercises: {
+        where: { type: "multiple_choice" },
+        orderBy: { order: "asc" },
+        take: 1,
+        select: { id: true, prompt: true, options: { orderBy: { order: "asc" }, select: { id: true, label: true } } },
+      },
+    },
+  });
+  const storyChallenge = storyLesson?.exercises[0];
+  if (!storyLesson || !storyChallenge) throw new Error("Seeded story challenge exercise was not found.");
+
   const storyContent = {
     paragraphs: [
       { speaker: "Mia", text: "Good morning! My name is Mia." },
       { speaker: "Leo", text: "Good morning, Mia. I am Leo." },
       { speaker: "Mia", text: "Nice to meet you, Leo." },
     ],
-    comprehension: [{ question: "When do Mia and Leo meet?", options: ["Morning", "Evening"] }],
+    challenge: { lessonId: storyLesson.id, exerciseId: storyChallenge.id, prompt: storyChallenge.prompt, options: storyChallenge.options },
+    comprehension: [{ question: storyChallenge.prompt, options: storyChallenge.options.map(({ label }) => label) }],
   };
 
   await prisma.story.upsert({
