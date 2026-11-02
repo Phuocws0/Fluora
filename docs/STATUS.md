@@ -9,27 +9,34 @@
 - Issue #6 learning-content schema, seed data, and read APIs are implemented; a seeded PostgreSQL API smoke check passed.
 - Issue #2 mobile navigation shell is implemented with five logical tabs and auth/onboarding/detail destinations; typecheck and Android bundle export pass.
 - Issue #27 core learning activity API records answers and idempotent completions, derives progress/analytics/skill confidence, and supports planner/evidence CRUD, mission passport/completion, hints, and misconception dismiss/restore. Private routes use verified bearer sessions.
+- Issue #3 identity backend ([plan](plans/03-identity-onboarding-settings.md)): part 1 (schema, scrypt passwords, bearer sessions, shared `backend/src/http/` helpers, register/login/logout, profile, password change, session list/revoke) merged in PR #47. Parts 2–3 are implemented together with issue #35: settings read/update/reset with onboarding completion, placement questions and attempts (with the skill-baseline fallback), email verification and resend, password forgot/reset, Google sign-in via `tokeninfo` (disabled unless `GOOGLE_CLIENT_IDS` is set), and account deletion that hands over owned groups and rooms.
+- Issue #35 community, League, rooms, and rewards backend: friends and discovery with privacy rules, notifications (including lazy study reminders), study groups with membership, ownership transfer, discussion, and challenges, study rooms with messages and polls, peer review, group plan tasks and whiteboard notes, League tiers and leaderboard, daily quests, achievements, an append-only gem wallet, and reward redemption/cancellation. `/api/progress` and `/api/home` now return the real gem balance. A scripted Docker smoke test covered 55 success, validation, permission, privacy, concurrency, and deletion checks, and the PR #47 auth smoke test still passes.
 
 ## In Progress
 
-- Issue #3 identity backend, part 1 of 3 (see [plans/03-identity-onboarding-settings.md](plans/03-identity-onboarding-settings.md)): the identity schema and migration, scrypt password hashing, opaque bearer sessions, the `authenticate`/`requireUser` middleware, API-wide JSON 404/error handling, and register, login, logout, profile read/update, password change, and session list/revoke are implemented. A local Docker smoke check covered success, validation, ownership, revocation, and the support/practice integration. Settings, onboarding, placement (part 2), and email verification, password recovery, Google sign-in, and account deletion (part 3) remain planned.
-- Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Private routes now use the issue #3 bearer session. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
+- Issue #39 backend foundation: learner deck/card CRUD, import preview/import, custom review scheduling, curated story reads, story bookmarks, reading progress, and basic practice/study-tool/dictionary reads are implemented. Mistake-derived review, word bookmarks, richer tool content, and story challenge answers remain planned.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
-- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Private routes now use the issue #3 bearer session; exports include the public user fields and support requests.
+- Issue #33 support/export backend foundation has merged: help articles, owner-scoped support requests, and local JSON export persistence are implemented. Exports include the public user fields and support requests; settings, community, and wallet data are not included yet.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
 ## Planned
 
-1. Finish backend identity (#3 parts 2–3), including settings and placement.
-2. Integrate mobile sign-in (#4) and lesson/progress UI (#7) with the implemented APIs.
-3. Continue through practice, community, profile/settings, support, and tutor flows in `docs/PRODUCT.md`.
+1. Integrate mobile account/onboarding (#4), profile/settings (#20), and League/community (#17) with the implemented APIs.
+2. Implement the Flo Tutor backend (#32); it should read `saveTutorHistory` through `getPrivacySettings` in `features/identity/settings.service.ts`.
+3. Continue through the remaining practice, support, and tutor flows in `docs/PRODUCT.md`.
 
 ## Known limitations
 
-- Login has no rate limiting in this local demo.
-- Existing feature controllers (`learning`, `support`, `practice`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
-- Enrollment-aware home selection, placement-based baseline, and real gem/reward accounting belong to later domain work.
+- Login, forgot-password, and resend have no rate limiting in this local demo.
+- No email is sent: verification and reset tokens are only written to the backend log (`[dev-mail]` lines).
+- Google sign-in can only be verified end to end with a real OAuth client ID; without `GOOGLE_CLIENT_IDS` it returns `503`.
+- League tiers, quest targets, and reward prices are calibrated to the four seeded lessons (52 XP in total per learner); scale them when more content is seeded.
+- The "finish 1 story" quest counts a story whose reading progress is completed and was last saved today.
+- Study reminders appear only when the learner opens notifications; there is no push delivery or scheduler. Room messages and polls refresh by request (no real-time delivery).
+- Re-running the seed moves the demo learners' lesson completions to the current time so the weekly leaderboard keeps data.
+- Existing feature controllers (`learning`, `support`, `practice`, `activity`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
+- Enrollment-aware home selection is not implemented.
 
 ## Blocked
 
@@ -37,5 +44,5 @@
 
 ## Next Recommended Tasks
 
-- Issue #3 part 2: settings, onboarding resume, and placement endpoints.
-- Connect mobile sign-in and lesson/progress screens to the bearer-session and learning-activity APIs.
+- Connect mobile sign-in, onboarding, placement, and settings screens (#4, #20) to the identity APIs.
+- Build the League/community mobile screens (#17) against the implemented contracts.
