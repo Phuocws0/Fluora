@@ -40,10 +40,12 @@ Common statuses: `400` invalid input, `401` missing/invalid session, `403` actio
 | `POST /api/users/me/data-exports` | Implemented | Create a ready local export job → `{exportId,status:"ready"}` | `401`, `500` |
 | `GET /api/users/me/data-exports` | Implemented | List the learner's export jobs → `{exports:[...]}` | `401` |
 | `GET /api/users/me/data-exports/:exportId` | Implemented | Read export status/details → `{export}` | `400`, `401`, `404` |
-| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:1,generatedAt,user}` | `400`, `401`, `404`, `409` if not ready |
+| `GET /api/users/me/data-exports/:exportId/download` | Implemented | Download JSON attachment → `{version:2,generatedAt,user}`; includes account, learning, practice, community, group, room, achievement, quest, reward, and wallet records owned by the learner | `400`, `401`, `404`, `409` if not ready |
 | `DELETE /api/users/me/data-exports/:exportId` | Implemented | Cancel/delete an export job → `{deleted:true}` | `400`, `401`, `404` |
 
 Account deletion requires explicit confirmation and removes the user's personal records across every domain (sessions, settings, placement, support, exports, practice, activity, community, and wallet rows). It does not delete curated content or other learners' records. Before deleting, the backend promotes the earliest-joined other member of each group the learner owns (or deletes the group when nobody else is left) and gives the learner's hosted rooms to that group's owner.
+
+Data exports exclude password hashes, Google subject IDs, sessions, and authentication-token hashes. Friend-request, notification, group, room, peer-review, achievement, quest, redemption, and wallet records are included for the requesting learner; shared content includes only the context needed to understand the learner's own record.
 
 ### Implemented session and account behavior
 

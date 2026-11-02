@@ -37,7 +37,6 @@
 - Re-running the seed moves the demo learners' lesson completions to the current time so the weekly leaderboard keeps data.
 - Existing feature controllers (`learning`, `support`, `practice`, `activity`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
 - Enrollment-aware home selection is not implemented.
-- The personal data export (#33) does not yet include community, League, or wallet data (friends, groups, posts, messages, notifications, quest claims, redemptions, wallet transactions).
 
 ## Blocked
 

@@ -90,10 +90,24 @@ export async function getGroup(userId: string, groupId: string) {
 }
 
 export async function updateGroup(userId: string, groupId: string, input: GroupUpdate) {
-  await requireGroupOwner(groupId, userId);
   const { ownerId, ...fields } = input;
 
   await prisma.$transaction(async (tx) => {
+    // Serialize updates so concurrent ownership transfers cannot leave multiple owners.
+    const locked = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT "id" FROM "study_groups" WHERE "id" = ${groupId}::uuid FOR UPDATE
+    `;
+    if (locked.length === 0) throw new HttpError(404, "NOT_FOUND", "Study group not found.");
+
+    const group = await tx.studyGroup.findUnique({ where: { id: groupId }, select: { visibility: true } });
+    const currentOwner = await tx.groupMembership.findUnique({ where: { groupId_userId: { groupId, userId } }, select: { role: true } });
+    if (!group) throw new HttpError(404, "NOT_FOUND", "Study group not found.");
+    if (!currentOwner) {
+      if (group.visibility === "private") throw new HttpError(404, "NOT_FOUND", "Study group not found.");
+      throw new HttpError(403, "NOT_A_MEMBER", "Join this group first.");
+    }
+    if (currentOwner.role !== "owner") throw new HttpError(403, "OWNER_ONLY", "Only the group owner can do this.");
+
     if (ownerId && ownerId !== userId) {
       const target = await tx.groupMembership.findUnique({ where: { groupId_userId: { groupId, userId: ownerId } } });
       if (!target) throw new HttpError(400, "NOT_A_MEMBER", "The new owner must already be a member.");

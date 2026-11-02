@@ -37,7 +37,7 @@ async function sharedGroupMembers(viewerId: string, targetIds: string[]): Promis
   return new Set(rows.map((row) => row.userId));
 }
 
-/** Profile access: self, any friend-request relationship, a shared group, or a discoverable target. */
+/** Profile access: self, an active friend-request relationship, a shared group, or a discoverable target. */
 export async function canViewProfile(viewerId: string, targetId: string): Promise<boolean> {
   if (viewerId === targetId) return true;
   const [relationship, privacy, shared] = await Promise.all([
@@ -45,7 +45,9 @@ export async function canViewProfile(viewerId: string, targetId: string): Promis
     getPrivacySettings([targetId]),
     sharedGroupMembers(viewerId, [targetId]),
   ]);
-  return relationship.get(targetId) !== "none" || shared.has(targetId) || privacy.get(targetId)?.discoverable === true;
+  const status = relationship.get(targetId);
+  const hasActiveRelationship = status !== "none" && status !== "declined";
+  return hasActiveRelationship || shared.has(targetId) || privacy.get(targetId)?.discoverable === true;
 }
 
 /** Targets whose XP, streak, tier, and achievements the viewer may see (`progressVisibility`). */
