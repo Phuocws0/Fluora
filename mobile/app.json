@@ -27,6 +27,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      ["expo-audio", { "microphonePermission": "Allow Fluora to record speaking practice on your device." }],
       ["expo-image-picker", { "photosPermission": "Allow Fluora to attach a screenshot to your support request." }]
     ],
     "experiments": {

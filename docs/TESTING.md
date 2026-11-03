@@ -2,6 +2,8 @@
 
 Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks plus focused mobile transport/Tutor-preview unit checks (see `TIEN_HANDOFF.md`); do not add a testing framework just because this plan exists.
 
+The home-summary regression checks run with `node --experimental-vm-modules --test scripts/learning-home.test.mjs`. They verify completed lesson IDs for new learners and out-of-order completions without requiring PostgreSQL.
+
 The support screenshot validator has a focused check: `npm run build && node --test scripts/support-screenshot.test.mjs`. It covers short references, PNG/JPEG data URLs, the 5 MB boundary, and unsupported data types.
 
 ## Current checks and CI
