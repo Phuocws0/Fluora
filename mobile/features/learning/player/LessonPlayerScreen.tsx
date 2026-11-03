@@ -16,17 +16,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ContentState } from "../../../components/ContentState";
 import { useAuth } from "../../auth/AuthContext";
 import { getLesson } from "../learning.service";
-import { submitExerciseAnswer } from "../activity.service";
+import { completeLesson, submitExerciseAnswer } from "../activity.service";
 import { useLearningResource } from "../useLearningResource";
 import { ChoiceExercise } from "./components/ChoiceExercise";
 import { SentenceTilesExercise } from "./components/SentenceTilesExercise";
 import { TranscriptGapExercise } from "./components/TranscriptGapExercise";
 import { MatchingExercise } from "./components/MatchingExercise";
 import { SpeakingExercise } from "./components/SpeakingExercise";
+import { HintLadderModal } from "./components/HintLadderModal";
+import { LessonCompletionModal } from "./components/LessonCompletionModal";
+import { AnswerHistoryModal } from "./components/AnswerHistoryModal";
 import type {
   ExerciseAnswerPayload,
   ExerciseAnswerResult,
-  LessonOverview,
+  LessonCompletionResult,
 } from "../../../types/learning";
 
 export function LessonPlayerScreen() {
@@ -52,6 +55,12 @@ export function LessonPlayerScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<ExerciseAnswerResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Modals state
+  const [hintModalVisible, setHintModalVisible] = useState(false);
+  const [completionModalVisible, setCompletionModalVisible] = useState(false);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
+  const [completionResult, setCompletionResult] = useState<LessonCompletionResult | null>(null);
 
   const handleExit = () => {
     Alert.alert(
@@ -172,16 +181,27 @@ export function LessonPlayerScreen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setFeedback(null);
     setSubmitError(null);
     if (currentIndex + 1 < exercises.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      // Completed last exercise! We'll integrate full completion modal in Task 4
-      Alert.alert("Lesson Complete!", "You answered all activities in this lesson.", [
-        { text: "Finish", onPress: () => router.back() },
-      ]);
+      // Trigger lesson completion
+      setSubmitting(true);
+      try {
+        const result = await completeLesson(lesson.id);
+        setCompletionResult(result);
+        setCompletionModalVisible(true);
+      } catch (cause) {
+        Alert.alert(
+          "Lesson Complete",
+          cause instanceof Error ? cause.message : "You have finished all exercises in this lesson.",
+          [{ text: "Done", onPress: () => router.back() }],
+        );
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -212,6 +232,16 @@ export function LessonPlayerScreen() {
           <View style={styles.progressBarWrapper}>
             <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Get hint"
+            onPress={() => setHintModalVisible(true)}
+            style={styles.hintButton}
+          >
+            <Ionicons name="bulb-outline" size={16} color="#236c19" />
+            <Text style={styles.hintButtonText}>Hint</Text>
+          </Pressable>
 
           <Text style={styles.stepBadge}>
             {currentIndex + 1}/{exercises.length}
@@ -340,7 +370,7 @@ export function LessonPlayerScreen() {
                 ) : null}
                 <Pressable
                   accessibilityRole="button"
-                  onPress={handleContinue}
+                  onPress={() => void handleContinue()}
                   style={[
                     styles.continueButton,
                     feedback.isCorrect
@@ -373,6 +403,30 @@ export function LessonPlayerScreen() {
             </Pressable>
           )}
         </View>
+
+        {/* Modals */}
+        <HintLadderModal
+          visible={hintModalVisible}
+          exerciseId={exId}
+          onClose={() => setHintModalVisible(false)}
+        />
+
+        <LessonCompletionModal
+          visible={completionModalVisible}
+          lessonTitle={lesson.title}
+          completionResult={completionResult}
+          onReviewAnswers={() => setHistoryModalVisible(true)}
+          onFinish={() => {
+            setCompletionModalVisible(false);
+            router.back();
+          }}
+        />
+
+        <AnswerHistoryModal
+          visible={historyModalVisible}
+          lessonId={lesson.id}
+          onClose={() => setHistoryModalVisible(false)}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -398,7 +452,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
@@ -414,6 +468,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#58cc02",
     borderRadius: 8,
     height: "100%",
+  },
+  hintButton: {
+    alignItems: "center",
+    backgroundColor: "#eaf8de",
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  hintButtonText: {
+    color: "#236c19",
+    fontSize: 11,
+    fontWeight: "800",
   },
   stepBadge: {
     color: "#65766c",
