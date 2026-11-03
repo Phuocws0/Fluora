@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Issue #11 Practice/vocabulary/reading/offline implementation: API-backed Practice Hub; personal deck/card/review/bookmark CRUD; CSV/JSON picker, mapping, validation and selected-row import; reusable flashcards and scheduled recall; guided listening, pronunciation/rhythm/recording, writing, dictionary, grammar/verb, word-map and situation tools; article/dialogue/comprehension reader with save/resume/reset and existing-player challenges; account-scoped device downloads, optional media, cancel/remove/retry, cached playback and local reading sync. Backend adds an optional all-scheduled review query and two repeatable story seeds; no new models or migrations. `expo-audio`/`expo-speech` are aligned with SDK 57. Typecheck, backend build, Prisma validation, Android export, all 18 Node checks, native microphone configuration and 56 real HTTP/PostgreSQL practice checks passed. CI now runs the focused regression checks. Native-device acceptance is still pending; see [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
+
 - Issue #7 mobile learning flow, interactive lesson player, progress, and insights hub are implemented; Android device/live-backend acceptance remains:
   - Enhanced Learning Home with authenticated streak, XP, and gems header status badges, dynamic continue-learning hero algorithm, guest public catalog mode, and quick-access navigation to weekly planner, mission passport, and learning insights hub.
   - Interactive multi-mode lesson player supporting 5 exercise modes: multiple choice, sentence tiles, transcript gaps, matching pairs, and speaking. Features top progress bar, answer verification, feedback sheets with explanation, 3-step progressive hint ladder modal, idempotent lesson completion modal, and past answer history modal.
@@ -27,6 +29,8 @@
 
 ## In Progress
 
+- Issue #11 Android acceptance: visual comparison, native file picker/audio, airplane-mode cold restart and playback, interrupted transfer recovery, pending reading sync, and account isolation on a real device. No Android emulator/device is available in the implementation environment.
+
 - Issue #20 profile/settings/help/support/export mobile screens are implemented against the existing identity, support, and activity APIs. They include profile editing, learning analytics (weekly breakdown), accessibility (text size live preview, reduced motion, captions), focus and low-bandwidth modes, wellbeing timer, Flo companion, daily goals/promise, privacy controls with confirmed tutor chat history clearing, settings reset, account security and deletion, help articles with category filter and search, open/closed support requests (create, edit, cancel), and local JSON export sharing with status/cancellation. The Page 06 Garden UI pass adds Nunito typography, bright-green fixed actions, the approved five-tab footer on Profile detail screens, a weekly XP chart from real activity, profile/security cards, FAQ expansion, and more faithful accessibility, privacy, support, low-bandwidth, and wellbeing layouts. It also validates a required reminder time before saving, adds an optional 5 MB screenshot attachment to support requests without external storage, allows replacing/clearing an open request's screenshot, and removes temporary export files even when writing or sharing fails. Typecheck, backend build, Prisma validation, relevant tests, and Android export pass. Physical-device visual and live-backend acceptance remain.
 
 - Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
@@ -39,10 +43,11 @@
 
 1. Complete Android and live-backend acceptance for League/community (#17) and Tutor (#22).
 2. Complete Android acceptance for mobile account/onboarding (#4) and profile/settings (#20).
-3. Continue through the remaining practice and learning flows in `docs/PRODUCT.md`.
+3. Complete Practice/vocabulary/reading/offline native acceptance (#11) using [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 
 ## Known limitations
 
+- Practice study tools use guided demo samples and self-assessment; no automatic pronunciation/writing grading. The dictionary currently has three terms. Offline exercises do not submit answers or earn XP; reading changes sync explicitly. These limits and storage behavior are documented in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 - Login, forgot-password, and resend have no rate limiting in this local demo.
 - No email is sent: verification and reset tokens are only written to the backend log (`[dev-mail]` lines).
 - Google sign-in can only be verified end to end with a real OAuth client ID; without `GOOGLE_CLIENT_IDS` it returns `503`.
@@ -61,5 +66,6 @@
 
 ## Next Recommended Tasks
 
+- Run the Practice Android acceptance checklist (#11), including file picker, audio and offline cold start.
 - Complete Android acceptance for mobile email sign-in, onboarding, placement, account profile, and settings (#4, #20).
 - Complete end-to-end Android acceptance for the League/community and Tutor screens (#17, #22).

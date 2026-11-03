@@ -325,6 +325,28 @@ async function seedLearningContent() {
     },
   });
 
+  // Page 10 promoted reader modes, using the design's short demo texts.
+  const practiceStories: Array<{ slug: string; title: string; kind: string; content: Prisma.InputJsonObject }> = [
+    { slug: "a-day-at-the-market", title: "A day at the market", kind: "article", content: {
+      paragraphs: [
+        { text: "Every Saturday, Ana visits the market near her home. She loves the bright flowers and warm bread." },
+        { text: "Small routines make a city feel like home.", quote: true },
+        { text: "Today she has a short conversation with a friendly shopkeeper." },
+      ],
+      comprehension: [{ question: "Ana visited a market. What did she do next?", options: ["Bought bread", "Met a friend"] }],
+    } },
+    { slug: "a-conversation-at-the-cafe", title: "A conversation at the café", kind: "dialogue", content: {
+      paragraphs: [
+        { speaker: "Waiter", text: "Hi! What would you like?" },
+        { speaker: "Learner", text: "A tea, please." },
+        { speaker: "Waiter", text: "Anything else?" },
+        { speaker: "Learner", text: "A sandwich too." },
+      ],
+      comprehension: [{ question: "What did the learner order?", options: ["Tea and a sandwich", "Coffee and fruit"] }],
+    } },
+  ];
+  for (const story of practiceStories) await prisma.story.upsert({ where: { slug: story.slug }, create: story, update: { title: story.title, kind: story.kind, content: story.content } });
+
   for (const goal of [
     { slug: "introduce-yourself", title: "Introduce yourself", skill: "speaking", description: "Say your name and greet another learner." },
     { slug: "ask-for-directions", title: "Ask for directions", skill: "reading", description: "Understand and use simple direction words." },

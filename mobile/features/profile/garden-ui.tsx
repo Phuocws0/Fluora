@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
@@ -39,7 +39,7 @@ export function ProfileAuthGate({ children, inTab = false }: { children: ReactNo
   return <>{children}</>;
 }
 
-function Footer() {
+function Footer({ activeTab }: { activeTab: "Practice" | "Profile" }) {
   const tabs = [
     { name: "Learn", icon: "home-outline", route: "/(tabs)/learn" },
     { name: "Practice", icon: "book-outline", route: "/(tabs)/practice" },
@@ -48,14 +48,14 @@ function Footer() {
     { name: "Profile", icon: "person-outline", route: "/(tabs)/profile" },
   ] as const;
   return <View style={styles.footer}>
-    {tabs.map(tab => <Pressable key={tab.name} accessibilityRole="tab" accessibilityState={{ selected: tab.name === "Profile" }} onPress={() => router.replace(tab.route)} style={[styles.tab, tab.name === "Profile" && styles.activeTab]}>
-      <Ionicons name={tab.icon} size={20} color={tab.name === "Profile" ? garden.forest : garden.muted} />
-      <Text style={[styles.tabText, tab.name === "Profile" && { color: garden.forest }]}>{tab.name}</Text>
+    {tabs.map(tab => <Pressable key={tab.name} accessibilityRole="tab" accessibilityState={{ selected: tab.name === activeTab }} onPress={() => router.replace(tab.route)} style={[styles.tab, tab.name === activeTab && styles.activeTab]}>
+      <Ionicons name={tab.icon} size={20} color={tab.name === activeTab ? garden.forest : garden.muted} />
+      <Text style={[styles.tabText, tab.name === activeTab && { color: garden.forest }]}>{tab.name}</Text>
     </Pressable>)}
   </View>;
 }
 
-export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action, showFooter = true }: {
+export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action, showFooter = true, activeTab = "Profile", scrollRef }: {
   title: string;
   children: ReactNode;
   back?: boolean;
@@ -63,10 +63,12 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
   eyebrow?: string;
   action?: Action;
   showFooter?: boolean;
+  activeTab?: "Practice" | "Profile";
+  scrollRef?: RefObject<ScrollView | null>;
 }) {
   return <SafeAreaView edges={["top", "bottom"]} style={styles.safe}>
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.breadcrumb}>
           {back && <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile"))}><Text style={styles.back}>‹</Text></Pressable>}
           <Text style={styles.eyebrow}>{eyebrow}</Text>
@@ -75,7 +77,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
         {children}
       </ScrollView>
       {action && <View style={styles.action}><GardenButton {...action} /></View>}
-      {showFooter && <Footer />}
+      {showFooter && <Footer activeTab={activeTab} />}
     </KeyboardAvoidingView>
   </SafeAreaView>;
 }

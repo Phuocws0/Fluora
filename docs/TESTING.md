@@ -1,6 +1,6 @@
 # Testing and Verification
 
-Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks plus focused mobile transport/Tutor-preview unit checks (see `TIEN_HANDOFF.md`); do not add a testing framework just because this plan exists.
+Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks plus focused Node tests for transport/Tutor preview, home progress, support attachments, import/reading, account-scoped offline storage and queues. See [TIEN_HANDOFF.md](TIEN_HANDOFF.md) and [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md); no separate testing framework is required.
 
 The home-summary regression checks run with `node --experimental-vm-modules --test scripts/learning-home.test.mjs`. They verify completed lesson IDs for new learners and out-of-order completions without requiring PostgreSQL.
 
@@ -15,10 +15,15 @@ npm ci
 npm run typecheck
 npm run prisma:validate
 npm run build
+npm run test:unit
 npm run check:mobile
 ```
 
 The CI job does not start PostgreSQL or deploy anything. For a local backend/database smoke check, run `docker compose up --build -d` and request `GET http://localhost:4000/health`; it should return `200` with both service and database status `ok`.
+
+For issue #11, after migrations and `npm run db:seed`, run `node --experimental-vm-modules scripts/practice-api-smoke.mjs` against the default `http://localhost:4000` (override with `FLUORA_API_URL`). It drives the actual mobile practice service, creates two disposable accounts, checks 56 API success/validation/ownership/history paths, and deletes the accounts in cleanup. Use a local demonstration database. Unit queue tests use a native-filesystem substitute and cannot establish physical-device correctness.
+
+Practice Android acceptance must include native CSV/JSON file picking; deck/card/review/bookmark CRUD; invalid import rows excluded from submission; microphone permission/recording/playback and TTS; article/dialogue/tree modes and resume/reset; course/unit/lesson/story download, cancellation, removal, retry and process interruption; airplane-mode cold start and cached playback; text-only downloads with no network media request; pending reading sync after reconnect; and logout/second-account cache isolation. Rebuild the development client after native package changes. `expo-audio` and `expo-speech` must match Expo SDK 57. Follow the detailed checklist in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 
 ## Static verification
 

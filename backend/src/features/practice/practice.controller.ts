@@ -194,10 +194,14 @@ export function dictionary(request: Request, response: Response) {
 
 export function reviewItems(request: Request, response: Response) {
   const kind = request.query.kind;
+  const includeScheduled = request.query.includeScheduled;
+  if (includeScheduled !== undefined && includeScheduled !== "true" && includeScheduled !== "false") {
+    error(response, 400, "VALIDATION_ERROR", "includeScheduled must be true or false."); return;
+  }
   if (kind !== undefined && (typeof kind !== "string" || !["custom", "mistake"].includes(kind))) {
     error(response, 400, "VALIDATION_ERROR", "Invalid review kind."); return;
   }
-  return run(response, () => service.listReviewItems(userId(response), kind));
+  return run(response, () => service.listReviewItems(userId(response), kind, includeScheduled === "true"));
 }
 export function reviewItem(request: Request, response: Response) {
   const itemId = id(request.params.itemId, response);

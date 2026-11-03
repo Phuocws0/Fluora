@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -27,6 +27,8 @@ import { HintLadderModal } from "./components/HintLadderModal";
 import { LessonCompletionModal } from "./components/LessonCompletionModal";
 import { AnswerHistoryModal } from "./components/AnswerHistoryModal";
 import { AudioOnlyPlayer } from "./components/AudioOnlyPlayer";
+import { isConnectionError, offlineLesson } from "../../practice/downloads";
+import { LessonAudioPrompt, promptAudioText } from "./components/LessonAudioPrompt";
 import type {
   ExerciseAnswerPayload,
   ExerciseAnswerResult,
@@ -34,10 +36,18 @@ import type {
 } from "../../../types/learning";
 
 export function LessonPlayerScreen() {
-  const { lessonId = "" } = useLocalSearchParams<{ lessonId: string }>();
+  const { lessonId = "", offline } = useLocalSearchParams<{ lessonId: string; offline?: string }>();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
-  const { data: lesson, loading, error, refresh } = useLearningResource(lessonId, getLesson);
+  const { isAuthenticated, user } = useAuth();
+  const [preferOffline, setPreferOffline] = useState(offline === "1");
+  const [offlinePractice, setOfflinePractice] = useState(false);
+  const loadLesson = useCallback(async (id: string) => {
+    if (!preferOffline) try { const lesson = await getLesson(id); setOfflinePractice(false); return lesson; } catch (cause) { if (!isConnectionError(cause)) throw cause; }
+    const cached = user ? await offlineLesson(user.id, id) : null;
+    if (!cached) throw new Error("This lesson is not available on this device. Connect and download it first.");
+    setOfflinePractice(true); return cached;
+  }, [preferOffline, user?.id]);
+  const { data: lesson, loading, error, refresh } = useLearningResource(lessonId, loadLesson);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -55,7 +65,7 @@ export function LessonPlayerScreen() {
   // Submission & feedback state
   const [submitting, setSubmitting] = useState(false);
   const actionLock = useRef(false);
-  const [feedback, setFeedback] = useState<ExerciseAnswerResult | null>(null);
+  const [feedback, setFeedback] = useState<(ExerciseAnswerResult & { offline?: boolean }) | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Modals state
@@ -172,6 +182,10 @@ export function LessonPlayerScreen() {
 
     const payload = buildPayload();
     if (!payload) return;
+    if (offlinePractice) {
+      setFeedback({ isCorrect: false, score: 0, feedback: "Offline practice: this answer has not been graded or submitted. Reconnect to submit answers and earn XP.", offline: true });
+      return;
+    }
     actionLock.current = true;
     setSubmitting(true);
     setSubmitError(null);
@@ -179,6 +193,15 @@ export function LessonPlayerScreen() {
       const result = await submitExerciseAnswer(exId, payload);
       setFeedback(result);
     } catch (cause) {
+      if (isConnectionError(cause) && user) {
+        try {
+          if (await offlineLesson(user.id, lesson.id)) {
+            setOfflinePractice(true);
+            setFeedback({ isCorrect: false, score: 0, feedback: "Connection lost. Continue ungraded offline practice, or reconnect to submit your answer.", offline: true });
+            return;
+          }
+        } catch (cacheError) { setSubmitError(cacheError instanceof Error ? cacheError.message : "Could not open the downloaded lesson."); return; }
+      }
       setSubmitError(cause instanceof Error ? cause.message : "Could not submit your answer.");
     } finally {
       actionLock.current = false;
@@ -193,6 +216,10 @@ export function LessonPlayerScreen() {
       setFeedback(null);
       setCurrentIndex(currentIndex + 1);
     } else {
+      if (offlinePractice) {
+        Alert.alert("Offline practice finished", "No answers, XP or lesson completion were submitted. Reopen the lesson online to record your progress.", [{ text: "Done", onPress: () => router.back() }]);
+        return;
+      }
       // Trigger lesson completion
       actionLock.current = true;
       setSubmitting(true);
@@ -267,7 +294,7 @@ export function LessonPlayerScreen() {
 
         {audioOnlyMode ? (
           <AudioOnlyPlayer
-            promptText={currentExercise.prompt}
+            promptText={promptAudioText(currentExercise.content, currentExercise.prompt)}
             onExitAudioOnly={() => setAudioOnlyMode(false)}
           />
         ) : (
@@ -288,11 +315,13 @@ export function LessonPlayerScreen() {
             ACTIVITY {currentIndex + 1} · {exType.toLocaleUpperCase().replace(/_/g, " ")}
           </Text>
           <Text style={styles.prompt}>{currentExercise.prompt}</Text>
+          {offlinePractice && <View style={styles.errorBanner}><Text style={styles.errorText}>OFFLINE PRACTICE · Answers are ungraded and XP is not saved.</Text><Pressable accessibilityRole="button" onPress={() => { setFeedback(null); if (preferOffline) setPreferOffline(false); else void refresh(); }}><Text style={styles.hintButtonText}>Reconnect / submit online</Text></Pressable></View>}
           {currentExercise.instruction ? (
             <Text style={styles.instruction}>{currentExercise.instruction}</Text>
           ) : null}
 
           {/* Exercise Mode Renderers */}
+          {["listening_choice", "transcript_gap", "dictation"].includes(exType) && <LessonAudioPrompt content={currentExercise.content} prompt={currentExercise.prompt} />}
           {(exType === "multiple_choice" || exType === "listening_choice") && (
             <ChoiceExercise
               options={currentExercise.options}
@@ -360,6 +389,7 @@ export function LessonPlayerScreen() {
               style={[
                 styles.feedbackSheet,
                 feedback.isCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
+                feedback.offline && { backgroundColor: "#EAF4FF" },
               ]}
             >
               <View style={styles.feedbackHeader}>
@@ -376,16 +406,18 @@ export function LessonPlayerScreen() {
                       : styles.feedbackTitleIncorrect,
                   ]}
                 >
-                  {feedback.isCorrect ? "Good work!" : "Not quite"}
+                  {feedback.offline ? "Offline practice" : feedback.isCorrect ? "Good work!" : "Not quite"}
                 </Text>
               </View>
+
+              {feedback.offline && <Text style={styles.feedbackExplanation}>{feedback.feedback}</Text>}
 
               {feedback.explanation ? (
                 <Text style={styles.feedbackExplanation}>{feedback.explanation}</Text>
               ) : null}
 
               <View style={styles.feedbackButtons}>
-                {!feedback.isCorrect ? (
+                {!feedback.isCorrect && !feedback.offline ? (
                   <Pressable
                     accessibilityRole="button"
                     onPress={handleTryAgain}

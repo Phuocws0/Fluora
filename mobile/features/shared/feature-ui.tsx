@@ -160,7 +160,7 @@ export function Empty({ text = "Nothing here yet." }: { text?: string }) {
 }
 export function failure(cause: unknown): string {
   if (cause instanceof ApiError && cause.status === 401)
-    return "Your session expired. Return to League or Tutor and sign in again.";
+    return "Your session expired. Please sign in again.";
   if (cause instanceof ApiError && cause.status === 404)
     return "This item is missing, unavailable, or private. Refresh the list.";
   return cause instanceof Error

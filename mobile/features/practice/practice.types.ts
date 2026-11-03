@@ -1,0 +1,14 @@
+export type Deck = { id: string; name: string; createdAt: string; _count?: { cards: number } };
+export type WordCard = { id: string; setId: string; front: string; back: string; tag: string | null; example: string | null };
+export type CardInput = { front: string; back: string; tag?: string | null; example?: string | null };
+export type ReviewItem = { id: string; front: string; back: string; kind: "custom" | "mistake"; sourceExerciseId?: string | null; nextReviewAt: string; mistakeCount?: number; dismissed?: boolean };
+export type StorySummary = { id: string; slug: string; title: string; kind: string };
+export type Story = StorySummary & { content: unknown };
+export type ReadingProgress = { position: number; completed: boolean };
+export type Bookmark = { id: string; targetType: "story" | "word"; targetId: string; note: string | null; tag: string | null };
+export type Tool = { id: string; title: string; kind: string };
+export type DictionaryEntry = { word: string; definition: string; example: string };
+export type ImportRow = Record<string, string>;
+export type ImportMapping = { front: string; back: string; tag?: string; example?: string };
+export type ImportPreview = { validRows: CardInput[]; errors: Array<{ row: number; message: string }> };
+export type PracticeSummary = { reviewDueCount: number; suggestions: Array<{ kind: string; id: string; title: string }> };

@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { ApiError, setUnauthorizedHandler } from "../../services/api";
-import { clearAccessToken, getAccessToken } from "../../services/session";
+import { clearAccessToken, getAccessToken, loadSessionSnapshot, saveSessionSnapshot } from "../../services/session";
 import {
   getCurrentUser,
   loginWithEmail,
@@ -33,6 +33,8 @@ export type AuthContextValue = {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  offlineSession: boolean;
+  sessionNotice: string | null;
   settings: LearnerSettings | null;
   login: (email: string, password: string) => Promise<AuthenticatedUser>;
   register: (
@@ -57,6 +59,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [token, setToken] = useState<string | null>(null);
   const [settings, setSettings] = useState<LearnerSettings | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [offlineSession, setOfflineSession] = useState(false);
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user || !token || offlineSession) return;
+    void saveSessionSnapshot({ user, token, settings }).catch(() => {
+      setSessionNotice("This device could not save your offline sign-in. Keep the app open while using downloads.");
+    });
+  }, [user, token, settings, offlineSession]);
 
   useEffect(
     () =>
@@ -94,6 +105,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(currentUser);
       setSettings(currentSettings);
+      setOfflineSession(false);
+      setSessionNotice(null);
     } catch (error) {
       if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
         await clearAccessToken();
@@ -131,6 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (isMounted) {
           setUser(currentUser);
           setSettings(currentSettings);
+          setOfflineSession(false);
         }
       } catch (error) {
         if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
@@ -139,6 +153,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(null);
             setToken(null);
             setSettings(null);
+          }
+        } else if (error instanceof ApiError && (error.status === undefined || error.status >= 500)) {
+          try {
+            const activeToken = await getAccessToken();
+            const snapshot = activeToken ? await loadSessionSnapshot(activeToken) : null;
+            if (isMounted && snapshot) {
+              setUser(snapshot.user); setSettings(snapshot.settings); setOfflineSession(true);
+              setSessionNotice("Offline session: showing this device's last saved profile. Reconnect to sync account data.");
+            }
+          } catch {
+            if (isMounted) setSessionNotice("Offline sign-in could not be restored. Reconnect and sign in again.");
           }
         }
       } finally {
@@ -160,6 +185,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const auth = await loginWithEmail({ email, password });
       setUser(auth.user);
       setToken(auth.token);
+      setSettings(null);
+      setOfflineSession(false);
+      setSessionNotice(null);
       try {
         const currentSettings = await getLearnerSettings();
         setSettings(currentSettings);
@@ -181,6 +209,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const auth = await registerWithEmail({ displayName, email, password });
       setUser(auth.user);
       setToken(auth.token);
+      setSettings(null);
+      setOfflineSession(false);
+      setSessionNotice(null);
 
       if (draft) {
         try {
@@ -217,6 +248,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null);
         setToken(null);
         setSettings(null);
+        setOfflineSession(false);
+        setSessionNotice(null);
       }
     }
   }, []);
@@ -234,6 +267,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       token,
       isLoading,
       isAuthenticated: Boolean(user),
+      offlineSession,
+      sessionNotice,
       settings,
       login,
       register,
@@ -245,6 +280,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       token,
       isLoading,
+      offlineSession,
+      sessionNotice,
       settings,
       login,
       register,
