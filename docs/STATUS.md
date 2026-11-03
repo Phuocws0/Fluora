@@ -18,6 +18,8 @@
 
 ## In Progress
 
+- Issue #20 profile/settings/help/support/export mobile screens are implemented against the existing identity, support, and activity APIs. They include profile editing, learning analytics (weekly breakdown), accessibility (text size live preview, reduced motion, captions), focus and low-bandwidth modes, wellbeing timer, Flo companion, daily goals/promise, privacy controls with confirmed tutor chat history clearing, settings reset, account security and deletion, help articles with category filter and search, open/closed support requests (create, edit, cancel), and local JSON export sharing with status/cancellation. The Page 06 Garden UI pass adds Nunito typography, bright-green fixed actions, the approved five-tab footer on Profile detail screens, a weekly XP chart from real activity, profile/security cards, FAQ expansion, and more faithful accessibility, privacy, support, low-bandwidth, and wellbeing layouts. It also validates a required reminder time before saving, adds an optional 5 MB screenshot attachment to support requests without external storage, allows replacing/clearing an open request's screenshot, and removes temporary export files even when writing or sharing fails. Typecheck, backend build, Prisma validation, relevant tests, and Android export pass. Physical-device visual and live-backend acceptance remain.
+
 - Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
 - Issue #22 Flo Tutor mobile UI is connected to the implemented Tutor API contract, with an explicit in-memory preview. It supports chats, role-play hints, message actions, notes, and history privacy controls. Live Android/backend acceptance remains.
 - Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
@@ -28,7 +30,7 @@
 ## Planned
 
 1. Complete Android and live-backend acceptance for League/community (#17) and Tutor (#22).
-2. Complete Android acceptance for mobile account/onboarding (#4), then implement profile/settings flows (#20).
+2. Complete Android acceptance for mobile account/onboarding (#4) and profile/settings (#20).
 3. Continue through the remaining practice and learning flows in `docs/PRODUCT.md`.
 
 ## Known limitations
@@ -51,5 +53,5 @@
 
 ## Next Recommended Tasks
 
-- Complete Android acceptance for mobile email sign-in, onboarding, placement, and account profile (#4); implement remaining settings flows (#20).
+- Complete Android acceptance for mobile email sign-in, onboarding, placement, account profile, and settings (#4, #20).
 - Complete end-to-end Android acceptance for the League/community and Tutor screens (#17, #22).

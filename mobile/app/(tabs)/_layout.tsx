@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { font } from "../../features/profile/garden-ui";
 
 const ACTIVE = "#236c19";
 const MUTED = "#65766c";
@@ -12,15 +13,15 @@ export default function TabLayout() {
         tabBarActiveTintColor: ACTIVE,
         tabBarInactiveTintColor: MUTED,
         tabBarActiveBackgroundColor: "#eaf8de",
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
-        tabBarItemStyle: { borderRadius: 16, marginHorizontal: 2, marginVertical: 7 },
+        tabBarLabelStyle: { fontFamily: font.bold, fontSize: 11 },
+        tabBarItemStyle: { borderRadius: 14, marginHorizontal: 2, marginVertical: 4 },
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopWidth: 0,
-          borderRadius: 24,
-          height: 74,
-          marginBottom: 10,
-          marginHorizontal: 16,
+          borderRadius: 20,
+          height: 54,
+          marginBottom: 16,
+          marginHorizontal: 24,
           paddingHorizontal: 4,
           position: "absolute",
           paddingBottom: 0,

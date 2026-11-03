@@ -313,7 +313,7 @@ Cursor lists (`discussion`, `comments`, `messages`, `notifications`) accept `?be
 | `PATCH /api/support/requests/:requestId` | Implemented | Edit an open request → `{request}` | `400`, `401`, `403`, `404`, `409` |
 | `DELETE /api/support/requests/:requestId` | Implemented | Cancel/delete an open request → `{deleted:true}` | `401`, `403`, `404`, `409` |
 
-Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service.
+Help articles remain curated/read-only. Support requests can be changed only while open; this local demo stores a request record and does not require an external ticketing service. The optional `screenshot` accepts either a short reference (up to 500 characters) or a PNG/JPEG base64 data URL containing at most 5 MB of decoded image data. Support-request JSON bodies have a 7 MB limit to allow one screenshot. An open request's screenshot can be replaced or cleared with `PATCH` (`null` clears it).
 
 The support/export routes use the bearer-session identity from issue #3 (`res.locals.userId`) and return `401` without a valid session. The local export is generated as JSON when downloaded and includes the learner's current profile, settings, placement attempts, support requests, practice and reading data, answers, progress, planner entries, evidence, mission completions, and misconception view states, plus the community, League, wallet, and tutor records listed above. Credential hashes, bearer sessions, and one-time auth-token hashes are excluded.
 

@@ -19,6 +19,7 @@ module.exports = ({ config }) => {
     ...config,
     plugins: [
       ...existingPlugins,
+      "expo-sharing",
       ...(iosUrlScheme
         ? [["@react-native-google-signin/google-signin", { iosUrlScheme }]]
         : []),

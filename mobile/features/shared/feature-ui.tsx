@@ -90,11 +90,13 @@ export function Button({
   onPress,
   disabled,
   danger,
+  primary,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   danger?: boolean;
+  primary?: boolean;
 }) {
   return (
     <Pressable
@@ -102,9 +104,9 @@ export function Button({
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[ui.button, danger && ui.danger, disabled && ui.disabled]}
+      style={[ui.button, primary && { backgroundColor: "#236c19", alignItems: "center" }, danger && ui.danger, disabled && ui.disabled]}
     >
-      <Text style={ui.buttonText}>{label}</Text>
+      <Text style={[ui.buttonText, primary && { color: "white", fontSize: 16 }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -121,10 +123,12 @@ export function Page({
   title,
   children,
   back = false,
+  onBack,
 }: {
   title: string;
   children: ReactNode;
   back?: boolean;
+  onBack?: () => void;
 }) {
   return (
     <KeyboardAvoidingView
@@ -135,10 +139,13 @@ export function Page({
         {back && (
           <Button
             label="‹ Back"
-            onPress={() =>
-              router.canGoBack()
-                ? router.back()
-                : router.replace("/(tabs)/league")
+            onPress={
+              onBack ??
+              (() =>
+                router.canGoBack()
+                  ? router.back()
+                  : router.replace("/(tabs)/learn")
+              )
             }
           />
         )}
@@ -424,9 +431,11 @@ export type SessionUser = { id: string; displayName: string | null };
 export function SessionGate({
   children,
   onCancel,
+  feature = "League and Tutor",
 }: {
   children: (user: SessionUser) => ReactNode;
   onCancel?: () => void;
+  feature?: string;
 }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -468,7 +477,7 @@ export function SessionGate({
       {onCancel && (
         <Button label="‹ Back" onPress={onCancel} disabled={action.busy} />
       )}
-      <Copy>Sign in to open your private League and Tutor features.</Copy>
+      <Copy>Sign in to open your private {feature} features.</Copy>
       <TextInput
         accessibilityLabel="Email"
         placeholder="Email"
