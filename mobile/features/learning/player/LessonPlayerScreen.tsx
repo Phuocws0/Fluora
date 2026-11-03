@@ -26,6 +26,7 @@ import { SpeakingExercise } from "./components/SpeakingExercise";
 import { HintLadderModal } from "./components/HintLadderModal";
 import { LessonCompletionModal } from "./components/LessonCompletionModal";
 import { AnswerHistoryModal } from "./components/AnswerHistoryModal";
+import { AudioOnlyPlayer } from "./components/AudioOnlyPlayer";
 import type {
   ExerciseAnswerPayload,
   ExerciseAnswerResult,
@@ -61,6 +62,7 @@ export function LessonPlayerScreen() {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
   const [completionResult, setCompletionResult] = useState<LessonCompletionResult | null>(null);
+  const [audioOnlyMode, setAudioOnlyMode] = useState(false);
 
   const handleExit = () => {
     Alert.alert(
@@ -235,6 +237,19 @@ export function LessonPlayerScreen() {
 
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Toggle audio-only mode"
+            onPress={() => setAudioOnlyMode((prev) => !prev)}
+            style={[styles.audioButton, audioOnlyMode && styles.audioButtonActive]}
+          >
+            <Ionicons
+              name={audioOnlyMode ? "headset" : "headset-outline"}
+              size={16}
+              color={audioOnlyMode ? "#ffffff" : "#236c19"}
+            />
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="Get hint"
             onPress={() => setHintModalVisible(true)}
             style={styles.hintButton}
@@ -248,12 +263,19 @@ export function LessonPlayerScreen() {
           </Text>
         </View>
 
-        {/* Content Scroll View */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+        {audioOnlyMode ? (
+          <AudioOnlyPlayer
+            promptText={currentExercise.prompt}
+            onExitAudioOnly={() => setAudioOnlyMode(false)}
+          />
+        ) : (
+          <>
+            {/* Content Scroll View */}
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
           <View style={styles.metaRow}>
             <Text style={styles.lessonBreadcrumb}>
               {lesson.unit.title} › {lesson.title}
@@ -403,6 +425,8 @@ export function LessonPlayerScreen() {
             </Pressable>
           )}
         </View>
+        </>
+        )}
 
         {/* Modals */}
         <HintLadderModal
@@ -482,6 +506,17 @@ const styles = StyleSheet.create({
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
+  },
+  audioButton: {
+    alignItems: "center",
+    backgroundColor: "#eaf8de",
+    borderRadius: 12,
+    justifyContent: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  audioButtonActive: {
+    backgroundColor: "#236c19",
   },
   stepBadge: {
     color: "#65766c",
