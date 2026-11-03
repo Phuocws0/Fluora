@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Image, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { ActionState, Button, Card, Copy, Empty, Heading, ResourceState, confirmAction, ui, useAction, useResource } from "../../features/shared/feature-ui";
 import { Learner, Settings, WeeklyDay, profileService } from "../../features/profile/service";
-import { clearAccessToken } from "../../services/session";
+import { useAuth } from "../auth/AuthContext";
+import { ApiError } from "../../services/api";
 import { font, garden, GardenCaption, GardenCard, GardenSubtitle, Page } from "./garden-ui";
 
 const ink = "#20352B";
@@ -33,6 +34,11 @@ function Choice<T extends string>({ title, value, choices, onChange }: { title: 
     </Pressable>)}</View></View>;
 }
 
+function minuteChoices(current: number | null, presets: number[]) {
+  const values = current !== null && !presets.includes(current) ? [...presets, current].sort((a, b) => a - b) : presets;
+  return [{ value: "none", label: "None" }, ...values.map(value => ({ value: String(value), label: `${value} min` }))];
+}
+
 function TextSizePicker({ value, onChange }: { value: Settings["textSize"]; onChange: (value: Settings["textSize"]) => void }) {
   const sizes: { value: Settings["textSize"]; label: string }[] = [
     { value: "default", label: "100%" },
@@ -54,13 +60,12 @@ function TextSizePicker({ value, onChange }: { value: Settings["textSize"]; onCh
 }
 
 function General() {
+  const { logout, refreshSession } = useAuth();
   const resource = useResource(profileService.settings);
   const action = useAction();
-  const reset = () => confirmAction("Reset all preferences?", "This will discard your changes and restore default preferences. Course language, starting level and onboarding stay as they are.", () => void action.run(async () => { await profileService.resetSettings(); await resource.refresh(); }, "Preferences reset."));
+  const reset = () => confirmAction("Reset all preferences?", "This will discard your changes and restore default preferences. Course language, starting level and onboarding stay as they are.", () => void action.run(async () => { await profileService.resetSettings(); await refreshSession(); await resource.refresh(); }, "Preferences reset."));
   const signOut = () => confirmAction("Sign out of Fluora?", "You will need to sign in again to access your account.", () => void action.run(async () => {
-    try { await profileService.logout(); } catch {}
-    await clearAccessToken();
-    router.replace("/(auth)/welcome");
+    try { await logout(); } finally { router.replace("/(auth)/welcome"); }
   }, "Signed out."));
 
   return <Page title="Make learning your own" action={{ label: "App language", onPress: () => go("language") }}><GardenSubtitle>Manage your account and learning preferences.</GardenSubtitle><ResourceState resource={resource} />
@@ -89,6 +94,7 @@ function General() {
 }
 
 function EditProfile() {
+  const { refreshSession } = useAuth();
   const resource = useResource(profileService.profile);
   const action = useAction();
   const photoInput = useRef<TextInput>(null);
@@ -99,7 +105,11 @@ function EditProfile() {
     if (bio.trim().length > 160) return setValidation("Bio must be 160 characters or fewer.");
     if (avatar.trim() && (!/^https?:\/\/\S+$/i.test(avatar.trim()) || avatar.trim().length > 500)) return setValidation("Photo URL must be a valid http(s) link.");
     setValidation("");
-    if (await action.run(() => profileService.updateProfile({ displayName: name.trim(), bio: bio.trim() || null, avatarUrl: avatar.trim() || null }), "Profile saved.")) await resource.refresh();
+    await action.run(async () => {
+      await profileService.updateProfile({ displayName: name.trim(), bio: bio.trim() || null, avatarUrl: avatar.trim() || null });
+      await refreshSession();
+      await resource.refresh();
+    }, "Profile saved.");
   };
   return <Page title="Make it yours" action={{ label: action.busy ? "Saving…" : "Save changes", onPress: () => void save(), disabled: action.busy || !resource.data }}><GardenSubtitle>Your name and avatar help friends find you.</GardenSubtitle><ResourceState resource={resource} />
     {resource.data && <>
@@ -165,6 +175,7 @@ type EditableKey =
   | "floCompanion";
 
 function Preferences({ section }: { section: string }) {
+  const { refreshSession } = useAuth();
   const resource = useResource(profileService.settings);
   const action = useAction();
   const [draft, setDraft] = useState<Settings | null>(null);
@@ -220,7 +231,11 @@ function Preferences({ section }: { section: string }) {
     }
     setError("");
     const patch = Object.fromEntries(fields[section].map(k => [k, draft[k]])) as Partial<Settings>;
-    if (await action.run(() => profileService.updateSettings(patch), "Preferences saved.")) await resource.refresh();
+    await action.run(async () => {
+      await profileService.updateSettings(patch);
+      await refreshSession();
+      await resource.refresh();
+    }, "Preferences saved.");
   };
 
   const clearTutor = () => confirmAction("Clear tutor chat history?", "All past Flo conversations will be permanently deleted. This cannot be undone.", () => void action.run(async () => {
@@ -235,8 +250,8 @@ function Preferences({ section }: { section: string }) {
   return <Page title={titles[section] || "Preferences"} eyebrow={section === "low-bandwidth" || section === "wellbeing" ? "ACCESSIBILITY" : "YOUR PERSONAL SPACE"} onBack={back} action={{ label: action.busy ? "Saving…" : "Save preferences", onPress: () => void save(), disabled: action.busy || !dirty || (section === "wellbeing" && draft?.wellbeingTimerMinutes !== null && (!Number.isInteger(draft?.wellbeingTimerMinutes) || (draft?.wellbeingTimerMinutes ?? 0) < 5 || (draft?.wellbeingTimerMinutes ?? 0) > 180)) }}>
     {subtitles[section] && <GardenSubtitle>{subtitles[section]}</GardenSubtitle>}<ResourceState resource={resource} />
     {draft && <>
-      {section === "language" && <Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt" }]} onChange={v => set("appLanguage", v)} />}
-      
+      {section === "language" && <Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt" }, { value: "es", label: "Español" }, { value: "fr", label: "Français" }]} onChange={v => set("appLanguage", v)} />}
+
       {section === "accessibility" || section === "large-type" ? <>
         <GardenCaption>LIVE PREVIEW</GardenCaption>
         <View style={{ backgroundColor: "#EAF8DE", borderRadius: 16, padding: 14, minHeight: 152 }}>
@@ -283,9 +298,9 @@ function Preferences({ section }: { section: string }) {
       </>}
 
       {section === "goals" && <><Text style={ui.text}>Set your personal learning targets and companion.</Text>
-        <Choice title="Daily learning goal" value={String(draft.dailyGoalMinutes ?? "none")} choices={[{ value: "none", label: "None" }, { value: "15", label: "15 min" }, { value: "30", label: "30 min" }, { value: "45", label: "45 min" }, { value: "60", label: "60 min" }]} onChange={v => set("dailyGoalMinutes", v === "none" ? null : Number(v))} />
-        <Choice title="Daily time budget" value={String(draft.dailyTimeBudgetMinutes ?? "none")} choices={[{ value: "none", label: "None" }, { value: "15", label: "15 min" }, { value: "30", label: "30 min" }, { value: "60", label: "60 min" }]} onChange={v => set("dailyTimeBudgetMinutes", v === "none" ? null : Number(v))} />
-        <Choice title="Flo Companion" value={draft.floCompanion ?? "sprout"} choices={[{ value: "sprout", label: "Sprout Flo" }, { value: "bloom", label: "Bloom Flo" }, { value: "sage", label: "Sage Flo" }]} onChange={v => set("floCompanion", v)} />
+        <Choice title="Daily learning goal" value={String(draft.dailyGoalMinutes ?? "none")} choices={minuteChoices(draft.dailyGoalMinutes, [5, 10, 15, 20, 30, 45, 60])} onChange={v => set("dailyGoalMinutes", v === "none" ? null : Number(v))} />
+        <Choice title="Daily time budget" value={String(draft.dailyTimeBudgetMinutes ?? "none")} choices={minuteChoices(draft.dailyTimeBudgetMinutes, [5, 10, 15, 20, 30, 60])} onChange={v => set("dailyTimeBudgetMinutes", v === "none" ? null : Number(v))} />
+        <Choice title="Flo Companion" value={draft.floCompanion ?? "none"} choices={[{ value: "none", label: "None" }, { value: "flo-sprout", label: "Sprout Flo" }, { value: "flo-classic", label: "Classic Flo" }, { value: "flo-mentor", label: "Mentor Flo" }, ...(draft.floCompanion && !["flo-sprout", "flo-classic", "flo-mentor"].includes(draft.floCompanion) ? [{ value: draft.floCompanion, label: `Current: ${draft.floCompanion}` }] : [])]} onChange={v => set("floCompanion", v === "none" ? null : v)} />
         <Copy>Learning promise</Copy><TextInput style={ui.input} accessibilityLabel="Learning promise" maxLength={200} value={draft.learningPromise ?? ""} onChangeText={v => set("learningPromise", v.trim() ? v : null)} placeholder="E.g. Practice 15 minutes before breakfast" />
       </>}
 
@@ -296,6 +311,7 @@ function Preferences({ section }: { section: string }) {
 }
 
 function Security() {
+  const { logout } = useAuth();
   const resource = useResource(profileService.profile);
   const sessions = useResource(profileService.sessions);
   const action = useAction();
@@ -312,9 +328,7 @@ function Security() {
   };
 
   const signOut = () => confirmAction("Sign out of Fluora?", "You will need to sign in again to access your account.", () => void action.run(async () => {
-    try { await profileService.logout(); } catch {}
-    await clearAccessToken();
-    router.replace("/(auth)/welcome");
+    try { await logout(); } finally { router.replace("/(auth)/welcome"); }
   }, "Signed out."));
 
   return <Page title="Keep your account safe" action={{ label: action.busy ? "Updating…" : "Change password", onPress: () => void changePassword(), disabled: action.busy || !resource.data }}><GardenSubtitle>Manage your sign-in details and connected devices.</GardenSubtitle><ResourceState resource={resource} />
@@ -335,7 +349,13 @@ function Security() {
       <Heading>Delete account</Heading><Copy>This permanently removes your account and personal data. Enter your email to confirm.</Copy>
       <TextInput accessibilityLabel="Confirm email" autoCapitalize="none" keyboardType="email-address" style={ui.input} value={email} onChangeText={setEmail} placeholder={resource.data.email} />
       <ActionState action={action} />
-      <Button label="Delete my account" danger disabled={action.busy || email.trim().toLowerCase() !== resource.data.email.toLowerCase()} onPress={() => confirmAction("Permanently delete account?", "Your account and personal data will be deleted. This cannot be undone.", () => void action.run(async () => { await profileService.deleteAccount(email.trim()); await clearAccessToken(); router.replace("/(auth)/welcome"); }, "Account deleted."))} />
+      <Button label="Delete my account" danger disabled={action.busy || email.trim().toLowerCase() !== resource.data.email.toLowerCase()} onPress={() => confirmAction("Permanently delete account?", "Your account and personal data will be deleted. This cannot be undone.", () => void action.run(async () => {
+        await profileService.deleteAccount(email.trim());
+        // The deleted account returns 401 to logout; AuthContext still clears local state.
+        try { await logout(); } catch (cause) {
+          if (!(cause instanceof ApiError && cause.status === 401)) throw cause;
+        } finally { router.replace("/(auth)/welcome"); }
+      }, "Account deleted."))} />
     </>}
   </Page>;
 }

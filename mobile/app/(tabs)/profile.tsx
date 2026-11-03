@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Page, ResourceState, SessionGate, useResource } from "../../features/shared/feature-ui";
+import { Page, ResourceState, useResource } from "../../features/shared/feature-ui";
 import { profileService } from "../../features/profile/service";
-import { font, GardenButton } from "../../features/profile/garden-ui";
+import { font, GardenButton, ProfileAuthGate } from "../../features/profile/garden-ui";
+import { useAuth } from "../../features/auth/AuthContext";
 
 const green = "#265E32";
 const ink = "#20352B";
@@ -19,6 +20,7 @@ function Row({ icon, title, subtitle, section }: { icon: React.ComponentProps<ty
 }
 
 function Home() {
+  const { user } = useAuth();
   const resource = useResource(profileService.profile);
   const progress = useResource(profileService.progress);
 
@@ -29,11 +31,16 @@ function Home() {
       <View style={styles.hero}>
         <View style={{ flex: 1 }}>
           <Text style={styles.heroName}>{resource.data.displayName || "Learner"}</Text>
-          <Text style={styles.sub}>Learning with Fluora</Text>
+          <Text style={styles.sub}>{resource.data.email}</Text>
           <Text style={styles.heroCopy}>A little every day adds up. Keep growing with Flo.</Text>
         </View>
         <Image source={require("../../assets/profile-sprout.png")} style={styles.mascot} resizeMode="contain" />
       </View>
+      {user && !user.emailVerified && <Pressable accessibilityRole="button" onPress={() => router.push("/(auth)/verify-email")} style={styles.verifyLink}>
+        <Ionicons name="mail-unread-outline" size={18} color={green} />
+        <Text style={styles.verifyText}>Verify your email address</Text>
+        <Ionicons name="chevron-forward" size={18} color={green} />
+      </Pressable>}
       <View style={styles.stats}>
         <Pressable onPress={() => go("analytics")} style={styles.stat}>
           <Text style={styles.statValue}>{progress.data?.currentStreak ?? "—"}</Text>
@@ -60,7 +67,7 @@ function Home() {
 }
 
 export default function ProfileScreen() {
-  return <SessionGate feature="Profile">{() => <Home />}</SessionGate>;
+  return <ProfileAuthGate inTab><Home /></ProfileAuthGate>;
 }
 
 const styles = StyleSheet.create({
@@ -78,4 +85,6 @@ const styles = StyleSheet.create({
   row: { backgroundColor: "#F8FAF6", borderRadius: 20, padding: 16, flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 9 },
   rowTitle: { color: ink, fontFamily: font.bold, fontSize: 15, marginBottom: 3 },
   icon: { width: 42, height: 42, borderRadius: 14, backgroundColor: "#E5F4DC", alignItems: "center", justifyContent: "center" },
+  verifyLink: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#EAF8DE", borderRadius: 16, padding: 14, marginTop: 12 },
+  verifyText: { flex: 1, color: green, fontFamily: font.bold, fontSize: 14 },
 });

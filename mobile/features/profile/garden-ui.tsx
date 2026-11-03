@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../auth/AuthContext";
 
 export const garden = {
   ink: "#20352B",
@@ -28,6 +29,16 @@ export function GardenButton({ label, onPress, disabled = false }: Action) {
   </Pressable>;
 }
 
+export function ProfileAuthGate({ children, inTab = false }: { children: ReactNode; inTab?: boolean }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <SafeAreaView style={styles.loading}><ActivityIndicator color={garden.forest} /></SafeAreaView>;
+  if (!isAuthenticated) return <Page title="Welcome back" back={false} showFooter={!inTab} action={inTab ? undefined : { label: "Sign in", onPress: () => router.push("/(auth)/login") }}>
+    <GardenSubtitle>Sign in to open your profile and settings.</GardenSubtitle>
+    {inTab && <GardenButton label="Sign in" onPress={() => router.push("/(auth)/login")} />}
+  </Page>;
+  return <>{children}</>;
+}
+
 function Footer() {
   const tabs = [
     { name: "Learn", icon: "home-outline", route: "/(tabs)/learn" },
@@ -44,13 +55,14 @@ function Footer() {
   </View>;
 }
 
-export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action }: {
+export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action, showFooter = true }: {
   title: string;
   children: ReactNode;
   back?: boolean;
   onBack?: () => void;
   eyebrow?: string;
   action?: Action;
+  showFooter?: boolean;
 }) {
   return <SafeAreaView edges={["top", "bottom"]} style={styles.safe}>
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -63,7 +75,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
         {children}
       </ScrollView>
       {action && <View style={styles.action}><GardenButton {...action} /></View>}
-      <Footer />
+      {showFooter && <Footer />}
     </KeyboardAvoidingView>
   </SafeAreaView>;
 }
@@ -81,6 +93,7 @@ export function GardenSubtitle({ children }: { children: ReactNode }) {
 }
 
 const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "white" },
   safe: { flex: 1, backgroundColor: "white" },
   flex: { flex: 1 },
   content: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 12, paddingBottom: 28 },

@@ -40,7 +40,6 @@ export const profileService = {
   sessions: async () => (await getJson<{ sessions: AccountSession[] }>("/users/me/sessions")).sessions,
   revokeSession: (id: string) => deleteJson<{ revoked: boolean }>("/users/me/sessions/" + id),
   changePassword: (currentPassword: string, newPassword: string) => patchJson<{ updated: boolean }>("/users/me/password", { currentPassword, newPassword }),
-  logout: () => postJson<{ ok: boolean }>("/auth/logout", {}),
   deleteAccount: (email: string) => deleteJson<{ deleted: boolean }>("/users/me", { confirmEmail: email }),
   clearTutorChats: () => deleteJson<{ deleted: boolean }>("/tutor/chats", { confirm: true }),
   articles: async () => (await getJson<{ articles: Article[] }>("/help/articles")).articles,
