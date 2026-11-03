@@ -170,10 +170,10 @@ export async function getPractice(userId: string) {
   };
 }
 
-export async function listReviewItems(userId: string, kind?: string) {
+export async function listReviewItems(userId: string, kind?: string, includeScheduled = false) {
   const now = new Date();
   const [customItems, rows] = await Promise.all([
-    kind === "mistake" ? [] : prisma.reviewItem.findMany({ where: { userId, kind: "custom", nextReviewAt: { lte: now } }, orderBy: { nextReviewAt: "asc" } }),
+    kind === "mistake" ? [] : prisma.reviewItem.findMany({ where: { userId, kind: "custom", ...(includeScheduled ? {} : { nextReviewAt: { lte: now } }) }, orderBy: { nextReviewAt: "asc" } }),
     kind === "custom" ? [] : misconceptionRows(userId),
   ]);
   const activeMistakes = rows.filter((row) => !row.dismissed);
@@ -185,7 +185,7 @@ export async function listReviewItems(userId: string, kind?: string) {
     : [];
   const savedByExercise = new Map(savedMistakes.map((item) => [item.sourceExerciseId, item.nextReviewAt]));
   const mistakeItems = activeMistakes
-    .filter((row) => !savedByExercise.has(row.exerciseId) || savedByExercise.get(row.exerciseId)! <= now)
+    .filter((row) => includeScheduled || !savedByExercise.has(row.exerciseId) || savedByExercise.get(row.exerciseId)! <= now)
     .map((row) => asMistakeReview(userId, row, savedByExercise.get(row.exerciseId) ?? now));
   return { items: [...customItems, ...mistakeItems].sort((left, right) => left.nextReviewAt.getTime() - right.nextReviewAt.getTime()) };
 }

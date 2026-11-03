@@ -141,7 +141,7 @@ The implemented course, unit, lesson, and learning-path reads are public curated
 | `GET /api/lessons/:lessonId/answers` | Implemented | Read the learner's immutable answer history for a lesson → `{answers:[...]}` | `401`, `404` |
 | `POST /api/exercises/:exerciseId/answers` | Implemented | Submit choice, sentence tiles, transcript gap, dictation, or speaking/recording result; `{answer:{kind,...}}` → `{isCorrect,feedback,explanation?,score?,speakingScorecard?}` | `400`, `401`, `404` |
 | `GET /api/exercises/:exerciseId/hints?step=` | Implemented | Return the next hint in the hint ladder → `{step,text}` | `400`, `404` |
-| `GET /api/practice/review-items?kind=` | Implemented | Read due custom items and recurring mistakes; optional `kind` is `custom` or `mistake` → `{items:[...]}` | `400`, `401` |
+| `GET /api/practice/review-items?kind=&includeScheduled=` | Implemented | Read due custom items and recurring mistakes; optional `kind` is `custom` or `mistake`. `includeScheduled=true` also returns future-due items for management; omitted/`false` keeps due-only behavior → `{items:[...]}` | `400`, `401` |
 | `GET /api/practice/review-items/:itemId` | Implemented | Read one owned custom item or active mistake-derived item → `{item}` | `401`, `404` |
 | `POST /api/practice/review-items` | Implemented | Create a learner-owned custom review item; `{front,back,kind?}` (`kind` must be `custom`) → `{item}` | `400`, `401` |
 | `PATCH /api/practice/review-items/:itemId` | Implemented | Edit custom `front`/`back`, or dismiss/restore a derived mistake with `{dismissed:boolean}` → `{item}` | `400`, `401`, `404` |
@@ -183,7 +183,9 @@ Recording Studio captures audio locally on the device. The demo answer may inclu
 
 Practice, review, vocabulary, bookmark, and reading mutations are scoped to the authenticated learner. Due counts combine due custom review items with recurring mistakes derived from that learner's immutable answer history. Review outcomes append to `review_outcomes`; successful recall schedules the next review in 24 hours and an incorrect recall in 10 minutes. Mistakes can be dismissed/restored without editing their source answers. The current demo dictionary and study-tool responses are intentionally small curated datasets. Story content may include a `challenge` with a seeded `exerciseId`; clients submit its answer through `POST /api/exercises/:exerciseId/answers`, reusing the core learning API instead of adding a story-specific answer route.
 
-The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed.
+The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed. Account-scoped snapshots include existing course/unit/lesson/story responses and optionally their available media; text-only snapshots omit remote media references. Offline exercise answers are ungraded and are not queued or awarded XP. Reading progress saved offline has an explicit sync action using the existing reading-progress PUT/DELETE endpoints; it does not add an offline API. See [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
+
+Study-tool endpoints return metadata, not grading or generated feedback. Mobile tools use curated Figma examples with local checks and explicitly labeled self-assessment. The current dictionary supports only its seeded terms (`hello`, `morning`, `name`); an unknown word returns `404`. Expanding content or adding automated pronunciation/writing assessment is separate work.
 
 ## League, rewards, community, and notifications
 

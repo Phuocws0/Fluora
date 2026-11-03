@@ -8,7 +8,7 @@ Fluora is a mobile language-learning app intended for local demonstration. The p
 - Backend: Node.js 24, Express 5, TypeScript, Prisma ORM 7
 - Database: PostgreSQL 17
 - Local runtime: Docker Compose for backend and PostgreSQL; Expo runs on the host
-- CI: GitHub Actions typecheck, Prisma validation, backend build, and Android bundle export
+- CI: GitHub Actions typecheck, Prisma validation, backend build, focused regression checks, and Android bundle export
 
 ## Repository structure
 
@@ -28,7 +28,7 @@ fluora/
 └── package.json             # npm workspaces and shared commands
 ```
 
-The mobile app has the five-tab navigation shell, a learning flow backed by course/unit/lesson APIs, League/community screens, and a Flo Tutor screen connected to the Tutor API with a separate in-memory preview. The backend supports accounts (registration, login, sessions, settings, placement, email verification, password recovery, optional Google sign-in, account deletion), learning activity and progress, and the community, League, rewards, and Tutor APIs. The main mobile account screens and remaining practice/profile features are still planned. See [the handoff](docs/TIEN_HANDOFF.md) for screen coverage and outstanding device/backend acceptance checks. Other unfinished destinations show a simple placeholder.
+The mobile app connects learning, account/onboarding, profile/settings, Practice/vocabulary/reading/offline, League/community, and Flo Tutor flows to the existing backend. Tutor also offers a separate in-memory preview. Backend APIs cover those domains; some study tools and dictionary entries intentionally use small curated demo datasets. See the [Practice handoff](docs/PRACTICE_HANDOFF.md), [League/Tutor handoff](docs/TIEN_HANDOFF.md), and [current status](docs/STATUS.md) for coverage and outstanding native-device acceptance.
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ Seed the demonstration course after the backend and database are running:
 npm run db:seed --workspace @fluora/backend
 ```
 
-The seed command is safe to run again and does not reset the database. Besides the course, it adds daily quests, achievements, reward-shop items, peer-review samples, three Flo Tutor role-play scenarios, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
+The seed command is safe to run again and does not reset the database. Besides the course, it adds three story/article/dialogue reads, daily quests, achievements, reward-shop items, peer-review samples, three Flo Tutor role-play scenarios, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
 
 This local demo sends no email. Email-verification and password-reset tokens are written to the backend log instead; read them with:
 
@@ -106,10 +106,11 @@ Do not reset the database as a routine setup step.
 npm run typecheck
 npm run prisma:validate
 npm run build
+npm run test:unit
 npm run check:mobile
 ```
 
-GitHub Actions runs these checks on pull requests and pushes to `main`. Focused mobile transport and Tutor-preview unit checks can be run with `node --experimental-vm-modules --test scripts/mobile-features.test.mjs`; live API/device acceptance remains separate.
+GitHub Actions runs these checks on pull requests and pushes to `main`. `test:unit` uses Node's existing test runner; build the backend first. Live API/device acceptance remains separate; see [TESTING.md](docs/TESTING.md).
 
 The public `main` branch requires a pull request, one approval, and passing CI. Only the repository owner can update or merge into `main`; collaborators can push work to feature branches.
 
@@ -123,4 +124,5 @@ The public `main` branch requires a pull request, one approval, and passing CI. 
 - [Database model](docs/DATABASE.md)
 - [Testing and verification](docs/TESTING.md)
 - [Current status](docs/STATUS.md)
+- [Practice implementation and device QA](docs/PRACTICE_HANDOFF.md)
 - [Agent instructions](AGENTS.md)

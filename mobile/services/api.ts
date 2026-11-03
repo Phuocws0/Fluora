@@ -41,14 +41,15 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.body !== undefined && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    response = await fetch(`${apiBaseUrl}/api${path}`, { ...init, headers });
+    response = await fetch(`${apiBaseUrl}/api${path}`, { ...init, headers, signal: controller.signal });
   } catch {
     throw new ApiError(
-      "Could not reach Fluora. Check that the backend is running.",
+      "Could not reach Fluora. Check your connection and that the backend is running, then try again.",
     );
-  }
+  } finally { clearTimeout(timeout); }
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse;
@@ -85,6 +86,10 @@ export function postJson<T>(path: string, body: unknown): Promise<T> {
 
 export function patchJson<T>(path: string, body: unknown): Promise<T> {
   return requestJson<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+export function putJson<T>(path: string, body: unknown): Promise<T> {
+  return requestJson<T>(path, { method: "PUT", body: JSON.stringify(body) });
 }
 
 export function deleteJson<T>(path: string, body?: unknown): Promise<T> {

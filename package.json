@@ -13,6 +13,7 @@
     "dev:backend": "npm run dev --workspace @fluora/backend",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspace @fluora/backend",
+    "test:unit": "node --experimental-vm-modules --test scripts/*.test.mjs",
     "check:mobile": "npm run check --workspace @fluora/mobile",
     "prisma:generate": "npm run prisma:generate --workspace @fluora/backend",
     "prisma:validate": "npm run prisma:validate --workspace @fluora/backend",

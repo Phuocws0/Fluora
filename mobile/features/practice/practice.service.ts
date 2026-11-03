@@ -1,0 +1,33 @@
+import { deleteJson, getJson, patchJson, postJson, putJson } from "../../services/api";
+import type { Bookmark, CardInput, Deck, DictionaryEntry, ImportMapping, ImportPreview, ImportRow, PracticeSummary, ReadingProgress, ReviewItem, Story, StorySummary, Tool, WordCard } from "./practice.types";
+
+export const practiceApi = {
+  summary: () => getJson<PracticeSummary>("/practice"),
+  tools: async () => (await getJson<{ tools: Tool[] }>("/study-tools")).tools,
+  tool: async (id: string) => (await getJson<{ tool: Tool }>(`/study-tools/${encodeURIComponent(id)}`)).tool,
+  dictionary: async (word: string) => (await getJson<{ entry: DictionaryEntry }>(`/dictionary?query=${encodeURIComponent(word.trim())}`)).entry,
+  decks: async () => (await getJson<{ sets: Deck[] }>("/vocabulary/sets")).sets,
+  deck: (id: string) => getJson<{ set: Deck; cards: WordCard[] }>(`/vocabulary/sets/${id}`),
+  createDeck: (name: string) => postJson<{ set: Deck }>("/vocabulary/sets", { name }),
+  renameDeck: (id: string, name: string) => patchJson<{ set: Deck }>(`/vocabulary/sets/${id}`, { name }),
+  deleteDeck: (id: string) => deleteJson<{ deleted: boolean }>(`/vocabulary/sets/${id}`),
+  createCard: (id: string, input: CardInput) => postJson<{ card: WordCard }>(`/vocabulary/sets/${id}/cards`, input),
+  updateCard: (id: string, input: CardInput) => patchJson<{ card: WordCard }>(`/vocabulary/cards/${id}`, input),
+  deleteCard: (id: string) => deleteJson<{ deleted: boolean }>(`/vocabulary/cards/${id}`),
+  preview: (filename: string, rows: ImportRow[], mapping: ImportMapping) => postJson<ImportPreview>("/vocabulary/import/preview", { filename, rows, mapping }),
+  import: (destinationSetId: string, rows: ImportRow[], mapping: ImportMapping) => postJson<{ importedCount: number }>("/vocabulary/import", { destinationSetId, rows, mapping }),
+  reviews: async (kind?: string, includeScheduled = false) => (await getJson<{ items: ReviewItem[] }>(`/practice/review-items?includeScheduled=${includeScheduled}${kind ? `&kind=${kind}` : ""}`)).items,
+  createReview: (front: string, back: string) => postJson<{ item: ReviewItem }>("/practice/review-items", { front, back, kind: "custom" }),
+  updateReview: (id: string, front: string, back: string) => patchJson<{ item: ReviewItem }>(`/practice/review-items/${id}`, { front, back }),
+  deleteReview: (id: string) => deleteJson<{ deleted: boolean }>(`/practice/review-items/${id}`),
+  answerReview: (id: string, correct: boolean) => postJson<{ result: { correct: boolean }; nextReviewAt: string }>(`/practice/review-items/${id}/answers`, { correct }),
+  stories: async () => (await getJson<{ stories: StorySummary[] }>("/stories")).stories,
+  story: async (id: string) => (await getJson<{ story: Story }>(`/stories/${id}`)).story,
+  reading: async (id: string) => (await getJson<{ progress: ReadingProgress | null }>(`/stories/${id}/progress`)).progress,
+  saveReading: (id: string, position: number, completed: boolean) => putJson<{ progress: ReadingProgress }>(`/stories/${id}/progress`, { position, completed }),
+  resetReading: (id: string) => deleteJson<{ deleted: boolean }>(`/stories/${id}/progress`),
+  bookmarks: async () => (await getJson<{ bookmarks: Bookmark[] }>("/bookmarks")).bookmarks,
+  bookmark: (targetType: "story" | "word", targetId: string) => postJson<{ bookmark: Bookmark }>("/bookmarks", { targetType, targetId }),
+  editBookmark: (id: string, note: string | null, tag: string | null) => patchJson<{ bookmark: Bookmark }>(`/bookmarks/${id}`, { note, tag }),
+  removeBookmark: (id: string) => deleteJson<{ deleted: boolean }>(`/bookmarks/${id}`),
+};

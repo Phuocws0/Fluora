@@ -125,6 +125,9 @@ async function transport(fetchImpl) {
     Headers,
     Response,
     Request,
+    AbortController,
+    setTimeout,
+    clearTimeout,
     fetch: fetchImpl,
     process: { env: {} },
   });

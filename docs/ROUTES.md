@@ -1,6 +1,6 @@
 # Navigation Routes
 
-The mobile app now uses Expo Router. The routes below are the implemented starter routes; feature destinations that are not ready show a plain placeholder. The broader product map remains a plan until its feature UI is implemented.
+The mobile app uses Expo Router. The routes below are implemented logical destinations; physical-device acceptance is tracked in [STATUS.md](STATUS.md). The broader product map remains a plan where source has no corresponding screen.
 
 ## Implemented starter routes
 
@@ -34,13 +34,19 @@ learning/insights
 └── reset-password
 
 settings/[section]
+practice/[section]
+practice/decks/[deckId]
+practice/tools/[toolId]
+stories/[storyId]
 ```
 
-Learn, course, unit, interactive lesson player (with 5 exercise modes, hint ladder, answer history, completion modal, expo-audio speaking, and audio-only mode), weekly study planner, mission passport, learning insights hub (skill baseline, misconceptions, evidence, weekly analytics), lesson search, and path comparison screens call the existing learning API. Auth and onboarding use the identity APIs. Profile and settings call the account, progress, support, and export APIs; physical-device acceptance remains. Practice remains a placeholder. League/community and Tutor have local UI implementations, with live Android acceptance still pending. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
+Learn, course, unit, interactive lesson player (with 5 exercise modes, hint ladder, answer history, completion modal, expo-audio speaking, and audio-only mode), weekly study planner, mission passport, learning insights hub (skill baseline, misconceptions, evidence, weekly analytics), lesson search, and path comparison screens call the existing learning API. Auth and onboarding use the identity APIs. Profile and settings call the account, progress, support, and export APIs. Practice connects vocabulary, review, study tools, reading/bookmarks and device downloads; see [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md). League/community and Tutor have local UI implementations; see [TIEN_HANDOFF.md](TIEN_HANDOFF.md). Android acceptance remains across these flows.
+
+`practice/[section]` supports `vocabulary`, `import`, `review`, `bookmarks`, `dictionary`, `tools`, `stories`, and `downloads`. Tool IDs select one shared screen; its exercise modes, flashcards, import preview, editing, reader comprehension tree, and dialogue bubbles are states/components/modals. They do not add routes. The player and reader accept `?offline=1` when opened from a downloaded package.
 
 ## Planned logical model
 
-The following routes are still proposed destinations for later feature work:
+The following is the product navigation model. Some destinations below are grouped differently in the implemented routes above; it is not a list of missing files to create:
 
 ```text
 /
@@ -75,10 +81,10 @@ The following routes are still proposed destinations for later feature work:
 ├── planner
 ├── missions/passport
 ├── learning/insights
-├── learning-tools/[toolId]
-├── vocabulary/sets/[setId]
+├── practice/[section]
+├── practice/tools/[toolId]
+├── practice/decks/[deckId]
 ├── stories/[storyId]
-├── downloads
 ├── community/friends/[userId]
 ├── community/groups/[groupId]
 ├── community/groups/[groupId]/room

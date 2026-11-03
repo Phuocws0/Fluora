@@ -37,5 +37,8 @@ jobs:
       - name: Build backend
         run: npm run build
 
+      - name: Run regression checks
+        run: npm run test:unit
+
       - name: Export Android mobile bundle
         run: npm run check:mobile
