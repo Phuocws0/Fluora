@@ -53,4 +53,4 @@ Before Android acceptance, rebuild the development client for the SDK 57 audio p
 7. Reconnect, explicitly sync reading, submit online lesson answers, then log out and sign in as another learner: the first learner's drafts/downloads must not appear.
 8. Check narrow-screen layout, back navigation, loading/empty/error states and destructive confirmations against Figma.
 
-Android bundle export and native configuration inspection do not replace these device checks. No Android emulator/device is available in the implementation environment; physical audio, picker, offline restart and visual acceptance remain pending.
+Android bundle export and native configuration inspection do not replace these device checks. An Android 15/API 35 emulator was available for the core-flow check in [issue #24's report](qa/2026-11-03-android-demo.md), but no physical Android device was available. Microphone quality, native picker, airplane-mode cold start/playback, interrupted-download recovery, pending reading sync, and account isolation still need physical-hardware acceptance.
