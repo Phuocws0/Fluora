@@ -2,6 +2,15 @@
 
 ## Completed
 
+- Issue #7 mobile learning flow, interactive lesson player, progress, and insights hub are fully implemented:
+  - Enhanced Learning Home with authenticated streak, XP, and gems header status badges, dynamic continue-learning hero algorithm, guest public catalog mode, and quick-access navigation to weekly planner, mission passport, and learning insights hub.
+  - Interactive multi-mode lesson player supporting 5 exercise modes: multiple choice, sentence tiles, transcript gaps, matching pairs, and speaking. Features top progress bar, answer verification, feedback sheets with explanation, 3-step progressive hint ladder modal, idempotent lesson completion modal, and past answer history modal.
+  - Study Planner screen with full CRUD for weekly schedule items, day filters, and direct links to scheduled lessons.
+  - Mission Passport screen with stamps collection, mission detail dialogs, prerequisite lesson detection on 409 INCOMPLETE_MISSION, and claim completion flow.
+  - Learning Insights hub with segmented navigation across 4 sections: Skill Baseline matrix, Misconception Map with active/dismissed filtering and toggle, Can-Do Evidence portfolio with sample CRUD, and Weekly Analytics 7-day bar chart.
+  - Audio studio enhancements: device-local recording via expo-audio, TTS prompt pronunciation via expo-speech, dynamic WaveformVisualizer (Page 10 Frame 106), speaking scorecard, and distraction-free audio-only lesson mode (Page 10 Frame 148).
+  - Strict TypeScript across all activity endpoints and payloads without any/as any. Full typecheck and Expo Android export pass.
+
 - Documentation foundation and second consistency audit against the selected Figma scope.
 - Initial npm-workspaces monorepo scaffold: Expo TypeScript app, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and migrations, Docker Compose local runtime, and GitHub Actions CI.
 - Created the GitHub backlog and four milestones; the open feature issues now include the 17 promoted Page 10 concepts and expanded learner-owned CRUD scope.
@@ -22,7 +31,6 @@
 
 - Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
 - Issue #22 Flo Tutor mobile UI is connected to the implemented Tutor API contract, with an explicit in-memory preview. It supports chats, role-play hints, message actions, notes, and history privacy controls. Live Android/backend acceptance remains.
-- Issue #7 mobile learning flow is partially implemented: course catalog, course/unit/lesson navigation, lesson search, and learning-path comparison use the service layer and current APIs. Personalized continue-learning/progress and the lesson player remain unfinished.
 - Mobile Google sign-in is implemented for native builds and connects to `POST /api/auth/google`. End-to-end sign-in requires a development build and valid Google OAuth client IDs.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.

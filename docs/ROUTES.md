@@ -20,6 +20,9 @@ unit/[unitId]
 lesson/[lessonId]
 lessons/search
 learning-paths
+planner
+missions/passport
+learning/insights
 
 /(auth)/
 ├── welcome
@@ -33,7 +36,7 @@ learning-paths
 settings/[section]
 ```
 
-Learn, course, unit, lesson preview, lesson search, and path comparison screens call the existing learning API. Auth and onboarding use the identity APIs. Profile and settings call the account, progress, support, and export APIs; physical-device acceptance remains. Practice remains a placeholder. League/community and Tutor have local UI implementations, with live Android acceptance still pending. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
+Learn, course, unit, interactive lesson player (with 5 exercise modes, hint ladder, answer history, completion modal, expo-audio speaking, and audio-only mode), weekly study planner, mission passport, learning insights hub (skill baseline, misconceptions, evidence, weekly analytics), lesson search, and path comparison screens call the existing learning API. Auth and onboarding use the identity APIs. Profile and settings call the account, progress, support, and export APIs; physical-device acceptance remains. Practice remains a placeholder. League/community and Tutor have local UI implementations, with live Android acceptance still pending. See [the handoff](TIEN_HANDOFF.md) for verification and backend limitations.
 
 ## Planned logical model
 
