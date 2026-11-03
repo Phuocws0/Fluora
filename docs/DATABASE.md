@@ -113,7 +113,7 @@ Implemented models (table names in parentheses):
 - **Achievement / UserAchievement** (`achievements`, `user_achievements`): curated definitions; a row records the first time a learner qualified (`earnedAt`).
 - **Reward / RewardRedemption** (`rewards`, `reward_redemptions`): curated shop items (`instant` or `deferred` fulfillment) and redemptions (`fulfilled`, `pending`, `cancelled`) with the cost snapshot.
 - **WalletTransaction** (`wallet_transactions`): append-only gem ledger (`quest_reward`, `redemption`, `refund`). The balance is `SUM(amount)`; a redemption has at most one charge and one refund (`@@unique([redemptionId, reason])`).
-- **support_requests:** Learner-owned drafts/submissions, optional screenshot reference, device details, and response status; edits/cancellation are limited to open requests.
+- **support_requests:** Learner-owned drafts/submissions, optional screenshot reference or PNG/JPEG data URL (up to 5 MB decoded), device details, and response status; edits/cancellation are limited to open requests. Screenshots stay in PostgreSQL for this local demo; there is no external storage.
 
 ```text
 User ├── FriendRequest (requester / addressee)

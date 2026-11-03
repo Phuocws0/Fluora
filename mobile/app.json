@@ -26,7 +26,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      ["expo-image-picker", { "photosPermission": "Allow Fluora to attach a screenshot to your support request." }]
     ],
     "experiments": {
       "typedRoutes": true

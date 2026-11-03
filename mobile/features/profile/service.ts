@@ -25,7 +25,7 @@ export type Settings = {
 };
 export type AccountSession = { id: string; deviceName: string | null; userAgent: string | null; lastUsedAt: string; current: boolean };
 export type Article = { id: string; category: string; title: string; body: string };
-export type SupportRequest = { id: string; message: string; screenshot: string | null; status: "open" | "closed"; createdAt: string; updatedAt: string };
+export type SupportRequest = { id: string; message: string; screenshot: string | null; deviceDetails: { issueCategory?: string; platform?: string; osVersion?: string }; status: "open" | "closed"; createdAt: string; updatedAt: string };
 export type DataExport = { id: string; status: string; createdAt: string; updatedAt: string };
 export type WeeklyDay = { date: string; xp: number; answers: number };
 
@@ -45,8 +45,8 @@ export const profileService = {
   clearTutorChats: () => deleteJson<{ deleted: boolean }>("/tutor/chats", { confirm: true }),
   articles: async () => (await getJson<{ articles: Article[] }>("/help/articles")).articles,
   requests: async () => (await getJson<{ requests: SupportRequest[] }>("/support/requests")).requests,
-  createRequest: (message: string, screenshot?: string) => postJson<{ request: SupportRequest }>("/support/requests", { message, ...(screenshot ? { screenshot } : {}), deviceDetails: { platform: Platform.OS, osVersion: String(Platform.Version) } }),
-  updateRequest: (id: string, message: string) => patchJson<{ request: SupportRequest }>("/support/requests/" + id, { message }),
+  createRequest: (message: string, screenshot: string | undefined, issueCategory: string) => postJson<{ request: SupportRequest }>("/support/requests", { message, ...(screenshot ? { screenshot } : {}), deviceDetails: { platform: Platform.OS, osVersion: String(Platform.Version), issueCategory } }),
+  updateRequest: (id: string, message: string, screenshot: string | null, issueCategory: string) => patchJson<{ request: SupportRequest }>("/support/requests/" + id, { message, screenshot, deviceDetails: { platform: Platform.OS, osVersion: String(Platform.Version), issueCategory } }),
   cancelRequest: (id: string) => deleteJson<{ deleted: boolean }>("/support/requests/" + id),
   exports: async () => (await getJson<{ exports: DataExport[] }>("/users/me/data-exports")).exports,
   createExport: () => postJson<{ exportId: string; status: string }>("/users/me/data-exports", {}),

@@ -2,6 +2,8 @@
 
 Keep verification proportional to a local demo and use tools already present. The project has typecheck/build checks plus focused mobile transport/Tutor-preview unit checks (see `TIEN_HANDOFF.md`); do not add a testing framework just because this plan exists.
 
+The support screenshot validator has a focused check: `npm run build && node --test scripts/support-screenshot.test.mjs`. It covers short references, PNG/JPEG data URLs, the 5 MB boundary, and unsupported data types.
+
 ## Current checks and CI
 
 GitHub Actions runs on pull requests and pushes to `main`:

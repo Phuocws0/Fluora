@@ -30,9 +30,14 @@ function message(value: unknown): string | null {
   return normalized.length > 0 && normalized.length <= 5000 ? normalized : null;
 }
 
-function screenshot(value: unknown): string | null | undefined {
+export function screenshot(value: unknown): string | null | undefined {
   if (value === undefined || value === null) return value;
-  return typeof value === "string" && value.length <= 500 ? value : undefined;
+  if (typeof value !== "string") return undefined;
+  if (!value.startsWith("data:")) return value.length <= 500 ? value : undefined;
+  const match = /^data:image\/(?:png|jpeg);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!match) return undefined;
+  const encoded = match[1];
+  return encoded.length % 4 === 0 && Buffer.from(encoded, "base64").length <= 5 * 1024 * 1024 ? value : undefined;
 }
 
 function deviceDetails(value: unknown): service.DeviceDetails | null {

@@ -15,6 +15,8 @@ import { apiNotFound, jsonErrorHandler } from "./http/errors.js";
 
 const app = express();
 
+// A support request may include one PNG/JPEG screenshot of up to 5 MB (base64 encoded).
+app.use("/api/support/requests", express.json({ limit: "7mb" }));
 app.use(express.json());
 app.use("/api", authenticate);
 app.use("/api", identityRouter);
