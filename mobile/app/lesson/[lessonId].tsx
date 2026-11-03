@@ -1,3 +1,3 @@
-import { LessonScreen } from "../../features/learning/LearningDetailScreens";
+import { LessonPlayerScreen } from "../../features/learning/player/LessonPlayerScreen";
 
-export default LessonScreen;
+export default LessonPlayerScreen;
