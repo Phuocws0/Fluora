@@ -40,7 +40,7 @@ export function AudioOnlyPlayer({ promptText, onExitAudioOnly }: Props) {
       <View style={styles.topRow}>
         <View style={styles.badge}>
           <Ionicons name="headset-outline" size={14} color="#236c19" />
-          <Text style={styles.badgeText}>AUDIO-ONLY MODE (PAGE 10 · 148)</Text>
+          <Text style={styles.badgeText}>AUDIO-ONLY MODE</Text>
         </View>
 
         <Pressable accessibilityRole="button" onPress={onExitAudioOnly} style={styles.exitBtn}>

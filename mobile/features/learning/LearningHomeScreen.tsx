@@ -20,11 +20,17 @@ type NextLessonInfo = {
 };
 
 export function LearningHomeScreen() {
+  const { user } = useAuth();
+  return <LearningHomeContent key={user?.id ?? "guest"} />;
+}
+
+function LearningHomeContent() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
   const [nextLesson, setNextLesson] = useState<NextLessonInfo | null>(null);
+  const [reviewMode, setReviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,8 +46,9 @@ export function LearningHomeScreen() {
         try {
           summary = await getHomeSummary();
           setHomeSummary(summary);
-        } catch {
+        } catch (cause) {
           setHomeSummary(null);
+          throw cause;
         }
       } else {
         setHomeSummary(null);
@@ -62,20 +69,13 @@ export function LearningHomeScreen() {
             })),
           );
           if (allLessons.length > 0) {
-            const lastId = summary?.progress.lastCompletedLesson?.lessonId;
-            if (lastId) {
-              const idx = allLessons.findIndex((l) => l.id === lastId);
-              if (idx >= 0 && idx + 1 < allLessons.length) {
-                resolvedNext = allLessons[idx + 1];
-              } else {
-                resolvedNext = allLessons[0];
-              }
-            } else {
-              resolvedNext = allLessons[0];
-            }
+            const completedIds = new Set(summary?.progress.completedLessonIds ?? []);
+            const pending = allLessons.find((item) => !completedIds.has(item.id));
+            resolvedNext = pending ?? allLessons[0];
+            setReviewMode(!pending && Boolean(summary));
           }
-        } catch {
-          // Keep resolvedNext as null if course detail fails
+        } catch (cause) {
+          throw cause;
         }
       }
       setNextLesson(resolvedNext);
@@ -167,9 +167,9 @@ export function LearningHomeScreen() {
             <>
               <View style={styles.heroHeader}>
                 <Text style={styles.heroEyebrow}>
-                  CONTINUE LEARNING · {nextLesson.skill.toLocaleUpperCase()}
+                  {reviewMode ? "REVIEW" : "CONTINUE LEARNING"} · {nextLesson.skill.toLocaleUpperCase()}
                 </Text>
-                <Text style={styles.heroTitle}>Resume next lesson</Text>
+                <Text style={styles.heroTitle}>{reviewMode ? "Review a completed lesson" : "Resume next lesson"}</Text>
               </View>
               <LearningCard
                 highlighted

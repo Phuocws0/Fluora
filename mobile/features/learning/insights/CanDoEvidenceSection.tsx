@@ -162,9 +162,9 @@ export function CanDoEvidenceSection() {
             <View key={goal.id} style={styles.goalCard}>
               <View style={styles.goalHeader}>
                 <View style={styles.badgeRow}>
-                  <Text style={styles.codeBadge}>{goal.code}</Text>
+                  <Text style={styles.codeBadge}>{goal.slug}</Text>
                   <Text style={styles.levelSkill}>
-                    {goal.level} · {goal.skill.toUpperCase()}
+                    {goal.skill.toUpperCase()}
                   </Text>
                 </View>
                 <Pressable

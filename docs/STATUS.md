@@ -2,14 +2,14 @@
 
 ## Completed
 
-- Issue #7 mobile learning flow, interactive lesson player, progress, and insights hub are fully implemented:
+- Issue #7 mobile learning flow, interactive lesson player, progress, and insights hub are implemented; Android device/live-backend acceptance remains:
   - Enhanced Learning Home with authenticated streak, XP, and gems header status badges, dynamic continue-learning hero algorithm, guest public catalog mode, and quick-access navigation to weekly planner, mission passport, and learning insights hub.
   - Interactive multi-mode lesson player supporting 5 exercise modes: multiple choice, sentence tiles, transcript gaps, matching pairs, and speaking. Features top progress bar, answer verification, feedback sheets with explanation, 3-step progressive hint ladder modal, idempotent lesson completion modal, and past answer history modal.
-  - Study Planner screen with full CRUD for weekly schedule items, day filters, and direct links to scheduled lessons.
+  - Study Planner screen with CRUD for scheduled date, time, duration and label. Planner entries do not contain a lesson link in the current API.
   - Mission Passport screen with stamps collection, mission detail dialogs, prerequisite lesson detection on 409 INCOMPLETE_MISSION, and claim completion flow.
   - Learning Insights hub with segmented navigation across 4 sections: Skill Baseline matrix, Misconception Map with active/dismissed filtering and toggle, Can-Do Evidence portfolio with sample CRUD, and Weekly Analytics 7-day bar chart.
   - Audio studio enhancements: device-local recording via expo-audio, TTS prompt pronunciation via expo-speech, dynamic WaveformVisualizer (Page 10 Frame 106), speaking scorecard, and distraction-free audio-only lesson mode (Page 10 Frame 148).
-  - Strict TypeScript across all activity endpoints and payloads without any/as any. Full typecheck and Expo Android export pass.
+  - Review fixes align Mission and Can-Do models with Prisma/API fields, allow retrying a failed lesson completion, prevent duplicate submissions, and select the first unfinished lesson from completed IDs. Audio recording uses native metering and explicit self-assessment; no automatic transcription or pronunciation grading is implemented. Typecheck and Android export are the static checks; microphone/playback and screen interactions still need a physical-device pass.
 
 - Documentation foundation and second consistency audit against the selected Figma scope.
 - Initial npm-workspaces monorepo scaffold: Expo TypeScript app, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and migrations, Docker Compose local runtime, and GitHub Actions CI.

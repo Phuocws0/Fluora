@@ -125,6 +125,7 @@ export type HomeSummary = {
     level: string;
   } | null;
   progress: {
+    completedLessonIds: string[];
     completedLessons: number;
     currentStreak: number;
     xp: number;
@@ -183,10 +184,9 @@ export type LearningEvidence = {
 
 export type CanDoGoal = {
   id: string;
-  code: string;
+  slug: string;
   title: string;
   description: string;
-  level: string;
   skill: string;
   evidence: LearningEvidence[];
 };
@@ -196,9 +196,6 @@ export type MissionPassportItem = {
   slug: string;
   title: string;
   description: string;
-  instructions: string;
-  category: string;
-  badgeUrl: string | null;
   requiredLessonId: string | null;
   completedAt: string | null;
 };
@@ -208,9 +205,6 @@ export type MissionDetail = {
   slug: string;
   title: string;
   description: string;
-  instructions: string;
-  category: string;
-  badgeUrl: string | null;
   requiredLessonId: string | null;
 };
 

@@ -145,7 +145,7 @@ export function MissionPassportScreen() {
                     <Text style={styles.stampEmoji}>{isEarned ? "🏅" : "🔒"}</Text>
                   </View>
                   <View style={styles.stampInfo}>
-                    <Text style={styles.stampCategory}>{mission.category.toLocaleUpperCase()}</Text>
+                    <Text style={styles.stampCategory}>LANGUAGE MISSION</Text>
                     <Text style={styles.stampTitle}>{mission.title}</Text>
                     <Text style={styles.stampDesc} numberOfLines={2}>
                       {mission.description}
@@ -182,7 +182,7 @@ export function MissionPassportScreen() {
                 <View style={styles.modalHeader}>
                   <View style={styles.modalCategoryRow}>
                     <Text style={styles.modalCategory}>
-                      {selectedMission.category.toLocaleUpperCase()}
+                      LANGUAGE MISSION
                     </Text>
                     {selectedMission.completedAt ? (
                       <View style={styles.modalEarnedBadge}>
@@ -198,18 +198,18 @@ export function MissionPassportScreen() {
                 <Text style={styles.modalTitle}>{selectedMission.title}</Text>
                 <Text style={styles.modalDesc}>{selectedMission.description}</Text>
 
-                <View style={styles.instructionsBox}>
-                  <Text style={styles.instructionsEyebrow}>MISSION INSTRUCTIONS:</Text>
-                  <Text style={styles.instructionsText}>{selectedMission.instructions}</Text>
-                </View>
-
                 {selectedMission.requiredLessonId && !selectedMission.completedAt ? (
-                  <View style={styles.prereqBox}>
+                  <Pressable accessibilityRole="button" onPress={() => {
+                    const lessonId = selectedMission.requiredLessonId;
+                    if (!lessonId) return;
+                    setSelectedMission(null);
+                    router.push({ pathname: "/lesson/[lessonId]", params: { lessonId } });
+                  }} style={styles.prereqBox}>
                     <Ionicons name="information-circle-outline" size={18} color="#1967d2" />
                     <Text style={styles.prereqText}>
-                      Prerequisite: You must complete the linked lesson first before claiming this stamp.
+                      Complete the linked lesson first. Tap to open it.
                     </Text>
-                  </View>
+                  </Pressable>
                 ) : null}
 
                 <View style={styles.modalActions}>

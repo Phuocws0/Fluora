@@ -114,17 +114,17 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `POST /api/lessons/:lessonId/complete` | Implemented | Record lesson completion → `{lessonId,completedAt,xpEarned}` | `401`, `404`, `409` |
 | `GET /api/learning/skill-baseline` | Implemented | Read level and confidence by skill → `{level,skills:[{skill,confidence,attempts}],source:"answers"|"placement"}`. Derived from recorded answers; a learner with no answers gets the latest placement attempt (level from `settings.startingLevel` when set). | `401`, `404` (no answers and no placement) |
 | `GET /api/analytics/weekly` | Implemented | Weekly XP/activity chart → `{days:[...],summary}` | `401` |
-| `GET /api/learning/evidence` | Implemented | Read can-do goals and attached samples → `{goals:[...]}` | `401` |
+| `GET /api/learning/evidence` | Implemented | Read can-do goals and attached samples → `{goals:[{id,slug,title,skill,description,evidence:[...]}]}`. Goals have no `code` or `level` field. | `401` |
 | `POST /api/learning/evidence` | Implemented | Attach a completed learning sample; `{goalId,kind,summary,reference?}` → `{evidence}` | `400`, `401`, `404` |
 | `PATCH /api/learning/evidence/:evidenceId` | Implemented | Edit a learner-owned evidence sample; changed fields → `{evidence}` | `400`, `401`, `404` |
 | `DELETE /api/learning/evidence/:evidenceId` | Implemented | Remove a learner-attached sample → `{deleted:true}` | `401`, `404` |
-| `GET /api/missions/passport` | Implemented | Read mission passport and earned stamps → `{missions:[...]}` | `401` |
-| `GET /api/missions/:missionId` | Implemented | Read curated mission instructions → `{mission}` | `404` |
+| `GET /api/missions/passport` | Implemented | Read mission passport and earned stamps → `{missions:[{id,slug,title,description,requiredLessonId,completedAt}]}` | `401` |
+| `GET /api/missions/:missionId` | Implemented | Read one curated mission → `{mission:{id,slug,title,description,requiredLessonId}}`; the description contains its instructions. | `404` |
 | `POST /api/missions/:missionId/complete` | Implemented | Record completed mission evidence; progress is derived → `{completion}` | `400`, `401`, `404`, `409` |
 | `GET /api/learning/misconceptions` | Implemented | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
 | `PATCH /api/learning/misconceptions/:itemId` | Implemented | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
 
-Issue #27 implements core learning activity persistence. Private routes use the verified bearer session from issue #3 and return `401` without one. `GET /api/home` uses the first published course (enrollment-aware selection is still planned), XP/streak from completions, and the real gem balance from the wallet ledger. `GET /api/progress` returns the same derived gem balance.
+Issue #27 implements core learning activity persistence. Private routes use the verified bearer session from issue #3 and return `401` without one. `GET /api/home` uses the first published course (enrollment-aware selection is still planned), XP/streak from completions, and the real gem balance from the wallet ledger. Its `progress` includes `lastCompletedLesson` and `completedLessonIds:string[]`, so mobile can select the first unfinished lesson even when lessons were completed out of order. `GET /api/progress` returns the same derived gem balance.
 
 The implemented course, unit, lesson, and learning-path reads are public curated content and do not require authentication. The course detail response is the course syllabus. Lesson responses omit exercise answer keys, correctness flags, and feedback explanations; those remain server-side until an answer is submitted.
 

@@ -25,7 +25,8 @@ import {
 import type { PlannerEntry, PlannerInput } from "../../../types/learning";
 
 function getTodayString(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 export function StudyPlannerScreen() {
@@ -85,7 +86,7 @@ export function StudyPlannerScreen() {
   };
 
   const handleSave = async () => {
-    const durationNum = parseInt(formDuration, 10);
+    const durationNum = Number(formDuration);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(formDate)) {
       setFormError("Date must be formatted as YYYY-MM-DD.");
       return;
@@ -94,7 +95,7 @@ export function StudyPlannerScreen() {
       setFormError("Time must be formatted as HH:mm (24-hour).");
       return;
     }
-    if (isNaN(durationNum) || durationNum < 1 || durationNum > 480) {
+    if (!Number.isInteger(durationNum) || durationNum < 1 || durationNum > 480) {
       setFormError("Duration must be between 1 and 480 minutes.");
       return;
     }

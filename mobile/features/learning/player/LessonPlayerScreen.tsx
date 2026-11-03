@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -54,6 +54,7 @@ export function LessonPlayerScreen() {
 
   // Submission & feedback state
   const [submitting, setSubmitting] = useState(false);
+  const actionLock = useRef(false);
   const [feedback, setFeedback] = useState<ExerciseAnswerResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -127,7 +128,7 @@ export function LessonPlayerScreen() {
   } else if (exType === "matching") {
     hasProvidedAnswer = (matchingAnswers[exId] ?? []).length > 0;
   } else if (exType === "speaking") {
-    hasProvidedAnswer = Boolean(speakingAnswers[exId]?.transcript);
+    hasProvidedAnswer = Boolean(speakingAnswers[exId]?.transcript) && (speakingAnswers[exId]?.score ?? 0) > 0;
   }
 
   const buildPayload = (): ExerciseAnswerPayload | null => {
@@ -149,13 +150,14 @@ export function LessonPlayerScreen() {
       return { kind: "matching", pairs: matchingAnswers[exId] ?? [] };
     }
     if (exType === "speaking") {
-      const sp = speakingAnswers[exId] ?? { transcript: currentExercise.prompt, score: 85 };
-      return { kind: "speaking", transcript: sp.transcript, score: sp.score };
+      const sp = speakingAnswers[exId];
+      return sp ? { kind: "speaking", transcript: sp.transcript, score: sp.score } : null;
     }
     return null;
   };
 
   const handleCheckAnswer = async () => {
+    if (actionLock.current) return;
     if (!isAuthenticated) {
       Alert.alert(
         "Sign in required",
@@ -170,7 +172,7 @@ export function LessonPlayerScreen() {
 
     const payload = buildPayload();
     if (!payload) return;
-
+    actionLock.current = true;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -179,29 +181,29 @@ export function LessonPlayerScreen() {
     } catch (cause) {
       setSubmitError(cause instanceof Error ? cause.message : "Could not submit your answer.");
     } finally {
+      actionLock.current = false;
       setSubmitting(false);
     }
   };
 
   const handleContinue = async () => {
-    setFeedback(null);
+    if (actionLock.current) return;
     setSubmitError(null);
     if (currentIndex + 1 < exercises.length) {
-      setCurrentIndex((prev) => prev + 1);
+      setFeedback(null);
+      setCurrentIndex(currentIndex + 1);
     } else {
       // Trigger lesson completion
+      actionLock.current = true;
       setSubmitting(true);
       try {
         const result = await completeLesson(lesson.id);
         setCompletionResult(result);
         setCompletionModalVisible(true);
       } catch (cause) {
-        Alert.alert(
-          "Lesson Complete",
-          cause instanceof Error ? cause.message : "You have finished all exercises in this lesson.",
-          [{ text: "Done", onPress: () => router.back() }],
-        );
+        setSubmitError(cause instanceof Error ? cause.message : "Could not save completion. Tap Complete Lesson to retry.");
       } finally {
+        actionLock.current = false;
         setSubmitting(false);
       }
     }
@@ -323,6 +325,7 @@ export function LessonPlayerScreen() {
 
           {exType === "matching" && (
             <MatchingExercise
+              key={exId}
               content={currentExercise.content}
               pairs={matchingAnswers[exId] ?? []}
               onChange={(pairs) => setMatchingAnswers((prev) => ({ ...prev, [exId]: pairs }))}
@@ -332,6 +335,7 @@ export function LessonPlayerScreen() {
 
           {exType === "speaking" && (
             <SpeakingExercise
+              key={exId}
               content={currentExercise.content}
               prompt={currentExercise.prompt}
               transcript={speakingAnswers[exId]?.transcript ?? ""}
@@ -385,6 +389,7 @@ export function LessonPlayerScreen() {
                   <Pressable
                     accessibilityRole="button"
                     onPress={handleTryAgain}
+                    disabled={submitting}
                     style={styles.tryAgainButton}
                   >
                     <Text style={styles.tryAgainText}>Try again</Text>
@@ -393,6 +398,7 @@ export function LessonPlayerScreen() {
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => void handleContinue()}
+                  disabled={submitting}
                   style={[
                     styles.continueButton,
                     feedback.isCorrect
@@ -401,7 +407,7 @@ export function LessonPlayerScreen() {
                   ]}
                 >
                   <Text style={styles.continueButtonText}>
-                    {currentIndex + 1 < exercises.length ? "Continue" : "Complete Lesson"}
+                    {submitting ? "Saving…" : currentIndex + 1 < exercises.length ? "Continue" : "Complete Lesson"}
                   </Text>
                 </Pressable>
               </View>

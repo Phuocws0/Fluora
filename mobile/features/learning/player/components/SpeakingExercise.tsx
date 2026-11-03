@@ -44,6 +44,7 @@ export function SpeakingExercise({
   } = useAudioRecorderStudio();
 
   const [hasRecorded, setHasRecorded] = useState(Boolean(transcript));
+  const [togglingRecording, setTogglingRecording] = useState(false);
   const player = useAudioPlayer(recordingUri);
 
   const handleListenPrompt = () => {
@@ -55,14 +56,17 @@ export function SpeakingExercise({
   };
 
   const handleToggleRecord = async () => {
-    if (disabled) return;
+    if (disabled || togglingRecording) return;
+    setTogglingRecording(true);
     try {
       if (isRecording) {
         await stopRecording();
         setHasRecorded(true);
-        // Default to a solid passing score upon real speech practice (85)
-        onChange({ transcript: targetPhrase, score: score > 0 ? score : 85 });
+        // Pronunciation is self-assessed in this local demo, not inferred from audio.
+        onChange({ transcript: targetPhrase, score: 0 });
       } else {
+        onChange({ transcript: "", score: 0 });
+        setHasRecorded(false);
         await startRecording();
       }
     } catch (cause) {
@@ -70,11 +74,13 @@ export function SpeakingExercise({
         "Microphone Required",
         cause instanceof Error ? cause.message : "Could not record audio.",
       );
+    } finally {
+      setTogglingRecording(false);
     }
   };
 
   const handleSelectScore = (newScore: number) => {
-    if (disabled) return;
+    if (disabled || isRecording || togglingRecording) return;
     onChange({ transcript: targetPhrase, score: newScore });
     setHasRecorded(true);
   };
@@ -117,7 +123,7 @@ export function SpeakingExercise({
 
       {/* Recording Studio Area */}
       <View style={styles.studioCard}>
-        <Text style={styles.studioTitle}>Recording Studio (Page 10 · 111)</Text>
+        <Text style={styles.studioTitle}>Recording Studio</Text>
 
         <WaveformVisualizer active={isRecording} meteringLevel={meteringLevel} />
 
@@ -125,7 +131,7 @@ export function SpeakingExercise({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={isRecording ? "Stop recording" : "Record your voice"}
-            disabled={disabled}
+            disabled={disabled || togglingRecording}
             onPress={() => void handleToggleRecord()}
             style={[
               styles.micButton,
@@ -157,16 +163,16 @@ export function SpeakingExercise({
 
         {/* Speaking Scorecard */}
         <View style={styles.scorecardContainer}>
-          <Text style={styles.scorecardHeading}>Speaking Scorecard (Page 10 · 115)</Text>
+          <Text style={styles.scorecardHeading}>Speaking Scorecard</Text>
           <Text style={styles.scorecardSubtitle}>
-            Self-assess pronunciation accuracy & fluency:
+            Demo self-assessment: listen back and rate your practice. Audio is not automatically scored.
           </Text>
 
           <View style={styles.scoreRow}>
             {[
               { label: "Needs Practice", val: 65, emoji: "🌱" },
               { label: "Good Accent", val: 85, emoji: "🌿" },
-              { label: "Native Fluency", val: 100, emoji: "✨" },
+              { label: "Confident", val: 100, emoji: "✨" },
             ].map((item) => {
               const isSelected = hasRecorded && score === item.val;
               return (
