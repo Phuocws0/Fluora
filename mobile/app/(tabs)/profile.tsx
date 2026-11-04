@@ -36,9 +36,6 @@ function Home() {
 
   return <ScreenContainer contentTopPadding={25} fixedFooterBottom={82} fixedFooter={<View style={styles.fixedAction}><GardenButton label="Edit profile" onPress={() => go("edit-profile")} /></View>}>
     <View style={styles.eyebrowRow}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn")} style={styles.backButton}>
-        <Text style={styles.backText}>‹</Text>
-      </Pressable>
       <Text style={styles.eyebrow}>YOUR PERSONAL SPACE</Text>
     </View>
     <Text style={styles.profileName}>{learnerName}</Text>
@@ -69,8 +66,6 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   eyebrowRow: { height: 32, flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 },
-  backButton: { width: 28, height: 32, justifyContent: "center" },
-  backText: { color: "#236C19", fontFamily: font.heavy, fontSize: 28, lineHeight: 32 },
   eyebrow: { color: "#65766C", fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   profileName: { color: ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 32 },
   profileMeta: { color: "#6B7F70", fontFamily: font.body, fontSize: 14, lineHeight: 21, marginTop: 12, marginBottom: 17 },

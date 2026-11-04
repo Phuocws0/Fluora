@@ -197,17 +197,10 @@ export async function searchLessons(filters: {
   skill?: string;
   minutes?: number;
 }) {
+  const query = normalizeSearchText(filters.query ?? "");
   const lessons = await prisma.lesson.findMany({
     where: {
       unit: { is: { course: { is: { isPublished: true } } } },
-      ...(filters.query
-        ? {
-            OR: [
-              { title: { contains: filters.query, mode: "insensitive" as const } },
-              { description: { contains: filters.query, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
       ...(filters.level ? { level: { equals: filters.level, mode: "insensitive" as const } } : {}),
       ...(filters.skill ? { skill: { equals: filters.skill, mode: "insensitive" as const } } : {}),
       ...(filters.minutes ? { durationMinutes: { lte: filters.minutes } } : {}),
@@ -233,7 +226,15 @@ export async function searchLessons(filters: {
     },
   });
 
-  return { lessons };
+  return {
+    lessons: query
+      ? lessons.filter((lesson) => normalizeSearchText(`${lesson.title} ${lesson.description ?? ""}`).includes(query))
+      : lessons,
+  };
+}
+
+function normalizeSearchText(value: string): string {
+  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase();
 }
 
 export async function listLearningPaths() {

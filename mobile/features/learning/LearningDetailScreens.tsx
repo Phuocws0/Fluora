@@ -61,8 +61,7 @@ export function CourseScreen() {
         <View style={[styles.outcomeCard, styles.outcomeBlue]}><Text style={styles.outcomeTitle}>Speak</Text><Text style={styles.outcomeCopy}>Introduce yourself</Text></View>
         <View style={[styles.outcomeCard, styles.outcomeMint]}><Text style={styles.outcomeTitle}>Understand</Text><Text style={styles.outcomeCopy}>Follow daily exchanges</Text></View>
       </View>
-      <Text style={styles.roadmapTitle}>Course roadmap</Text>
-      <View style={styles.levelTrack}><View style={styles.levelProgress} /></View>
+      <Text style={styles.roadmapTitle}>Course levels</Text>
       <View style={styles.levelLabels}>{["A1", "A2", "B1", "B2"].map((level) => <Text key={level} style={styles.levelLabel}>{level}</Text>)}</View>
     </> : !loading && !error ? <ContentState title="Course not found" message="This course may have been removed or is no longer published." /> : null}
   </Page>;
@@ -126,16 +125,11 @@ export function UnitScreen() {
       <View style={styles.lessonCards}>
         {firstLesson && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: firstLesson.id } })} style={[styles.lessonCard, styles.lessonCardFeatured]}>
           <Text style={styles.lessonCardTitle}>01 / {capitalize(firstLesson.skill)}</Text><Text style={styles.lessonCardDescription}>{firstLesson.title}</Text>
-          <View style={styles.lessonProgressTrack}><View style={styles.lessonProgressFill} /></View>
         </Pressable>}
         {[secondLesson, thirdLesson].filter((lesson) => lesson !== undefined).map((lesson, index) => <Pressable key={lesson.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id } })} style={[styles.lessonCard, styles.lessonCardSmall, unit.lessons.length === 2 && styles.lessonCardSingle, index === 1 && styles.lessonCardPlain]}>
           <Text style={styles.lessonCardTitle}>{String(index + 2).padStart(2, "0")} / {capitalize(lesson.skill)}</Text><Text style={styles.lessonCardDescription}>{lesson.title}</Text>
         </Pressable>)}
       </View>
-      {!!unit.lessons.length && <View style={styles.unitWordsSection}>
-        <Text style={styles.unitWordsHeading}>WORDS YOU WILL USE</Text>
-        <View style={styles.unitWordsGrid}>{unit.lessons.flatMap((lesson) => lesson.title.toLowerCase().split(/[^a-z]+/)).filter((word) => word.length > 3).slice(0, 4).map((word, index) => <Text key={word + "-" + index} style={styles.unitWord}>{word}</Text>)}</View>
-      </View>}
       {unit.lessons.length > 3 && <View style={styles.remainingLessons}><SectionTitle>More lessons</SectionTitle>{unit.lessons.slice(3).map((lesson) => <LearningCard key={lesson.id} title={lesson.title} subtitle={`${lesson.skill} · ${lesson.level}`} detail={`${lesson.durationMinutes} min`} onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id } })} />)}</View>}
       {!unit.lessons.length && <ContentState title="No lessons yet" message="Lessons for this unit will appear here when they are available." />}
     </> : !loading && !error ? <ContentState title="Unit not found" message="This unit may have been removed or is no longer published." /> : null}
@@ -203,9 +197,7 @@ const styles = StyleSheet.create({
   outcomeTitle: { color: garden.forest, fontFamily: font.bold, fontSize: 15, lineHeight: 22 },
   outcomeCopy: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 17, marginTop: 4 },
   roadmapTitle: { color: garden.ink, fontFamily: font.bold, fontSize: 17, lineHeight: 24, marginTop: 26 },
-  levelTrack: { backgroundColor: garden.line, borderRadius: 5, height: 8, marginTop: 30, overflow: "hidden" },
-  levelProgress: { backgroundColor: garden.green, borderRadius: 5, height: 8, width: "30%" },
-  levelLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: 3 },
+  levelLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
   levelLabel: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16 },
   pathList: { marginTop: 9, position: "relative" },
   pathConnector: { backgroundColor: garden.line, borderRadius: 5, height: 8, position: "absolute" },
@@ -224,14 +216,8 @@ const styles = StyleSheet.create({
   lessonCardPlain: { backgroundColor: "#ffffff" },
   lessonCardTitle: { color: garden.forest, fontFamily: font.bold, fontSize: 14, lineHeight: 20 },
   lessonCardDescription: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18, marginTop: 5 },
-  lessonProgressTrack: { backgroundColor: garden.line, borderRadius: 4, height: 6, marginHorizontal: 4, marginTop: 18, width: "72%" },
-  lessonProgressFill: { backgroundColor: garden.green, borderRadius: 4, height: 6, width: "38%" },
   unitKicker: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18, marginTop: 7 },
   unitMeta: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginTop: 16, marginBottom: 12 },
-  unitWordsSection: { marginTop: 40 },
-  unitWordsHeading: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginBottom: 8 },
-  unitWordsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  unitWord: { backgroundColor: garden.mint, borderRadius: 18, color: garden.forest, flexBasis: "48%", fontFamily: font.bold, fontSize: 11, lineHeight: 16, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 7 },
   remainingLessons: { marginTop: 14 },
 });
 

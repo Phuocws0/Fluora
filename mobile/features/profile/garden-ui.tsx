@@ -69,9 +69,10 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
 }) {
   const insets = useSafeAreaInsets();
   const topPadding = Math.max(0, 24 - Math.max(0, insets.top - 24));
+  const scrollBottomPadding = !showFooter && !action ? 84 : 28;
   return <SafeAreaView edges={["top", "bottom"]} style={styles.safe}>
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: topPadding }]} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: topPadding, paddingBottom: scrollBottomPadding }]} showsVerticalScrollIndicator={false}>
         <View style={styles.breadcrumb}>
           {back && <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile"))}><Text style={styles.back}>‹</Text></Pressable>}
           <Text style={styles.eyebrow}>{eyebrow}</Text>

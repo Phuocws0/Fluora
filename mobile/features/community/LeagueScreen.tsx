@@ -39,8 +39,8 @@ function LeagueHome() {
   const daysLeft = d ? Math.max(0, Math.ceil((new Date(d.league.period.endsAt).getTime() - Date.now()) / 86_400_000)) : null;
   const currentRank = d?.entries.find((entry) => entry.isCurrentUser)?.rank ?? d?.league.rank;
 
-  return <Page title="Grow with your community" eyebrow="GROW TOGETHER" activeTab="League" showFooter={false}
-    action={d ? { label: detailsVisible ? "Back to leaderboard" : "View league details", onPress: () => setDetailsVisible((visible) => !visible) } : undefined}>
+  return <Page title="Grow with your community" back={false} eyebrow="GROW TOGETHER" activeTab="League" showFooter={false}
+    action={d ? { label: detailsVisible ? "Hide league details" : "View league details", onPress: () => setDetailsVisible((visible) => !visible) } : undefined}>
     {d ? <>
       <Text style={styles.leagueSubtitle}>{d.league.tier.name.toLocaleUpperCase()} LEAGUE · {daysLeft} {daysLeft === 1 ? "DAY" : "DAYS"} LEFT</Text>
       <View style={styles.rankPill}><Text style={styles.rankPillText}>{currentRank ? `TOP 10 ADVANCE · YOUR RANK: ${currentRank}` : "TOP 10 ADVANCE · KEEP PRACTICING"}</Text></View>
@@ -65,6 +65,15 @@ function LeagueHome() {
         <ActionState action={action} />
         <ResourceState resource={resource} />
 
+        <Heading>More ways to grow together</Heading>
+        <View style={styles.detailControls}>
+          <Button label="Friends" onPress={() => router.push("/community/friends")} />
+          <Button label="Study groups" onPress={() => router.push("/community/groups")} />
+          <Button label="Rewards" onPress={() => router.push("/community/rewards")} />
+          <Button label="Notifications" onPress={() => router.push("/community/notifications")} />
+          <Button label="Peer review" onPress={() => router.push("/community/peer-review")} />
+        </View>
+
         <GardenCard tint={garden.mint}>
           <Heading>{d.league.tier.name} League</Heading>
           <Copy>#{d.league.rank ?? "—"} · {d.league.weeklyXp.toLocaleString()} XP this week</Copy>
@@ -87,14 +96,6 @@ function LeagueHome() {
           <Text style={styles.achievementMeta}>{achievement.progress}/{achievement.target}{achievement.earnedAt ? ` · Earned ${new Date(achievement.earnedAt).toLocaleDateString()}` : ""}</Text>
         </Card>)}
 
-        <Heading>More ways to grow together</Heading>
-        <View style={styles.detailControls}>
-          <Button label="Friends" onPress={() => router.push("/community/friends")} />
-          <Button label="Study groups" onPress={() => router.push("/community/groups")} />
-          <Button label="Rewards" onPress={() => router.push("/community/rewards")} />
-          <Button label="Notifications" onPress={() => router.push("/community/notifications")} />
-          <Button label="Peer review" onPress={() => router.push("/community/peer-review")} />
-        </View>
       </View>}
     </> : <ResourceState resource={resource} />}
   </Page>;

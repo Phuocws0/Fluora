@@ -8,7 +8,7 @@ export { ActionState, Button, Card, Copy, Editor, Empty, ResourceState, confirmA
 export type { EditorSpec } from "../shared/feature-ui";
 
 export function PracticePage({ title, children, tab = false, action, scrollRef, onBack }: { title: string; children: ReactNode; tab?: boolean; action?: { label: string; onPress: () => void; disabled?: boolean }; scrollRef?: RefObject<ScrollView | null>; onBack?: () => void }) {
-  return <Page title={title} back showFooter={!tab} activeTab="Practice" eyebrow="PRACTICE & EXPLORE" action={action} scrollRef={scrollRef} onBack={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn"))}>{children}</Page>;
+  return <Page title={title} back={!tab} showFooter={!tab} activeTab="Practice" eyebrow="PRACTICE & EXPLORE" action={action} scrollRef={scrollRef} onBack={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn"))}>{children}</Page>;
 }
 export function PracticeGate({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated } = useAuth();

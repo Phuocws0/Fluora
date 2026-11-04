@@ -1,6 +1,6 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { BackHandler, Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BackHandler, Image, Keyboard, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { tutorApi } from "./tutor.service";
 import { createTutorPreview } from "./tutor.preview";
 import { useAuth } from "../auth/AuthContext";
@@ -47,7 +47,7 @@ export default function TutorScreen() {
       </SessionGate>
     );
   if (mode === "preview") return <TutorPreview exit={() => setMode(null)} />;
-  return <Page title="Meet your AI tutor" eyebrow="YOUR PERSONAL SPACE" activeTab="Tutor" showFooter={false}
+  return <Page title="Meet your AI tutor" back={false} eyebrow="YOUR PERSONAL SPACE" activeTab="Tutor" showFooter={false}
     action={{ label: "Chat with Flo", onPress: startTutor }}>
     <GardenSubtitle>Ask questions, practice conversations and learn from mistakes.</GardenSubtitle>
     <Image source={require("../../assets/fluora-flo-sprout.png")} style={styles.homeMascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
@@ -92,6 +92,8 @@ function TutorWorkspace({
   preview: boolean;
   exit: () => void;
 }) {
+  const chatScrollRef = useRef<ScrollView | null>(null);
+  const messageFieldFocused = useRef(false);
   const [tab, setTab] = useState<"chat" | "history" | "notes">("chat");
   const [active, setActive] = useState<ChatDetail | null>(null);
   const [message, setMessage] = useState("");
@@ -100,6 +102,14 @@ function TutorWorkspace({
   const [hintSteps, setHintSteps] = useState<Record<string, number>>({});
   const [liveHints, setLiveHints] = useState<Record<string, string[]>>({});
   const a = useAction();
+  useEffect(() => {
+    const subscription = Keyboard.addListener("keyboardDidShow", () => {
+      if (messageFieldFocused.current) {
+        setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
+      }
+    });
+    return () => subscription.remove();
+  }, []);
   const r = useResource(
     useCallback(async () => {
       const [scenarios, history, notes, privacy] = await Promise.all([
@@ -268,12 +278,8 @@ function TutorWorkspace({
       exit,
     );
   return (
-    <Page title="Flo Tutor">
-      <Text style={preview ? ui.error : ui.small}>
-        {preview
-          ? "INTERFACE PREVIEW · Fixed examples · Memory only"
-          : "Tutor API · Availability depends on backend #32"}
-      </Text>
+    <Page title="Flo Tutor" back={false} showFooter={false} scrollRef={chatScrollRef}>
+      {preview && <Text style={ui.error}>PREVIEW · These example chats are not saved to your account.</Text>}
       <View style={ui.row}>
         <Button label="Exit" disabled={a.busy} onPress={leave} />
         {(["chat", "history", "notes"] as const).map((t) => (
@@ -596,6 +602,11 @@ function TutorWorkspace({
                         multiline
                         value={message}
                         onChangeText={setMessage}
+                        onFocus={() => {
+                          messageFieldFocused.current = true;
+                          setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 350);
+                        }}
+                        onBlur={() => { messageFieldFocused.current = false; }}
                         maxLength={1000}
                         style={ui.input}
                         editable={!a.busy}
