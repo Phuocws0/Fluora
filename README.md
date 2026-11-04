@@ -48,21 +48,23 @@ npm ci
 
 The values in `.env.example` are local placeholders. Change the local PostgreSQL password and matching `DATABASE_URL` before starting services. `.env` is ignored by Git.
 
-Start the backend and database:
+Start the backend/database, apply migrations, and load all demo fixtures:
 
 ```sh
-docker compose up --build -d
+npm run demo:setup
 ```
 
 The backend applies checked-in Prisma migrations on startup and listens inside Docker on port `4000`; it is published at `http://localhost:4000` by default. Set `PORT` in `.env` to change the host-published backend port. Its database-backed health endpoint is `GET /health`. PostgreSQL is published on port `5433` by default to avoid conflicting with a local PostgreSQL server.
 
-Seed the demonstration course after the backend and database are running:
+The checked-in seed provides four email/password accounts, three courses, 12 lessons/22 exercises, personal practice/progress, groups/rooms/polls, rewards and Tutor history. Demo accounts share the deliberately public local test password `FluoraDemo123!` (optional first-seed override: `DEMO_PASSWORD`). See [demo accounts, repeat-seed behavior, import files and walkthrough](docs/DEMO.md).
+
+To refresh an existing runtime after pulling seed changes:
 
 ```sh
-npm run db:seed --workspace @fluora/backend
+docker compose exec -T backend npm run db:seed --workspace @fluora/backend
 ```
 
-The seed command is safe to run again and does not reset the database. Besides the course, it adds three story/article/dialogue reads, daily quests, achievements, reward-shop items, peer-review samples, three Flo Tutor role-play scenarios, and three password-less demo learners (`demo.*@fluora.local`) so search, profiles, and the League leaderboard have data. The API is under `/api`; see [API.md](docs/API.md) for endpoints and response shapes.
+Each teammate gets these fixtures in their own local database; Git does not contain the Docker data volume. This command does not reset the database. The API is under `/api`; see [API.md](docs/API.md).
 
 This local demo sends no email. Email-verification and password-reset tokens are written to the backend log instead; read them with:
 
@@ -73,6 +75,21 @@ docker compose logs -f backend
 Each token appears once on a line starting with `[dev-mail]`.
 
 The Flo Tutor uses `TUTOR_PROVIDER=local` by default: an offline, rule-based demo tutor that needs no API key. Set `TUTOR_PROVIDER=off` in `.env` and recreate the backend container to check the "Flo is unavailable" state.
+
+To use a real LLM through an OpenAI-compatible gateway such as 9Router, configure the ignored root `.env`:
+
+```dotenv
+TUTOR_PROVIDER=openai
+LLM_BASE_URL=http://host.docker.internal:20128/v1
+LLM_API_KEY=<your-local-9router-key>
+LLM_MODEL=ag/gemini-3-flash
+```
+
+The model above was tested with this machine's Antigravity connection; use a model actually available to your own connection. In 9Router, enable only the accounts you authorize for the selected provider: the gateway key does not pin a chat request to a particular account. Connect accounts through 9Router's own sign-in UI and keep all OAuth credentials in 9Router. Fluora receives only the gateway API key, never a ChatGPT/Google password or OAuth token. Nothing is configured in mobile.
+
+On Linux, a gateway bound only to `127.0.0.1` cannot be reached from the backend container. Compose adds `host.docker.internal:host-gateway`. On the current machine, 9Router runs on the Docker host bridge address `172.17.0.1`, without listening on the LAN. Find your bridge address with `docker network inspect bridge --format '{{(index .IPAM.Config 0).Gateway}}'`, then start the installed gateway with `9router --host <bridge-address> --no-browser`. Its dashboard is at `http://<bridge-address>:20128`. For a backend running directly on the host, use that address instead of `host.docker.internal` in `LLM_BASE_URL`.
+
+Apply backend configuration/code changes with `docker compose up --build -d backend`. General chat and explanations use the LLM. Unsubmitted exercise hints stay curated; role-play grading and branches stay deterministic while the LLM adds feedback. Upstream failures return the existing unavailable state and do not save a partial message. A signed-in mobile account uses the backend; guest Tutor preview remains an explicit local preview. See [API.md](docs/API.md) for provider status, timeouts, and privacy.
 
 Mobile sign-in and registration use email and password; no Google OAuth configuration is needed for the demo. To run on an iPhone with Expo Go, start Expo from `mobile/` and point it at the host machine's LAN address:
 
@@ -131,5 +148,6 @@ The public `main` branch requires a pull request, one approval, and passing CI. 
 - [Database model](docs/DATABASE.md)
 - [Testing and verification](docs/TESTING.md)
 - [Current status](docs/STATUS.md)
+- [Demo setup, accounts and walkthrough](docs/DEMO.md)
 - [Practice implementation and device QA](docs/PRACTICE_HANDOFF.md)
 - [Agent instructions](AGENTS.md)

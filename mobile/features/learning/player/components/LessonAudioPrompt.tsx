@@ -1,13 +1,16 @@
-import { Text, View } from "react-native";
+import { LearningText as Text } from "../../../../components/LearningText";
+import { View } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useSpeechPrompt } from "../../audio/useSpeechPrompt";
 import { Button, s } from "../../../practice/practice-ui";
+import { useAuth } from "../../../auth/AuthContext";
 function contentObject(value: unknown): Record<string, unknown> { return value && typeof value === "object" ? value as Record<string, unknown> : {}; }
 export function promptAudioText(content: unknown, fallback: string) {
   const data = contentObject(content);
   return typeof data.transcript === "string" ? data.transcript.replace(/_+/g, "…") : typeof data.suggestedPhrase === "string" ? data.suggestedPhrase : fallback;
 }
 export function LessonAudioPrompt({ content, prompt }: { content: unknown; prompt: string }) {
+  const { settings } = useAuth();
   const data = contentObject(content);
   const source = typeof data.audioUrl === "string" ? data.audioUrl : null;
   const player = useAudioPlayer(source), status = useAudioPlayerStatus(player);
@@ -18,5 +21,6 @@ export function LessonAudioPrompt({ content, prompt }: { content: unknown; promp
       else if (isSpeaking) stop(); else speak(promptAudioText(content, prompt));
     }} />
     {!source && <Text style={s.caption}>This lesson provides a text prompt. Playback uses your installed device voice.</Text>}
+    {settings?.captions && <Text accessibilityLabel="Audio captions" style={s.body}>Captions: {promptAudioText(content, prompt)}</Text>}
   </View>;
 }

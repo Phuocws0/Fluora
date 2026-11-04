@@ -1,3 +1,4 @@
+import { REFERENCE_VOCABULARY } from "./reference-vocabulary.js";
 import { prisma } from "../../db/prisma.js";
 import { misconceptionRows, setMisconceptionDismissed } from "../activity/insights.service.js";
 
@@ -137,11 +138,7 @@ const tools = [
   { id: "transit", title: "Transit planning", kind: "mission" },
 ];
 
-const dictionary = [
-  { word: "hello", definition: "A greeting.", example: "Hello, my name is Mia." },
-  { word: "morning", definition: "The early part of the day.", example: "Good morning!" },
-  { word: "name", definition: "A word used to identify a person or thing.", example: "My name is Mia." },
-];
+const dictionary = REFERENCE_VOCABULARY.map(({ word, definition, example }) => ({ word, definition, example }));
 
 export function listTools() { return { tools }; }
 export function getTool(toolId: string) {

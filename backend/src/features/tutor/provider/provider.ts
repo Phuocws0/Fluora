@@ -1,6 +1,7 @@
 import { HttpError } from "../../../http/errors.js";
 import type { RolePlayTurn } from "../role-play.js";
 import { localProvider } from "./local.provider.js";
+import { createOpenAIProvider } from "./openai.provider.js";
 
 export const VERDICTS = ["correct", "almost", "try_again"] as const;
 
@@ -26,7 +27,7 @@ export type TutorTurnInput = {
 /** `choiceKey` is a suggestion; the service accepts it only if it belongs to the current turn. */
 export type TutorReply = { body: string; feedback: TutorFeedback | null; choiceKey: string | null };
 
-export type ProviderName = "local" | "off";
+export type ProviderName = "local" | "openai" | "off";
 
 export interface TutorProvider {
   readonly name: ProviderName;
@@ -45,8 +46,13 @@ const offProvider: TutorProvider = {
 function selectProvider(): TutorProvider {
   const configured = (process.env.TUTOR_PROVIDER ?? "").trim() || "local";
   if (configured === "local") return localProvider;
+  if (configured === "openai") {
+    const selected = createOpenAIProvider({ baseUrl: process.env.LLM_BASE_URL, apiKey: process.env.LLM_API_KEY, model: process.env.LLM_MODEL });
+    if (!selected.available) console.warn("Flo's OpenAI-compatible provider needs a valid LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL.");
+    return selected;
+  }
   if (configured === "off") return offProvider;
-  console.warn(`Unknown TUTOR_PROVIDER "${configured}"; the tutor is unavailable. Use "local" or "off".`);
+  console.warn("Unknown TUTOR_PROVIDER; the tutor is unavailable. Use local, openai, or off.");
   return offProvider;
 }
 

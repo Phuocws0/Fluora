@@ -1,8 +1,10 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { LearningText as Text } from "../../../../components/LearningText";
+import { LearningTextInput as TextInput } from "../../../../components/LearningText";
+import { StyleSheet, View } from "react-native";
 
 type Props = {
   content: unknown;
-  prompt: string;
+  mode?: "transcript_gap" | "dictation";
   text: string;
   onChange: (text: string) => void;
   disabled?: boolean;
@@ -16,26 +18,27 @@ function parseTranscript(content: unknown): string {
   return "";
 }
 
-export function TranscriptGapExercise({ content, prompt, text, onChange, disabled = false }: Props) {
+export function TranscriptGapExercise({ content, mode = "transcript_gap", text, onChange, disabled = false }: Props) {
   const transcript = parseTranscript(content);
 
   return (
     <View style={styles.container}>
-      {transcript ? (
+      {transcript && mode === "transcript_gap" ? (
         <View style={styles.transcriptCard}>
           <Text style={styles.transcriptEyebrow}>LISTEN & FILL THE GAP:</Text>
           <Text style={styles.transcriptText}>{transcript}</Text>
         </View>
       ) : null}
 
-      <Text style={styles.inputLabel}>YOUR ANSWER:</Text>
+      <Text style={styles.inputLabel}>{mode === "dictation" ? "WRITE THE SENTENCE YOU HEAR:" : "YOUR ANSWER:"}</Text>
       <TextInput
-        accessibilityLabel="Your answer"
+        accessibilityLabel={mode === "dictation" ? "Your dictation sentence" : "Your answer"}
         autoCapitalize="none"
         autoCorrect={false}
         editable={!disabled}
         onChangeText={onChange}
-        placeholder="Type the missing word here…"
+        multiline={mode === "dictation"}
+        placeholder={mode === "dictation" ? "Type the sentence you hear…" : "Type the missing word here…"}
         placeholderTextColor="#8d9d94"
         style={[styles.input, disabled && styles.disabled]}
         value={text}

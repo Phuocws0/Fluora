@@ -203,11 +203,14 @@ export async function skillBaseline(userId: string) {
 }
 
 export async function home(userId: string) {
-  const [course, totals, last, completed] = await Promise.all([
-    prisma.course.findFirst({ where: { isPublished: true }, orderBy: { order: "asc" }, select: { id: true, title: true, language: true, level: true } }),
+  const [courses, totals, last, completed] = await Promise.all([
+    prisma.course.findMany({ where: { isPublished: true }, orderBy: { order: "asc" }, select: { id: true, title: true, language: true, level: true, units: { select: { lessons: { select: { id: true } } } } } }),
     progress(userId),
     prisma.lessonCompletion.findFirst({ where: { userId }, orderBy: { completedAt: "desc" }, select: { lessonId: true, completedAt: true } }),
     prisma.lessonCompletion.findMany({ where: { userId }, select: { lessonId: true } }),
   ]);
+  const completedIds = new Set(completed.map(item => item.lessonId));
+  const selected = courses.find(course => course.units.some(unit => unit.lessons.some(lesson => !completedIds.has(lesson.id)))) ?? courses[0];
+  const course = selected ? { id: selected.id, title: selected.title, language: selected.language, level: selected.level } : null;
   return { course, progress: { ...totals, lastCompletedLesson: last, completedLessonIds: completed.map((item) => item.lessonId) }, streak: totals.currentStreak, wallet: { gems: totals.gems } };
 }

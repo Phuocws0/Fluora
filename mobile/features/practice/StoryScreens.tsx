@@ -1,5 +1,7 @@
+import { LearningText } from "../../components/LearningText";
+import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
@@ -140,7 +142,7 @@ function Reader({ id, forceOffline }: { id: string; forceOffline: boolean }) {
         <Text style={s.caption}>Paragraph {content.paragraphs.length ? position + 1 : 0} / {content.paragraphs.length} · Tap a word to explore its meaning</Text>
         {content.paragraphs.map((paragraph, i) => <View key={i} onLayout={event => { paragraphOffsets.current[i] = event.nativeEvent.layout.y; if (progressReady && i === position) scrollRef.current?.scrollTo({ y: event.nativeEvent.layout.y, animated: false }); }} style={{ backgroundColor: mode === "dialogue" ? i % 2 ? "#EAF4FF" : "#EAF8DE" : paragraph.quote ? "#EAF8DE" : "white", borderWidth: i === position ? 1 : 0, borderColor: "#58CC02", borderRadius: 18, padding: 16, marginVertical: 7, marginLeft: mode === "dialogue" && i % 2 ? 28 : 0 }}>
           {paragraph.speaker && <Text style={s.label}>{paragraph.speaker}</Text>}
-          <Text style={[s.body, settings?.textSize === "extra_large" ? { fontFamily: "Nunito_400Regular", fontSize: 24, lineHeight: 34 } : settings?.textSize === "large" ? { fontFamily: "Nunito_400Regular", fontSize: 20, lineHeight: 30 } : {}]}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</Text>
+          <LearningText style={s.body}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</LearningText>
           <Button label={isSpeaking && i === position ? "Stop reading aloud" : "Read aloud"} onPress={() => { setPosition(i); if (isSpeaking) stop(); else speak(paragraph.text); }} />
         </View>)}
         <View style={s.wrap}><Button label="Previous" disabled={!progressReady || action.busy || position === 0} onPress={() => save(position - 1)} /><Button label="Next / save position" disabled={!progressReady || action.busy || position >= content.paragraphs.length - 1} onPress={() => save(position + 1)} /><Button label="Mark read" disabled={!progressReady || action.busy || !content.paragraphs.length} onPress={() => save(Math.max(0, content.paragraphs.length - 1), true)} /></View>

@@ -4,11 +4,11 @@ import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
 
-async function loadActivity(completions) {
+async function loadActivity(completions, courses = [{ id: "course", title: "English", units: [{ lessons: [{ id: "lesson-1" }, { id: "lesson-2" }, { id: "lesson-3" }] }] }]) {
   const source = await readFile(new URL("../backend/src/features/activity/activity.service.ts", import.meta.url), "utf8");
   const context = vm.createContext({ Date, Map, Set });
   const prisma = {
-    course: { findFirst: async () => ({ id: "course", title: "English" }) },
+    course: { findMany: async () => courses },
     lessonCompletion: {
       findMany: async ({ where }) => {
         assert.equal(where.userId, "learner");
@@ -54,4 +54,20 @@ test("home returns an empty completion list for a new learner", async () => {
   assert.equal(result.progress.completedLessonIds.length, 0);
   assert.equal(result.progress.lastCompletedLesson, null);
   assert.equal(result.progress.completedLessons, 0);
+});
+
+test("home advances to an unfinished course and does not expose its internal lesson list", async () => {
+  const today = new Date();
+  const activity = await loadActivity([{ lessonId: "done", xpEarned: 12, completedAt: today }], [
+    { id: "finished", units: [{ lessons: [{ id: "done" }] }] },
+    { id: "next", units: [{ lessons: [{ id: "new" }] }] },
+  ]);
+  const result = await activity.home("learner");
+  assert.equal(result.course.id, "next");
+  assert.equal("units" in result.course, false);
+});
+
+test("home handles an empty catalog without inventing a course", async () => {
+  const activity = await loadActivity([], []);
+  assert.equal((await activity.home("learner")).course, null);
 });

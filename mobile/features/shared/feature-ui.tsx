@@ -1,19 +1,8 @@
+import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect, router } from "expo-router";
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { ContentState } from "../../components/ContentState";
 import { ApiError, getJson, postJson } from "../../services/api";

@@ -186,13 +186,14 @@ export const tutorApi: TutorService = {
     const content = topic && !context?.turnId && availableTopicLength > 0
       ? `Context: ${topic.slice(0, availableTopicLength)}\n\n${message}`
       : message;
-    const result = await postJson<ApiSendResult>(`/tutor/chats/${id(chatId)}/messages`, { message: content });
+    const result = await postJson<ApiSendResult>(`/tutor/chats/${id(chatId)}/messages`, { message: content }, 75000);
     return mapSendResult(result);
   },
   editMessage: async (chatId, messageId, message) => {
     const result = await patchJson<ApiSendResult>(
       `/tutor/chats/${id(chatId)}/messages/${id(messageId)}`,
       { message },
+      75000,
     );
     return mapSendResult(result);
   },

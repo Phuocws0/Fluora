@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { LearningText as Text } from "../../../../components/LearningText";
+import { Pressable, StyleSheet, View } from "react-native";
 import { font, garden } from "../../../profile/garden-ui";
 
 type Props = {

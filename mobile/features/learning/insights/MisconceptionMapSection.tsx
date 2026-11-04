@@ -1,6 +1,7 @@
+import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import { getMisconceptions, setMisconceptionDismissed } from "../activity.service";
 import type { MisconceptionItem } from "../../../types/learning";

@@ -1,6 +1,7 @@
+import { LearningText as Text } from "../../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { useAudioPlayer } from "expo-audio";
 import { useSpeechPrompt } from "../../audio/useSpeechPrompt";
 import { useAudioRecorderStudio } from "../../audio/useAudioRecorderStudio";
@@ -202,7 +203,7 @@ export function SpeakingExercise({
           {hasRecorded ? (
             <View style={styles.resultBox}>
               <Text style={styles.resultTranscript}>
-                Recorded Transcript: “{transcript || targetPhrase}”
+                Practice phrase (not transcribed): “{transcript || targetPhrase}”
               </Text>
               <Text style={styles.resultScore}>Scorecard Rating: {score}/100</Text>
             </View>

@@ -34,7 +34,7 @@ export function setUnauthorizedHandler(
   };
 }
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = 15000): Promise<T> {
   let response: Response;
   const accessToken = await getAccessToken();
   const headers = new Headers(init?.headers);
@@ -42,7 +42,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     headers.set("Content-Type", "application/json");
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     response = await fetch(`${apiBaseUrl}/api${path}`, { ...init, headers, signal: controller.signal });
   } catch {
@@ -80,12 +80,12 @@ export function getJson<T>(path: string): Promise<T> {
   return requestJson<T>(path);
 }
 
-export function postJson<T>(path: string, body: unknown): Promise<T> {
-  return requestJson<T>(path, { method: "POST", body: JSON.stringify(body) });
+export function postJson<T>(path: string, body: unknown, timeoutMs?: number): Promise<T> {
+  return requestJson<T>(path, { method: "POST", body: JSON.stringify(body) }, timeoutMs);
 }
 
-export function patchJson<T>(path: string, body: unknown): Promise<T> {
-  return requestJson<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+export function patchJson<T>(path: string, body: unknown, timeoutMs?: number): Promise<T> {
+  return requestJson<T>(path, { method: "PATCH", body: JSON.stringify(body) }, timeoutMs);
 }
 
 export function putJson<T>(path: string, body: unknown): Promise<T> {

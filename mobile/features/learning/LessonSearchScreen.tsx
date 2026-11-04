@@ -1,6 +1,8 @@
+import { LearningText as Text } from "../../components/LearningText";
+import { LearningTextInput as TextInput } from "../../components/LearningText";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { LearningCard } from "../../components/LearningCard";
 import { ScreenContainer } from "../../components/ScreenContainer";

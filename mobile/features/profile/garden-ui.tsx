@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { ReactNode, RefObject } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
 
 export const garden = {
@@ -67,9 +67,11 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
   activeTab?: GardenTab;
   scrollRef?: RefObject<ScrollView | null>;
 }) {
+  const insets = useSafeAreaInsets();
+  const topPadding = Math.max(0, 24 - Math.max(0, insets.top - 24));
   return <SafeAreaView edges={["top", "bottom"]} style={styles.safe}>
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: topPadding }]} showsVerticalScrollIndicator={false}>
         <View style={styles.breadcrumb}>
           {back && <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile"))}><Text style={styles.back}>‹</Text></Pressable>}
           <Text style={styles.eyebrow}>{eyebrow}</Text>

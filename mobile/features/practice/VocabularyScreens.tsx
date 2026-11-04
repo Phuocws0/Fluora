@@ -1,5 +1,6 @@
+import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
 import { practiceApi } from "./practice.service";

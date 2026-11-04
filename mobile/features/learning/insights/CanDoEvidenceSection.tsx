@@ -1,15 +1,9 @@
+import { LearningText as Text } from "../../../components/LearningText";
+import { LearningTextInput as TextInput } from "../../../components/LearningText";
+import { PreferenceModal as Modal } from "../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import {
   createEvidence,

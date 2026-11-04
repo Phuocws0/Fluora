@@ -1,8 +1,10 @@
+import { LearningText as Text } from "../../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSpeechPrompt } from "../../audio/useSpeechPrompt";
 import { WaveformVisualizer } from "../../components/WaveformVisualizer";
+import { useAuth } from "../../../auth/AuthContext";
 
 type Props = {
   promptText: string;
@@ -10,12 +12,14 @@ type Props = {
 };
 
 export function AudioOnlyPlayer({ promptText, onExitAudioOnly }: Props) {
+  const { settings } = useAuth();
+  const steady = Boolean(settings?.reducedMotion || settings?.focusMode);
   const { speak, stop, isSpeaking } = useSpeechPrompt();
   const [metering, setMetering] = useState(0.1);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
-    if (isSpeaking) {
+    if (isSpeaking && !steady) {
       interval = setInterval(() => {
         setMetering(0.3 + Math.random() * 0.6);
       }, 100);
@@ -25,7 +29,7 @@ export function AudioOnlyPlayer({ promptText, onExitAudioOnly }: Props) {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isSpeaking]);
+  }, [isSpeaking, steady]);
 
   const handlePlay = () => {
     if (isSpeaking) {
@@ -72,6 +76,7 @@ export function AudioOnlyPlayer({ promptText, onExitAudioOnly }: Props) {
         </View>
       </View>
 
+      {settings?.captions && <Text accessibilityLabel="Audio captions" style={styles.note}>Captions: {promptText}</Text>}
       <Text style={styles.note}>
         Tune your ears to natural pronunciation and cadence. Once you understand the prompt, use the standard mode to submit your response.
       </Text>

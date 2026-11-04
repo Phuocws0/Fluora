@@ -1,5 +1,6 @@
+import { LearningText as Text } from "../../components/LearningText";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Image, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { LearningCard } from "../../components/LearningCard";
 import { ScreenContainer } from "../../components/ScreenContainer";

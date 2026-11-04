@@ -1,16 +1,8 @@
+import { ONBOARDING_LEVELS as STARTING_LEVELS } from "./onboarding-levels";
+import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
@@ -32,13 +24,6 @@ const COURSE_LANGUAGES = [
   { id: "ja", label: "Japanese" },
   { id: "ko", label: "Korean" },
   { id: "fr", label: "French" },
-];
-
-const APP_LANGUAGES = [
-  { id: "en", label: "English", sublabel: "Default" },
-  { id: "vi", label: "Tiếng Việt", sublabel: "Vietnamese" },
-  { id: "es", label: "Español", sublabel: "Spanish" },
-  { id: "fr", label: "Français", sublabel: "French" },
 ];
 
 const MOTIVATIONS = [
@@ -76,17 +61,6 @@ const MOTIVATIONS = [
   },
 ];
 
-const STARTING_LEVELS: Array<{
-  id: "A1" | "A2" | "B1" | "B2";
-  label: "A0" | "A1" | "A2" | "B1";
-  desc: string;
-}> = [
-  { id: "A1", label: "A0", desc: "New" },
-  { id: "A2", label: "A1", desc: "Words" },
-  { id: "B1", label: "A2", desc: "Talks" },
-  { id: "B2", label: "B1", desc: "Ideas" },
-];
-const LEVEL_STEP_HEIGHTS = [110, 158, 206, 254];
 
 const DAILY_GOALS = [
   { minutes: 5, label: "5 min" },
@@ -170,6 +144,8 @@ const DEFAULT_DRAFT: OnboardingDraft = {
 };
 
 export function OnboardingWizard() {
+  const insets = useSafeAreaInsets();
+  const headerTopPadding = Math.max(0, 28 - Math.max(0, insets.top - 24));
   const router = useRouter();
   const { isAuthenticated, completeOnboarding } = useAuth();
 
@@ -191,7 +167,7 @@ export function OnboardingWizard() {
           ...prev,
           ...saved,
           courseLanguage: saved.courseLanguage === "en" ? "en" : prev.courseLanguage,
-          appLanguage: saved.appLanguage || prev.appLanguage,
+          appLanguage: "en",
           motivation: MOTIVATIONS.some((item) => item.id === saved.motivation)
             ? saved.motivation
             : prev.motivation,
@@ -330,7 +306,7 @@ export function OnboardingWizard() {
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Top Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { height: 32 + headerTopPadding, paddingTop: headerTopPadding }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Back"
@@ -385,7 +361,7 @@ export function OnboardingWizard() {
               })}
             </View>
             <Text style={styles.appLanguageNote}>
-              App language: {APP_LANGUAGES.find((language) => language.id === draft.appLanguage)?.label ?? "English"} / Tiếng Việt
+              App language: English (demo)
             </Text>
           </View>
         )}
@@ -451,9 +427,8 @@ export function OnboardingWizard() {
             <View style={styles.levelTask}>
               <Text style={styles.levelRampLabel}>YOUR FIRST CEFR STEP</Text>
               <View style={styles.levelRamp}>
-                {STARTING_LEVELS.map((level, index) => {
-                  const isSelected = draft.startingLevel === level.id ||
-                    (index === STARTING_LEVELS.length - 1 && (draft.startingLevel === "C1" || draft.startingLevel === "C2"));
+                {STARTING_LEVELS.map((level) => {
+                  const isSelected = draft.startingLevel === level.id;
                 return (
                   <Pressable
                     key={level.id}
@@ -468,7 +443,6 @@ export function OnboardingWizard() {
                     }
                     style={({ pressed }) => [
                       styles.levelStep,
-                      { left: index * 87, height: LEVEL_STEP_HEIGHTS[index] },
                       isSelected && styles.levelStepSelected,
                       pressed && styles.selectionCardPressed,
                     ]}
@@ -1110,12 +1084,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: {
-    height: 60,
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
     paddingHorizontal: 24,
-    paddingTop: 28,
   },
   backButton: {
     width: 28,
@@ -1464,30 +1436,25 @@ const styles = StyleSheet.create({
     marginTop: 35,
   },
   levelTask: {
-    height: 442,
-    position: "relative",
     width: "100%",
   },
   levelRampLabel: {
-    position: "absolute",
-    top: 0,
-    left: 0,
     color: "#236c19",
     fontFamily: "Nunito_700Bold",
     fontSize: 12,
     lineHeight: 18,
   },
   levelRamp: {
-    position: "absolute",
-    top: 76,
-    left: 0,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 18,
     width: "100%",
-    height: 254,
   },
   levelStep: {
-    position: "absolute",
-    bottom: 0,
-    width: 78,
+    flexBasis: "46%",
+    flexGrow: 1,
+    minHeight: 82,
     borderRadius: 16,
     padding: 14,
     backgroundColor: "#f7faf6",
@@ -1510,11 +1477,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   levelReassurance: {
-    position: "absolute",
-    top: 358,
-    left: 0,
+    marginTop: 18,
     width: "100%",
-    height: 84,
+    minHeight: 84,
     borderRadius: 16,
     backgroundColor: "#eaf8de",
     padding: 14,

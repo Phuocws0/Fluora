@@ -1,17 +1,8 @@
+import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GardenFooter, font, garden } from "../../profile/garden-ui";
 import { ContentState } from "../../../components/ContentState";
@@ -39,7 +30,8 @@ import type {
 export function LessonPlayerScreen() {
   const { lessonId = "", offline } = useLocalSearchParams<{ lessonId: string; offline?: string }>();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, settings } = useAuth();
+  const focusMode = settings?.focusMode ?? false;
   const [preferOffline, setPreferOffline] = useState(offline === "1");
   const [offlinePractice, setOfflinePractice] = useState(false);
   const loadLesson = useCallback(async (id: string) => {
@@ -264,9 +256,9 @@ export function LessonPlayerScreen() {
           <View style={styles.progressBarWrapper}>
             <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
-          <View accessibilityLabel="Five hearts remaining" style={styles.hearts}>
-            <Ionicons name="heart" size={15} color="#E34850" />
-            <Text style={styles.heartCount}>5</Text>
+          <View accessibilityLabel={`Exercise ${currentIndex + 1} of ${exercises.length}`} style={styles.exerciseCounter}>
+            <Ionicons name="book-outline" size={15} color={garden.forest} />
+            <Text style={styles.exerciseCounterText}>{currentIndex + 1}/{exercises.length}</Text>
           </View>
         </View>
 
@@ -288,14 +280,14 @@ export function LessonPlayerScreen() {
             <Text style={styles.instruction}>{currentExercise.instruction}</Text>
           ) : null}
           <View style={styles.exerciseTools}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Toggle audio-only mode" onPress={() => setAudioOnlyMode((previous) => !previous)} style={styles.utilityButton}>
+            {!focusMode && <Pressable accessibilityRole="button" accessibilityLabel="Toggle audio-only mode" onPress={() => setAudioOnlyMode((previous) => !previous)} style={styles.utilityButton}>
               <Ionicons name={audioOnlyMode ? "headset" : "headset-outline"} size={17} color={garden.forest} />
-            </Pressable>
+            </Pressable>}
             <Pressable accessibilityRole="button" onPress={() => setHintModalVisible(true)} style={styles.utilityButton}>
               <Ionicons name="bulb-outline" size={17} color={garden.forest} />
               <Text style={styles.utilityLabel}>Hint</Text>
             </Pressable>
-            <Text style={styles.stepBadge}>{currentIndex + 1} / {exercises.length}</Text>
+            <Text style={styles.stepBadge}>{focusMode ? "FOCUS MODE" : `${currentIndex + 1} / ${exercises.length}`}</Text>
           </View>
           {offlinePractice && <View style={styles.errorBanner}><Text style={styles.errorText}>OFFLINE PRACTICE · Answers are ungraded and XP is not saved.</Text><Pressable accessibilityRole="button" onPress={() => { setFeedback(null); if (preferOffline) setPreferOffline(false); else void refresh(); }}><Text style={styles.hintButtonText}>Reconnect / submit online</Text></Pressable></View>}
 
@@ -324,7 +316,7 @@ export function LessonPlayerScreen() {
           {(exType === "transcript_gap" || exType === "dictation") && (
             <TranscriptGapExercise
               content={currentExercise.content}
-              prompt={currentExercise.prompt}
+              mode={exType}
               text={gapAnswers[exId] ?? ""}
               onChange={(text) => setGapAnswers((prev) => ({ ...prev, [exId]: text }))}
               disabled={Boolean(feedback) || submitting}
@@ -469,7 +461,7 @@ export function LessonPlayerScreen() {
           onClose={() => setHistoryModalVisible(false)}
         />
       </KeyboardAvoidingView>
-      <GardenFooter activeTab="Learn" />
+      {!focusMode && <GardenFooter activeTab="Learn" />}
     </SafeAreaView>
   );
 }
@@ -542,8 +534,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#236c19",
   },
   stepBadge: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginLeft: "auto" },
-  hearts: { alignItems: "center", flexDirection: "row", gap: 3 },
-  heartCount: { color: "#E34850", fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
+  exerciseCounter: { alignItems: "center", flexDirection: "row", gap: 3 },
+  exerciseCounterText: { color: garden.forest, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
