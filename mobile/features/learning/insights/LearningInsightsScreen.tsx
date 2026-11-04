@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   backButton: { padding: 4 },
-  navTitle: { color: "#20352b", fontSize: 18, fontWeight: "900" },
+  navTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 18, fontWeight: "900" },
   authGateContainer: { flex: 1, justifyContent: "center", padding: 24 },
   tabBar: {
     backgroundColor: "#f5f8f4",
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 2,
   },
-  tabText: { color: "#65766c", fontSize: 12, fontWeight: "700" },
+  tabText: { fontFamily: "Nunito_700Bold", color: "#65766c", fontSize: 12, fontWeight: "700" },
   tabTextActive: { color: "#236c19", fontWeight: "900" },
   content: { padding: 20, paddingBottom: 40 },
 });

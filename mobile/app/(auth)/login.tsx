@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -13,12 +11,12 @@ import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import {
-  googleSignInUnavailableMessage,
   signInWithGoogle,
 } from "../../services/auth";
 import { useAuth } from "../../features/auth/AuthContext";
 import { getLearnerSettings } from "../../features/onboarding/onboarding.service";
 import { ScreenContainer } from "../../components/ScreenContainer";
+import { font, garden } from "../../features/profile/garden-ui";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -26,12 +24,9 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSigningInGoogle, setIsSigningInGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const unavailableMessage = googleSignInUnavailableMessage();
 
   const validate = (): string | null => {
     const trimmed = email.trim();
@@ -101,12 +96,13 @@ export default function LoginScreen() {
         }
       }
     } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "Google sign-in could not be completed.";
       setError(
         cause instanceof ApiError
           ? cause.message
-          : cause instanceof Error
-          ? cause.message
-          : "Google sign-in could not be completed.",
+          : message.startsWith("Set EXPO_PUBLIC_GOOGLE")
+            ? "Google sign-in is not configured for this local build."
+            : message,
       );
     } finally {
       setIsSigningInGoogle(false);
@@ -114,33 +110,39 @@ export default function LoginScreen() {
   }
 
   const isBusy = isSubmitting || isSigningInGoogle;
+  const initial = email.trim().charAt(0).toUpperCase() || "M";
 
   return (
-    <ScreenContainer>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Back to welcome"
-        onPress={() => router.replace("/(auth)/welcome")}
-        style={styles.backButton}
-      >
-        <Ionicons name="arrow-back" size={22} color="#20352b" />
-      </Pressable>
-
-      <Text style={styles.eyebrow}>FLUORA</Text>
-      <Text style={styles.title}>Welcome back</Text>
-      <Text style={styles.description}>
-        Sign in to continue your learning journey.
-      </Text>
-
-      <View style={styles.gardenCard}>
-        <Image
-          accessibilityLabel="Flo waiting in the Fluora garden"
-          resizeMode="contain"
-          source={require("../../assets/fluora-welcome-garden.png")}
-          style={styles.gardenIllustration}
-        />
-        <Text style={styles.gardenCaption}>Your garden is waiting</Text>
+    <ScreenContainer contentTopPadding={28} fixedFooterBottom={20} fixedFooter={
+      <View style={styles.stickyFooter}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isBusy, busy: isSubmitting }}
+          disabled={isBusy}
+          onPress={handleEmailSignIn}
+          style={({ pressed }) => [styles.primaryButton, pressed && !isBusy ? styles.primaryButtonPressed : null, isBusy && styles.disabled]}
+        >
+          {isSubmitting ? <ActivityIndicator color={garden.ink} /> : <Text style={styles.primaryButtonText}>Sign in</Text>}
+        </Pressable>
+        <Text style={styles.footer}>FLUORA · GROW AT YOUR OWN PACE</Text>
       </View>
+    }>
+      <View style={styles.topNavigation}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to welcome"
+          onPress={() => router.replace("/(auth)/welcome")}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={22} color={garden.forest} />
+        </Pressable>
+        <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
+      </View>
+      <Text style={styles.title}>Welcome back!</Text>
+      <Text style={styles.description}>Pick up right where you left off.</Text>
+
+      <View style={styles.avatar}><Text style={styles.avatarInitial}>{initial}</Text></View>
+      <Text style={styles.gardenCaption}>Your garden is waiting</Text>
 
       {error ? (
         <View style={styles.errorContainer} accessibilityRole="alert">
@@ -163,7 +165,7 @@ export default function LoginScreen() {
               setEmail(val);
               if (error) setError(null);
             }}
-            placeholder="you@example.com"
+            placeholder="minh@example.com"
             placeholderTextColor="#8a9a90"
             style={styles.input}
             value={email}
@@ -171,12 +173,7 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.field}>
-          <View style={styles.labelRow}>
-            <Text style={styles.label}>Password</Text>
-            <Link href="/(auth)/forgot-password" style={styles.forgotLink}>
-              Forgot password?
-            </Link>
-          </View>
+          <Text style={styles.label}>Password</Text>
           <View style={styles.passwordWrapper}>
             <TextInput
               accessibilityLabel="Password"
@@ -188,29 +185,16 @@ export default function LoginScreen() {
                 setPassword(val);
                 if (error) setError(null);
               }}
-              placeholder="Enter your password"
+              placeholder="••••••••••"
               placeholderTextColor="#8a9a90"
-              secureTextEntry={!showPassword}
+              secureTextEntry
               style={styles.passwordInput}
               value={password}
             />
-            <Pressable
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-              accessibilityRole="button"
-              disabled={isBusy}
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeButton}
-            >
-              <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color="#65766c"
-              />
-            </Pressable>
           </View>
         </View>
-
       </View>
+      <Link href="/(auth)/forgot-password" style={styles.forgotLink}>Forgot password?</Link>
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
@@ -221,111 +205,54 @@ export default function LoginScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityState={{
-          disabled: Boolean(unavailableMessage) || isBusy,
+          disabled: isBusy,
           busy: isSigningInGoogle,
         }}
-        disabled={Boolean(unavailableMessage) || isBusy}
+        disabled={isBusy}
         onPress={handleGoogleSignIn}
         style={({ pressed }) => [
           styles.googleButton,
           pressed && !isBusy ? styles.googleButtonPressed : null,
-          (Boolean(unavailableMessage) || isBusy) && styles.disabled,
-        ]}
-      >
-        {isSigningInGoogle ? (
-          <ActivityIndicator color="#236c19" />
-        ) : (
-          <Text style={styles.googleMark}>G</Text>
-        )}
-        <Text style={styles.googleButtonText}>
-          {isSigningInGoogle ? "Signing in…" : "Continue with Google"}
-        </Text>
-      </Pressable>
-
-      {unavailableMessage ? (
-        <Text style={styles.helper}>{unavailableMessage}</Text>
-      ) : null}
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isBusy, busy: isSubmitting }}
-        disabled={isBusy}
-        onPress={handleEmailSignIn}
-        style={({ pressed }) => [
-          styles.primaryButton,
-          pressed && !isBusy ? styles.primaryButtonPressed : null,
           isBusy && styles.disabled,
         ]}
       >
-        {isSubmitting ? (
-          <ActivityIndicator color="#20352b" />
-        ) : (
-          <Text style={styles.primaryButtonText}>Sign In</Text>
-        )}
+        {isSigningInGoogle ? <ActivityIndicator color="#236c19" /> : <Text style={styles.googleButtonText}>Continue with Google</Text>}
       </Pressable>
 
-      <View style={styles.links}>
-        <View style={styles.registerRow}>
-          <Text style={styles.registerText}>Don't have an account?</Text>
-          <Link href="/(auth)/register" style={styles.link}>
-            Create account
-          </Link>
-        </View>
-        {Platform.OS !== "web" ? (
-          <Link href="/(auth)/onboarding" style={styles.guestLink}>
-            Continue as a guest
-          </Link>
-        ) : null}
-      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingRight: 12,
-    marginBottom: 12,
-  },
-  eyebrow: {
-    color: "#236c19",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
+  topNavigation: { alignItems: "center", flexDirection: "row", gap: 8, height: 32, marginBottom: 12 },
+  backButton: { alignItems: "center", justifyContent: "center", height: 32, width: 28 },
+  eyebrow: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   title: {
-    color: "#20352b",
-    fontSize: 30,
-    fontWeight: "900",
-    marginTop: 8,
+    color: garden.ink,
+    fontFamily: font.heavy,
+    fontSize: 24,
+    fontWeight: "800",
+    lineHeight: 32,
   },
   description: {
-    color: "#65766c",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
+    color: garden.muted,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 12,
   },
-  gardenCard: {
-    minHeight: 106,
-    flexDirection: "row",
+  avatar: {
     alignItems: "center",
-    gap: 14,
-    backgroundColor: "#eaf8de",
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    marginTop: 18,
+    alignSelf: "center",
+    backgroundColor: garden.mint,
+    borderRadius: 38,
+    height: 76,
+    justifyContent: "center",
+    marginTop: 12,
+    width: 76,
   },
-  gardenIllustration: {
-    width: 86,
-    height: 86,
-  },
-  gardenCaption: {
-    flex: 1,
-    color: "#20352b",
-    fontSize: 17,
-    fontWeight: "800",
-  },
+  avatarInitial: { color: garden.forest, fontFamily: font.bold, fontSize: 16, lineHeight: 22 },
+  gardenCaption: { color: garden.forest, fontFamily: font.bold, fontSize: 18, lineHeight: 25, marginBottom: 12, marginTop: 16, textAlign: "center" },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -339,6 +266,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#b42318",
     fontSize: 13,
     fontWeight: "600",
@@ -346,73 +274,81 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   form: {
-    marginTop: 20,
-    gap: 16,
+    marginTop: 8,
+    gap: 10,
   },
   field: {
-    gap: 6,
-  },
-  labelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: garden.line,
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 76,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
   label: {
-    color: "#20352b",
-    fontSize: 13,
-    fontWeight: "700",
+    color: garden.ink,
+    fontFamily: font.bold,
+    fontSize: 12,
+    lineHeight: 18,
   },
   forgotLink: {
-    color: "#236c19",
-    fontSize: 13,
-    fontWeight: "600",
+    alignSelf: "flex-end",
+    color: garden.forest,
+    fontFamily: font.bold,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 8,
+    marginRight: 4,
   },
   input: {
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 12,
-    borderWidth: 1.5,
-    color: "#20352b",
-    fontSize: 15,
-    minHeight: 50,
-    paddingHorizontal: 16,
+    color: garden.muted,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 34,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   passwordWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 12,
-    borderWidth: 1.5,
   },
   passwordInput: {
     flex: 1,
-    color: "#20352b",
-    fontSize: 15,
-    minHeight: 50,
-    paddingHorizontal: 16,
-  },
-  eyeButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    color: garden.muted,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 34,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#58cc02",
+    backgroundColor: garden.green,
     borderRadius: 16,
     justifyContent: "center",
-    marginTop: 18,
-    minHeight: 56,
+    height: 56,
     paddingHorizontal: 20,
+    shadowColor: garden.forest,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 0,
+    elevation: 3,
   },
   primaryButtonPressed: {
     opacity: 0.82,
   },
   primaryButtonText: {
-    color: "#20352b",
+    fontFamily: font.bold,
+    color: garden.ink,
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
   },
+  stickyFooter: { gap: 8 },
+  footer: { color: garden.muted, fontFamily: font.bold, fontSize: 10, lineHeight: 15, textAlign: "center" },
   disabled: {
     opacity: 0.55,
   },
@@ -428,64 +364,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#e1e8e3",
   },
   dividerText: {
+    fontFamily: "Nunito_700Bold",
     color: "#8a9a90",
     fontSize: 13,
     fontWeight: "600",
   },
   googleButton: {
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 14,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 12,
+    alignItems: "flex-start",
+    backgroundColor: garden.blue,
+    borderRadius: 16,
     justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 20,
+    height: 58,
+    paddingHorizontal: 14,
   },
   googleButtonPressed: {
-    backgroundColor: "#f7f9f7",
-  },
-  googleMark: {
-    color: "#4285f4",
-    fontSize: 20,
-    fontWeight: "900",
+    backgroundColor: "#EAF4FF",
   },
   googleButtonText: {
-    color: "#26352d",
+    fontFamily: font.bold,
+    color: garden.forest,
     fontSize: 15,
     fontWeight: "700",
-  },
-  helper: {
-    color: "#748078",
-    fontSize: 13,
-    lineHeight: 19,
-    marginTop: 10,
-    textAlign: "center",
-  },
-  links: {
-    alignItems: "center",
-    gap: 14,
-    marginTop: 32,
-  },
-  registerRow: {
-    flexDirection: "row",
-    gap: 6,
-    alignItems: "center",
-  },
-  registerText: {
-    color: "#65766c",
-    fontSize: 14,
-  },
-  link: {
-    color: "#236c19",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  guestLink: {
-    color: "#52625d",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

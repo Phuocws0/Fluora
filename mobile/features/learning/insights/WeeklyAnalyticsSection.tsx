@@ -115,7 +115,7 @@ export function WeeklyAnalyticsSection() {
 const styles = StyleSheet.create({
   container: { gap: 14 },
   loadingBox: { alignItems: "center", padding: 40 },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
+  loadingText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, marginTop: 12 },
   summaryGrid: {
     flexDirection: "row",
     gap: 10,
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   summaryEyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 9,
     fontWeight: "800",
@@ -141,11 +142,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   summaryValue: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 18,
     fontWeight: "900",
   },
   chartTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -170,6 +173,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   barXpValue: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -195,17 +199,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#e5ece2",
   },
   barDateLabel: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 10,
     fontWeight: "700",
     marginTop: 4,
   },
   barAnswerCount: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 9,
     fontWeight: "600",
   },
   chartLegend: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 11,
     lineHeight: 16,

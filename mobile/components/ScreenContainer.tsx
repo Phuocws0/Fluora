@@ -2,18 +2,19 @@ import type { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type Props = { children: ReactNode; scroll?: boolean };
+type Props = { children: ReactNode; scroll?: boolean; contentTopPadding?: number; fixedFooter?: ReactNode; fixedFooterBottom?: number };
 
-export function ScreenContainer({ children, scroll = true }: Props) {
+export function ScreenContainer({ children, scroll = true, contentTopPadding = 16, fixedFooter, fixedFooterBottom = 82 }: Props) {
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {scroll ? (
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: contentTopPadding }]} showsVerticalScrollIndicator={false}>
           {children}
         </ScrollView>
       ) : (
-        <View style={styles.content}>{children}</View>
+        <View style={[styles.content, { paddingTop: contentTopPadding }]}>{children}</View>
       )}
+      {fixedFooter ? <View style={[styles.fixedFooter, { bottom: fixedFooterBottom }]}>{fixedFooter}</View> : null}
     </SafeAreaView>
   );
 }
@@ -21,4 +22,5 @@ export function ScreenContainer({ children, scroll = true }: Props) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#ffffff" },
   content: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 112 },
+  fixedFooter: { left: 24, position: "absolute", right: 24 },
 });

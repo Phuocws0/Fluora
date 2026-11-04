@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -27,18 +28,10 @@ type StepNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 const TOTAL_STEPS = 8;
 
 const COURSE_LANGUAGES = [
-  {
-    id: "en",
-    label: "English",
-    flag: "🇺🇸",
-    desc: "Global career, travel, and worldwide communication",
-  },
-  {
-    id: "es",
-    label: "Spanish",
-    flag: "🇪🇸",
-    desc: "Culture, travel, and the Americas & Spain",
-  },
+  { id: "en", label: "English" },
+  { id: "ja", label: "Japanese" },
+  { id: "ko", label: "Korean" },
+  { id: "fr", label: "French" },
 ];
 
 const APP_LANGUAGES = [
@@ -84,48 +77,16 @@ const MOTIVATIONS = [
 ];
 
 const STARTING_LEVELS: Array<{
-  id: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
-  name: string;
-  badge: string;
+  id: "A1" | "A2" | "B1" | "B2";
+  label: "A0" | "A1" | "A2" | "B1";
   desc: string;
 }> = [
-  {
-    id: "A1",
-    name: "Beginner",
-    badge: "A1",
-    desc: "Brand new to the language. Basic greetings, numbers & common words.",
-  },
-  {
-    id: "A2",
-    name: "Elementary",
-    badge: "A2",
-    desc: "Can understand simple everyday phrases and basic routine exchanges.",
-  },
-  {
-    id: "B1",
-    name: "Intermediate",
-    badge: "B1",
-    desc: "Can discuss familiar topics, travel experiences, work, and hobbies.",
-  },
-  {
-    id: "B2",
-    name: "Upper Intermediate",
-    badge: "B2",
-    desc: "Comfortable in conversations and expressing complex points of view.",
-  },
-  {
-    id: "C1",
-    name: "Advanced",
-    badge: "C1",
-    desc: "Fluent and spontaneous in academic, technical, and professional settings.",
-  },
-  {
-    id: "C2",
-    name: "Mastery",
-    badge: "C2",
-    desc: "Effortless, native-like command across nuanced and subtle contexts.",
-  },
+  { id: "A1", label: "A0", desc: "New" },
+  { id: "A2", label: "A1", desc: "Words" },
+  { id: "B1", label: "A2", desc: "Talks" },
+  { id: "B2", label: "B1", desc: "Ideas" },
 ];
+const LEVEL_STEP_HEIGHTS = [110, 158, 206, 254];
 
 const DAILY_GOALS = [
   { minutes: 5, label: "5 min" },
@@ -215,6 +176,7 @@ export function OnboardingWizard() {
   const [step, setStep] = useState<StepNumber>(1);
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
   const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
+  const [unavailableLanguage, setUnavailableLanguage] = useState<string | null>(null);
   const [customTimeInput, setCustomTimeInput] = useState("20:00");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -228,7 +190,7 @@ export function OnboardingWizard() {
         setDraft((prev) => ({
           ...prev,
           ...saved,
-          courseLanguage: saved.courseLanguage || prev.courseLanguage,
+          courseLanguage: saved.courseLanguage === "en" ? "en" : prev.courseLanguage,
           appLanguage: saved.appLanguage || prev.appLanguage,
           motivation: MOTIVATIONS.some((item) => item.id === saved.motivation)
             ? saved.motivation
@@ -365,8 +327,6 @@ export function OnboardingWizard() {
     }
   }
 
-  const progressPercent = (step / TOTAL_STEPS) * 100;
-
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Top Header */}
@@ -380,41 +340,24 @@ export function OnboardingWizard() {
             pressed && styles.backButtonPressed,
           ]}
         >
-          <Ionicons name="arrow-back" size={22} color="#20352b" />
+          <Text style={styles.backChevron}>‹</Text>
         </Pressable>
-
-        <View style={styles.headerCenter}>
-          <Text style={styles.stepCounter}>
-            Step {step} of {TOTAL_STEPS}
-          </Text>
-        </View>
-
-        <View style={styles.headerRightPlaceholder} />
-      </View>
-
-      {/* Progress Bar Track */}
-      <View style={styles.progressBarTrack}>
-        <View
-          style={[styles.progressBarFill, { width: `${progressPercent}%` }]}
-        />
+        <Text style={styles.headerEyebrow}>YOUR PERSONAL SETUP</Text>
       </View>
 
       {/* Main Step Container */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, (step === 2 || step === 3) && styles.motivationScrollContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* STEP 1: LANGUAGES */}
         {step === 1 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Choose Your Languages</Text>
+            <Text style={styles.stepTitle}>What would you like to{ "\n" }learn?</Text>
             <Text style={styles.stepSubtitle}>
-              Select the language you want to learn and your interface language.
+              Choose your first course. You can change it anytime.
             </Text>
-
-            {/* Course Language */}
-            <Text style={styles.sectionLabel}>I want to learn</Text>
-            <View style={styles.cardsColumn}>
+            <View style={styles.courseOptions}>
               {COURSE_LANGUAGES.map((item) => {
                 const isSelected = draft.courseLanguage === item.id;
                 return (
@@ -423,97 +366,35 @@ export function OnboardingWizard() {
                     accessibilityRole="radio"
                     accessibilityState={{ selected: isSelected }}
                     accessibilityLabel={`Learn ${item.label}`}
-                    onPress={() =>
-                      updateDraft((prev) => ({
-                        ...prev,
-                        courseLanguage: item.id,
-                      }))
-                    }
-                    style={({ pressed }) => [
-                      styles.selectionCard,
-                      isSelected && styles.selectionCardSelected,
-                      pressed && styles.selectionCardPressed,
-                    ]}
-                  >
-                    <Text style={styles.flagEmoji}>{item.flag}</Text>
-                    <View style={styles.cardTextContainer}>
-                      <Text
-                        style={[
-                          styles.cardTitle,
-                          isSelected && styles.cardTitleSelected,
-                        ]}
-                      >
-                        {item.label}
-                      </Text>
-                      <Text style={styles.cardDesc}>{item.desc}</Text>
-                    </View>
-                    <Ionicons
-                      name={
-                        isSelected
-                          ? "checkmark-circle"
-                          : "ellipse-outline"
+                    onPress={() => {
+                      if (item.id !== "en") {
+                        setUnavailableLanguage(item.label);
+                        return;
                       }
-                      size={22}
-                      color={isSelected ? "#236c19" : "#a1b1a7"}
-                    />
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {/* App Interface Language */}
-            <Text style={[styles.sectionLabel, { marginTop: 28 }]}>
-              App Interface Language
-            </Text>
-            <View style={styles.languagesGrid}>
-              {APP_LANGUAGES.map((lang) => {
-                const isSelected = draft.appLanguage === lang.id;
-                return (
-                  <Pressable
-                    key={lang.id}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: isSelected }}
-                    accessibilityLabel={`App language ${lang.label}`}
-                    onPress={() =>
-                      updateDraft((prev) => ({
-                        ...prev,
-                        appLanguage: lang.id,
-                      }))
-                    }
+                      updateDraft((prev) => ({ ...prev, courseLanguage: item.id }));
+                    }}
                     style={({ pressed }) => [
-                      styles.langChip,
-                      isSelected && styles.langChipSelected,
+                      styles.courseOption,
+                      isSelected && styles.courseOptionSelected,
                       pressed && styles.selectionCardPressed,
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.langChipLabel,
-                        isSelected && styles.langChipLabelSelected,
-                      ]}
-                    >
-                      {lang.label}
-                    </Text>
-                    {isSelected && (
-                      <Ionicons
-                        name="checkmark"
-                        size={16}
-                        color="#236c19"
-                        style={{ marginLeft: 6 }}
-                      />
-                    )}
+                    <Text style={[styles.courseOptionText, isSelected && styles.courseOptionTextSelected]}>{item.label}</Text>
                   </Pressable>
                 );
               })}
             </View>
+            <Text style={styles.appLanguageNote}>
+              App language: {APP_LANGUAGES.find((language) => language.id === draft.appLanguage)?.label ?? "English"} / Tiếng Việt
+            </Text>
           </View>
         )}
 
         {/* STEP 2: MOTIVATION */}
         {step === 2 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>What brings you here?</Text>
-            <Text style={styles.stepSubtitle}>
+            <Text style={[styles.stepTitle, styles.motivationStepTitle]}>What brings you here?</Text>
+            <Text style={[styles.stepSubtitle, styles.motivationStepSubtitle]}>
               We'll shape your learning around what matters to you.
             </Text>
 
@@ -554,7 +435,7 @@ export function OnboardingWizard() {
               })}
             </View>
             <Text style={styles.motivationHint}>
-              Choose what you want to do with {draft.courseLanguage === "es" ? "Spanish" : "English"}.
+              Choose what you want to do with {COURSE_LANGUAGES.find((language) => language.id === draft.courseLanguage)?.label ?? "English"}.
             </Text>
           </View>
         )}
@@ -562,69 +443,23 @@ export function OnboardingWizard() {
         {/* STEP 3: STARTING LEVEL & PLACEMENT TEST */}
         {step === 3 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>What is your starting level?</Text>
-            <Text style={styles.stepSubtitle}>
-              Select where you feel comfortable, or take our quick placement test.
+            <Text style={[styles.stepTitle, styles.motivationStepTitle]}>What's your starting point?</Text>
+            <Text style={[styles.stepSubtitle, styles.motivationStepSubtitle]}>
+              No experience needed. We'll take it one step at a time.
             </Text>
 
-            {/* Placement Test Callout Card */}
-            <View style={styles.placementCalloutCard}>
-              <View style={styles.placementCalloutHeader}>
-                <View style={styles.sparkleCircle}>
-                  <Ionicons name="sparkles" size={20} color="#236c19" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.placementCalloutTitle}>
-                    Not sure where to begin?
-                  </Text>
-                  <Text style={styles.placementCalloutDesc}>
-                    Take our 5-minute placement test for an adaptive CEFR recommendation.
-                  </Text>
-                </View>
-              </View>
-
-              {draft.placementAttempt ? (
-                <View style={styles.placementResultBanner}>
-                  <Ionicons name="checkmark-circle" size={18} color="#236c19" />
-                  <Text style={styles.placementResultText}>
-                    Test suggested level:{" "}
-                    <Text style={{ fontWeight: "800" }}>
-                      {draft.placementAttempt.level}
-                    </Text>
-                  </Text>
-                </View>
-              ) : null}
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Take Placement Test"
-                onPress={() => setIsPlacementModalOpen(true)}
-                style={({ pressed }) => [
-                  styles.placementTestButton,
-                  pressed && styles.placementTestButtonPressed,
-                ]}
-              >
-                <Ionicons name="school-outline" size={18} color="#236c19" />
-                <Text style={styles.placementTestButtonText}>
-                  {draft.placementAttempt
-                    ? "Retake Placement Test"
-                    : "Take Placement Test (5 min)"}
-                </Text>
-              </Pressable>
-            </View>
-
-            <Text style={[styles.sectionLabel, { marginTop: 24 }]}>
-              Or choose your level directly
-            </Text>
-            <View style={styles.cardsColumn}>
-              {STARTING_LEVELS.map((level) => {
-                const isSelected = draft.startingLevel === level.id;
+            <View style={styles.levelTask}>
+              <Text style={styles.levelRampLabel}>YOUR FIRST CEFR STEP</Text>
+              <View style={styles.levelRamp}>
+                {STARTING_LEVELS.map((level, index) => {
+                  const isSelected = draft.startingLevel === level.id ||
+                    (index === STARTING_LEVELS.length - 1 && (draft.startingLevel === "C1" || draft.startingLevel === "C2"));
                 return (
                   <Pressable
                     key={level.id}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: isSelected }}
-                    accessibilityLabel={`Level ${level.badge} ${level.name}`}
+                    accessibilityLabel={`Level ${level.label}, ${level.desc}`}
                     onPress={() =>
                       updateDraft((prev) => ({
                         ...prev,
@@ -632,50 +467,26 @@ export function OnboardingWizard() {
                       }))
                     }
                     style={({ pressed }) => [
-                      styles.selectionCard,
-                      isSelected && styles.selectionCardSelected,
+                      styles.levelStep,
+                      { left: index * 87, height: LEVEL_STEP_HEIGHTS[index] },
+                      isSelected && styles.levelStepSelected,
                       pressed && styles.selectionCardPressed,
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.levelPill,
-                        isSelected && styles.levelPillSelected,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.levelPillText,
-                          isSelected && styles.levelPillTextSelected,
-                        ]}
-                      >
-                        {level.badge}
-                      </Text>
-                    </View>
-                    <View style={styles.cardTextContainer}>
-                      <Text
-                        style={[
-                          styles.cardTitle,
-                          isSelected && styles.cardTitleSelected,
-                        ]}
-                      >
-                        {level.name}
-                      </Text>
-                      <Text style={styles.cardDesc}>{level.desc}</Text>
-                    </View>
-                    <Ionicons
-                      name={
-                        isSelected
-                          ? "checkmark-circle"
-                          : "ellipse-outline"
-                      }
-                      size={22}
-                      color={isSelected ? "#236c19" : "#a1b1a7"}
-                    />
+                    <Text style={styles.levelStepTitle}>{level.label}</Text>
+                    <Text style={styles.levelStepCopy}>{level.desc}</Text>
                   </Pressable>
                 );
-              })}
+                })}
+              </View>
+              <View style={styles.levelReassurance}>
+                <Text style={styles.levelReassuranceTitle}>No test pressure</Text>
+                <Text style={styles.levelReassuranceCopy}>Choose the highest step you feel comfortable with.</Text>
+              </View>
             </View>
+            <Pressable accessibilityRole="button" onPress={() => setIsPlacementModalOpen(true)} style={styles.placementTestLink}>
+              <Text style={styles.placementTestLinkText}>{draft.placementAttempt ? "Review placement test" : "Take a 5-minute placement test"}</Text>
+            </Pressable>
           </View>
         )}
 
@@ -1088,7 +899,7 @@ export function OnboardingWizard() {
                 <Ionicons name="language" size={18} color="#236c19" />
                 <Text style={styles.summaryLabel}>Target Language:</Text>
                 <Text style={styles.summaryValue}>
-                  {draft.courseLanguage === "es" ? "Spanish 🇪🇸" : "English 🇺🇸"}
+                  {COURSE_LANGUAGES.find((language) => language.id === draft.courseLanguage)?.label ?? "English"}
                 </Text>
               </View>
 
@@ -1249,8 +1060,8 @@ export function OnboardingWizard() {
             ]}
           >
             <Text style={styles.primaryButtonText}>Continue</Text>
-            <Ionicons name="arrow-forward" size={18} color="#ffffff" />
           </Pressable>
+          <Text style={styles.footerBrand}>FLUORA · GROW AT YOUR OWN PACE</Text>
         </View>
       )}
 
@@ -1260,6 +1071,35 @@ export function OnboardingWizard() {
         onClose={() => setIsPlacementModalOpen(false)}
         onAcceptLevel={handlePlacementAccepted}
       />
+      <Modal
+        visible={unavailableLanguage !== null}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setUnavailableLanguage(null)}
+      >
+        <View style={styles.courseUnavailableBackdrop}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Dismiss course preview dialog"
+            onPress={() => setUnavailableLanguage(null)}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={styles.courseUnavailableDialog}>
+            <Text style={styles.courseUnavailableTitle}>{unavailableLanguage} preview</Text>
+            <Text style={styles.courseUnavailableMessage}>
+              This demo includes English lessons. {unavailableLanguage} lessons are not available in this demo.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setUnavailableLanguage(null)}
+              style={styles.courseUnavailableButton}
+            >
+              <Text style={styles.courseUnavailableButtonText}>Back to courses</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1270,66 +1110,103 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: {
-    height: 54,
+    height: 60,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
+    alignItems: "flex-start",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingTop: 28,
   },
   backButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
+    width: 28,
+    height: 32,
     justifyContent: "center",
-    backgroundColor: "#f5f8f4",
   },
   backButtonPressed: {
-    backgroundColor: "#e8efe6",
+    opacity: 0.65,
   },
-  headerCenter: {
-    alignItems: "center",
+  backChevron: {
+    color: "#236c19",
+    fontFamily: "Nunito_800ExtraBold",
+    fontSize: 28,
+    lineHeight: 32,
   },
-  stepCounter: {
-    fontSize: 14,
-    fontWeight: "700",
+  headerEyebrow: {
     color: "#65766c",
-  },
-  headerRightPlaceholder: {
-    width: 38,
-  },
-  progressBarTrack: {
-    height: 4,
-    backgroundColor: "#eef3ee",
-    width: "100%",
-  },
-  progressBarFill: {
-    height: 4,
-    backgroundColor: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 18,
+    marginTop: 7,
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 32,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  motivationScrollContent: {
+    paddingTop: 12,
   },
   stepContainer: {
     flex: 1,
   },
   stepTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 24,
     fontWeight: "800",
     color: "#20352b",
     lineHeight: 32,
-    marginBottom: 6,
+    marginBottom: 15,
+  },
+  motivationStepTitle: {
+    marginBottom: 10,
   },
   stepSubtitle: {
-    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 16,
     color: "#65766c",
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  motivationStepSubtitle: {
+    marginBottom: 14,
+  },
+  courseOptions: {
+    gap: 16,
+  },
+  courseOption: {
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#dee8d9",
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+  },
+  courseOptionSelected: {
+    backgroundColor: "#eaf8de",
+    borderColor: "#236c19",
+  },
+  courseOptionText: {
+    color: "#20352b",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  courseOptionTextSelected: {
+    color: "#236c19",
+  },
+  appLanguageNote: {
+    color: "#65766c",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 16,
   },
   sectionLabel: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 15,
     fontWeight: "700",
     color: "#20352b",
@@ -1356,12 +1233,14 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   flagEmoji: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 28,
   },
   cardTextContainer: {
     flex: 1,
   },
   cardTitle: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
     fontWeight: "700",
     color: "#20352b",
@@ -1371,6 +1250,7 @@ const styles = StyleSheet.create({
     color: "#1a5113",
   },
   cardDesc: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
     lineHeight: 18,
@@ -1391,17 +1271,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   minuteRingValue: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 34,
     fontWeight: "800",
   },
   minuteRingCaption: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 14,
     fontWeight: "600",
     marginTop: 2,
   },
   minuteMotto: {
+    fontFamily: "Nunito_700Bold",
     alignSelf: "center",
     color: "#236c19",
     fontSize: 16,
@@ -1426,6 +1309,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eaf8de",
   },
   minuteOptionText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 12,
     fontWeight: "600",
@@ -1435,6 +1319,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   weekPreviewTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 11,
     fontWeight: "800",
@@ -1458,6 +1343,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#58cc02",
   },
   weekPreviewLabel: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 11,
     fontWeight: "600",
@@ -1492,11 +1378,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   budgetRingValue: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 34,
     fontWeight: "800",
   },
   budgetRingCaption: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 13,
     fontWeight: "600",
@@ -1522,6 +1410,7 @@ const styles = StyleSheet.create({
     borderColor: "#236c19",
   },
   langChipLabel: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 14,
     fontWeight: "600",
     color: "#20352b",
@@ -1552,6 +1441,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   motivationTitle: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 15,
     fontWeight: "700",
@@ -1559,6 +1449,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   motivationDescription: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "600",
@@ -1566,10 +1457,93 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   motivationHint: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 14,
     fontWeight: "600",
-    marginTop: 28,
+    marginTop: 35,
+  },
+  levelTask: {
+    height: 442,
+    position: "relative",
+    width: "100%",
+  },
+  levelRampLabel: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    color: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  levelRamp: {
+    position: "absolute",
+    top: 76,
+    left: 0,
+    width: "100%",
+    height: 254,
+  },
+  levelStep: {
+    position: "absolute",
+    bottom: 0,
+    width: 78,
+    borderRadius: 16,
+    padding: 14,
+    backgroundColor: "#f7faf6",
+    alignItems: "flex-start",
+  },
+  levelStepSelected: {
+    backgroundColor: "#eaf8de",
+  },
+  levelStepTitle: {
+    color: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  levelStepCopy: {
+    color: "#65766c",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+  },
+  levelReassurance: {
+    position: "absolute",
+    top: 358,
+    left: 0,
+    width: "100%",
+    height: 84,
+    borderRadius: 16,
+    backgroundColor: "#eaf8de",
+    padding: 14,
+    justifyContent: "center",
+  },
+  levelReassuranceTitle: {
+    color: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  levelReassuranceCopy: {
+    color: "#65766c",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  placementTestLink: {
+    alignSelf: "center",
+    height: 32,
+    justifyContent: "center",
+    marginTop: 12,
+  },
+  placementTestLinkText: {
+    color: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
   },
   placementCalloutCard: {
     backgroundColor: "#f2faee",
@@ -1593,12 +1567,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   placementCalloutTitle: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
     fontWeight: "700",
     color: "#20352b",
     marginBottom: 2,
   },
   placementCalloutDesc: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
     lineHeight: 18,
@@ -1613,6 +1589,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   placementResultText: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#236c19",
   },
@@ -1631,6 +1608,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eaf8de",
   },
   placementTestButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "700",
@@ -1647,6 +1625,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#236c19",
   },
   levelPillText: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 14,
     fontWeight: "800",
     color: "#47594e",
@@ -1661,6 +1640,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   goalTimeBadge: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     fontWeight: "700",
     color: "#236c19",
@@ -1683,12 +1663,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   reminderToggleTitle: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
     fontWeight: "700",
     color: "#20352b",
     marginBottom: 2,
   },
   reminderToggleDesc: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
   },
@@ -1711,6 +1693,7 @@ const styles = StyleSheet.create({
     borderColor: "#236c19",
   },
   timeChipText: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 14,
     fontWeight: "600",
     color: "#20352b",
@@ -1726,10 +1709,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   customTimeLabel: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
   },
   timeInput: {
+    fontFamily: "Nunito_700Bold",
     width: 80,
     height: 38,
     borderRadius: 8,
@@ -1760,6 +1745,7 @@ const styles = StyleSheet.create({
     borderColor: "#236c19",
   },
   dayChipText: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     fontWeight: "700",
     color: "#47594e",
@@ -1776,18 +1762,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   promiseTextInput: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 15,
     color: "#20352b",
     lineHeight: 22,
     minHeight: 64,
   },
   promiseCharCount: {
+    fontFamily: "Nunito_400Regular",
     textAlign: "right",
     fontSize: 12,
     color: "#8a9a90",
     marginTop: 4,
   },
   promisePresetsLabel: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     fontWeight: "600",
     color: "#65766c",
@@ -1811,6 +1800,7 @@ const styles = StyleSheet.create({
     borderColor: "#236c19",
   },
   promisePresetText: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#47594e",
     lineHeight: 18,
@@ -1834,6 +1824,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   companionRoleBadge: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 11,
     fontWeight: "700",
     color: "#65766c",
@@ -1858,6 +1849,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   summaryTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 16,
     fontWeight: "800",
     color: "#20352b",
@@ -1871,12 +1863,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   summaryLabel: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 14,
     fontWeight: "600",
     color: "#65766c",
     width: 140,
   },
   summaryValue: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 14,
     fontWeight: "700",
     color: "#20352b",
@@ -1889,6 +1883,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#e1e8e3",
   },
   summaryPromiseLabel: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 12,
     fontWeight: "700",
     color: "#65766c",
@@ -1896,6 +1891,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   summaryPromiseText: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#20352b",
     fontStyle: "italic",
@@ -1910,6 +1906,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   guestNoticeText: {
+    fontFamily: "Nunito_700Bold",
     flex: 1,
     fontSize: 13,
     color: "#236c19",
@@ -1929,34 +1926,93 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   errorBannerText: {
+    fontFamily: "Nunito_400Regular",
     color: "#b42318",
     fontSize: 13,
     flex: 1,
   },
   footerNav: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f4f1",
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 0,
     backgroundColor: "#ffffff",
+    gap: 12,
+    transform: [{ translateY: 7 }],
   },
   primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#236c19",
-    borderRadius: 14,
-    minHeight: 52,
+    backgroundColor: "#58cc02",
+    borderRadius: 16,
+    height: 56,
     paddingHorizontal: 20,
+    shadowColor: "#236c19",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 0,
+    elevation: 3,
   },
   primaryButtonPressed: {
-    backgroundColor: "#1c5714",
+    backgroundColor: "#51b902",
   },
   primaryButtonText: {
-    color: "#ffffff",
+    fontFamily: "Nunito_700Bold",
+    color: "#20352b",
     fontSize: 16,
     fontWeight: "700",
+    lineHeight: 24,
+  },
+  footerBrand: {
+    color: "#65766c",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+    marginBottom: 0,
+  },
+  courseUnavailableBackdrop: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(32,53,43,0.28)",
+    paddingHorizontal: 24,
+  },
+  courseUnavailableDialog: {
+    width: "100%",
+    maxWidth: 342,
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 24,
+    gap: 16,
+  },
+  courseUnavailableTitle: {
+    color: "#20352b",
+    fontFamily: "Nunito_800ExtraBold",
+    fontSize: 24,
+    lineHeight: 32,
+  },
+  courseUnavailableMessage: {
+    color: "#20352b",
+    fontFamily: "Nunito_400Regular",
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  courseUnavailableButton: {
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#eaf8de",
+    borderColor: "#dee8d9",
+    borderWidth: 1,
+    borderRadius: 16,
+  },
+  courseUnavailableButtonText: {
+    color: "#236c19",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    lineHeight: 24,
   },
   outlineButton: {
     alignItems: "center",
@@ -1972,6 +2028,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f8f4",
   },
   outlineButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "700",

@@ -255,18 +255,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   eyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 30,
     fontWeight: "900",
     marginTop: 8,
   },
   description: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 15,
     lineHeight: 22,
@@ -285,6 +288,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#b42318",
     fontSize: 13,
     fontWeight: "600",
@@ -299,11 +303,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 13,
     fontWeight: "700",
   },
   input: {
+    fontFamily: "Nunito_400Regular",
     backgroundColor: "#ffffff",
     borderColor: "#d8dfda",
     borderRadius: 12,
@@ -322,6 +328,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   passwordInput: {
+    fontFamily: "Nunito_400Regular",
     flex: 1,
     color: "#20352b",
     fontSize: 15,
@@ -345,6 +352,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   primaryButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -357,6 +365,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   link: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "700",
@@ -371,12 +380,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 26,
     fontWeight: "900",
     textAlign: "center",
   },
   successDescription: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 15,
     lineHeight: 22,

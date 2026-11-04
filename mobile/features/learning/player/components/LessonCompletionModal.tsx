@@ -95,15 +95,18 @@ const styles = StyleSheet.create({
     width: 80,
   },
   celebrationEmoji: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 40,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 24,
     fontWeight: "900",
     textAlign: "center",
   },
   subtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 14,
     lineHeight: 20,
@@ -121,6 +124,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   statEyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -133,6 +137,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   xpValue: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 28,
     fontWeight: "900",
@@ -148,6 +153,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   repeatText: {
+    fontFamily: "Nunito_700Bold",
     color: "#1967d2",
     flex: 1,
     fontSize: 11,
@@ -169,6 +175,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   reviewText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "800",
@@ -182,6 +189,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   finishText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#ffffff",
     fontSize: 15,
     fontWeight: "900",

@@ -120,12 +120,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 20,
     fontWeight: "900",
   },
   closeButton: { padding: 4 },
   subtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     lineHeight: 18,
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   stepBadge: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -150,6 +153,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   hintText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "700",
@@ -162,10 +166,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   loadingText: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#a82c20",
     fontSize: 13,
     fontWeight: "700",
@@ -183,6 +189,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   moreButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "800",
@@ -196,6 +203,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   doneButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "800",

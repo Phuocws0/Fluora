@@ -30,17 +30,18 @@ export function DownloadsScreen() {
   const course = useResource(useCallback(() => courseId ? getCourse(courseId) : Promise.resolve(null), [courseId]));
   const [opened, setOpened] = useState<OfflinePackage | null>(null);
   const used = local.entries.filter(e => e.status === "completed").reduce((sum, e) => sum + e.bytes, 0);
+  const firstCourse = catalog.data?.courses[0];
   const queue = (kind: DownloadKind, id: string, title: string) => void action.run(() => addDownload(owner, kind, id, title, includeMedia), "Added to your device queue.");
   const open = (entry: DownloadEntry) => void action.run(async () => {
     const data = await readPackage(owner, entry.id);
     if (data.story) router.push({ pathname: "/stories/[storyId]", params: { storyId: data.story.id, offline: "1" } });
     else setOpened(data);
   }, "");
-  return <PracticePage title="Take your classroom with you">
-    <GardenSubtitle>Keep learning even with an unreliable connection. Files and progress below are stored on this device.</GardenSubtitle>
-    <Section>DEVICE STORAGE</Section>
-    <Text style={[s.cardTitle, { fontSize: 30 }]}>{(used / 1024 / 1024).toFixed(2)} MB</Text><Text style={s.caption}>of 200 MB reserved for downloads</Text>
-    <View style={{ height: 15, borderRadius: 8, backgroundColor: garden.line, marginVertical: 15 }}><View style={{ width: `${Math.min(100, used / STORAGE_LIMIT * 100)}%`, height: 15, borderRadius: 8, backgroundColor: garden.green }} /></View>
+  return <PracticePage title="Take your classroom with you" action={firstCourse ? { label: "Download course", onPress: () => queue("course", firstCourse.id, firstCourse.title), disabled: action.busy } : undefined}>
+    <GardenSubtitle>Keep learning even with an unreliable connection.</GardenSubtitle>
+    <Text style={[s.section, { marginTop: 0 }]}>DEVICE STORAGE</Text>
+    <Text style={[s.cardTitle, { fontFamily: "Nunito_400Regular", fontSize: 30, marginTop: 7 }]}>{(used / 1024 / 1024).toFixed(2)} MB</Text><Text style={[s.caption, { marginTop: 22 }]}>of 200 MB reserved for Fluora</Text>
+    <View style={{ height: 24, borderRadius: 12, backgroundColor: garden.line, marginTop: 15, marginBottom: 19 }}><View style={{ width: `${Math.min(100, used / STORAGE_LIMIT * 100)}%`, height: 24, borderRadius: 12, backgroundColor: garden.green }} /></View>
     {local.error && <Text style={s.error}>{local.error}</Text>}
     <ActionState action={action} /><Section>DOWNLOAD QUEUE</Section>
     {!local.loading && !local.entries.length && <Empty text="Download a course, unit, lesson or story while connected." />}

@@ -148,16 +148,29 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentTopPadding={28} fixedFooterBottom={20} fixedFooter={
+      <View style={styles.stickyFooter}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
+          disabled={isSubmitting}
+          onPress={handleSendResetToken}
+          style={({ pressed }) => [styles.primaryButton, pressed && !isSubmitting ? styles.primaryButtonPressed : null, isSubmitting && styles.disabled]}
+        >
+          {isSubmitting ? <ActivityIndicator color="#20352b" /> : <Text style={styles.primaryButtonText}>Send reset link</Text>}
+        </Pressable>
+        <Text style={styles.footerBrand}>FLUORA · GROW AT YOUR OWN PACE</Text>
+      </View>
+    }>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Back"
+        accessibilityLabel="Back to sign in"
         onPress={() => router.back()}
-        style={styles.backButton}
+        style={styles.topNavigation}
       >
-        <Ionicons name="arrow-back" size={22} color="#20352b" />
+        <Ionicons name="chevron-back" size={22} color="#236c19" />
+        <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
       </Pressable>
-
       <Text style={styles.title}>Recover your account</Text>
       <Text style={styles.description}>
         Enter your email to get a password reset link.
@@ -169,13 +182,6 @@ export default function ForgotPasswordScreen() {
         <Text style={styles.recoveryCaption}>A private link, just for you.</Text>
       </View>
 
-      <View style={styles.stepsCard}>
-        <Text style={styles.stepsTitle}>What happens next?</Text>
-        <Text style={styles.stepsText}>1 · Submit your account email</Text>
-        <Text style={styles.stepsText}>2 · Copy the token from the backend log</Text>
-        <Text style={styles.stepsText}>3 · Choose a new password</Text>
-      </View>
-
       {error ? (
         <View style={styles.errorContainer} accessibilityRole="alert">
           <Ionicons name="alert-circle-outline" size={18} color="#b42318" />
@@ -185,6 +191,7 @@ export default function ForgotPasswordScreen() {
 
       <View style={styles.form}>
         <View style={styles.field}>
+          <View style={styles.inputCard}>
           <Text style={styles.label}>Where should we send the link?</Text>
           <TextInput
             accessibilityLabel="Email address"
@@ -197,65 +204,41 @@ export default function ForgotPasswordScreen() {
               setEmail(val);
               if (error) setError(null);
             }}
-            placeholder="you@example.com"
+            placeholder="minh@example.com"
             placeholderTextColor="#8a9a90"
             style={styles.input}
             value={email}
           />
+          </View>
         </View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
-          disabled={isSubmitting}
-          onPress={handleSendResetToken}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && !isSubmitting ? styles.primaryButtonPressed : null,
-            isSubmitting && styles.disabled,
-          ]}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#20352b" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Send reset link</Text>
-          )}
-        </Pressable>
       </View>
 
-      <View style={styles.footerRow}>
-        <Link href="/(auth)/login" style={styles.link}>
-          Back to Sign In
-        </Link>
+      <View style={styles.stepsCard}>
+        <Text style={styles.stepsTitle}>What happens next?</Text>
+        <Text style={styles.stepsText}>1 · Check your inbox</Text>
+        <Text style={styles.stepsText}>2 · Open the secure link</Text>
+        <Text style={styles.stepsText}>3 · Choose a new password</Text>
       </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingRight: 12,
-    marginBottom: 12,
-  },
-  eyebrow: {
-    color: "#236c19",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
+  topNavigation: { alignItems: "center", alignSelf: "flex-start", flexDirection: "row", gap: 8, height: 32, marginBottom: 12 },
+  eyebrow: { fontFamily: "Nunito_700Bold", color: "#65766c", fontSize: 12, lineHeight: 18 },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
-    fontSize: 30,
+    fontSize: 24,
+    lineHeight: 32,
     fontWeight: "900",
-    marginTop: 8,
   },
   description: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 12,
   },
   recoveryCard: {
     width: 240,
@@ -265,20 +248,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#eaf8de",
     borderRadius: 18,
     padding: 16,
-    marginTop: 24,
+    marginTop: 20,
   },
   recoveryLabel: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
   },
   recoveryAt: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 34,
     fontWeight: "900",
     marginTop: 6,
   },
   recoveryCaption: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 13,
     fontWeight: "600",
@@ -286,16 +272,18 @@ const styles = StyleSheet.create({
   },
   stepsCard: {
     gap: 6,
-    marginTop: 22,
+    marginTop: 44,
     marginBottom: 12,
   },
   stepsTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 15,
     fontWeight: "800",
     marginBottom: 2,
   },
   stepsText: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     lineHeight: 19,
@@ -315,11 +303,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   devCalloutTitle: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 13,
     fontWeight: "700",
   },
   devCalloutBody: {
+    fontFamily: "Nunito_400Regular",
     color: "#52625d",
     fontSize: 13,
     lineHeight: 19,
@@ -342,6 +332,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#b42318",
     fontSize: 13,
     fontWeight: "600",
@@ -349,26 +340,26 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   form: {
-    marginTop: 24,
+    marginTop: 30,
     gap: 16,
   },
-  field: {
-    gap: 6,
-  },
+  field: {},
+  inputCard: { backgroundColor: "#ffffff", borderColor: "#dee8d9", borderRadius: 16, borderWidth: 1, minHeight: 76, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 7 },
   label: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
-    fontSize: 13,
+    fontSize: 11,
+    lineHeight: 16,
     fontWeight: "700",
   },
   input: {
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 12,
-    borderWidth: 1.5,
+    fontFamily: "Nunito_400Regular",
     color: "#20352b",
-    fontSize: 15,
-    minHeight: 50,
-    paddingHorizontal: 16,
+    fontSize: 14,
+    lineHeight: 20,
+    minHeight: 33,
+    paddingHorizontal: 0,
+    paddingVertical: 2,
   },
   primaryButton: {
     alignItems: "center",
@@ -385,6 +376,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   primaryButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -403,6 +395,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f9f7",
   },
   secondaryButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "600",
@@ -415,6 +408,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
   },
   link: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "700",
@@ -429,12 +423,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 26,
     fontWeight: "900",
     textAlign: "left",
   },
   successDescription: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 15,
     lineHeight: 22,
@@ -449,6 +445,8 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: "100%",
   },
+  stickyFooter: { gap: 10 },
+  footerBrand: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 10, lineHeight: 14, textAlign: "center" },
   resendButton: {
     marginTop: 12,
   },

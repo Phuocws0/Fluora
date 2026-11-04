@@ -170,8 +170,9 @@ export function MisconceptionMapSection() {
 const styles = StyleSheet.create({
   container: { gap: 14 },
   loadingBox: { alignItems: "center", padding: 40 },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
+  loadingText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, marginTop: 12 },
   sectionSubtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#52625d",
     fontSize: 13,
     lineHeight: 19,
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   filterTabText: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "700",
@@ -220,6 +222,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   lessonMeta: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 11,
     fontWeight: "700",
@@ -231,11 +234,13 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   mistakeBadgeText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#a82c20",
     fontSize: 10,
     fontWeight: "800",
   },
   prompt: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -248,6 +253,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   explanationTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -255,6 +261,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   explanationText: {
+    fontFamily: "Nunito_400Regular",
     color: "#20352b",
     fontSize: 13,
     lineHeight: 18,
@@ -270,6 +277,7 @@ const styles = StyleSheet.create({
   },
   actionButtonRestore: {},
   actionButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "700",

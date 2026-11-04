@@ -5,5 +5,5 @@ export function SectionTitle({ children }: { children: string }) {
 }
 
 const styles = StyleSheet.create({
-  title: { color: "#20352b", fontSize: 19, fontWeight: "800", marginBottom: 12, marginTop: 26 },
+  title: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 19, fontWeight: "800", marginBottom: 12, marginTop: 26 },
 });

@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   transcriptEyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -61,18 +62,21 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   transcriptText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 18,
     fontWeight: "800",
     lineHeight: 26,
   },
   inputLabel: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   input: {
+    fontFamily: "Nunito_700Bold",
     backgroundColor: "#ffffff",
     borderColor: "#c5d6bf",
     borderRadius: 14,

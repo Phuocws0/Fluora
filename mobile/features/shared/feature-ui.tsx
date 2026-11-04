@@ -18,22 +18,27 @@ import { ScreenContainer } from "../../components/ScreenContainer";
 import { ContentState } from "../../components/ContentState";
 import { ApiError, getJson, postJson } from "../../services/api";
 import { getAccessToken, saveAccessToken } from "../../services/session";
+import { font, garden } from "../profile/garden-ui";
 
 export const ui = StyleSheet.create({
   title: {
-    fontSize: 28,
+    fontFamily: font.heavy,
+    fontSize: 24,
     fontWeight: "800",
-    color: "#20352b",
+    lineHeight: 32,
+    color: garden.ink,
     marginVertical: 8,
   },
   heading: {
-    fontSize: 19,
+    fontFamily: font.bold,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#20352b",
+    lineHeight: 25,
+    color: garden.ink,
     marginVertical: 12,
   },
-  text: { color: "#52625d", fontSize: 15, lineHeight: 23 },
-  small: { color: "#65766c", fontSize: 12, lineHeight: 19 },
+  text: { color: garden.muted, fontFamily: font.body, fontSize: 16, lineHeight: 24 },
+  small: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -42,32 +47,36 @@ export const ui = StyleSheet.create({
     marginVertical: 8,
   },
   card: {
-    backgroundColor: "#f5f8f4",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#dee8d9",
+    borderColor: garden.line,
     padding: 16,
     marginVertical: 6,
     gap: 6,
   },
   input: {
-    borderColor: "#c5d6bf",
+    borderColor: garden.line,
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
     color: "#20352b",
     backgroundColor: "white",
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 24,
     minHeight: 46,
     marginVertical: 6,
   },
   button: {
-    backgroundColor: "#eaf8de",
-    borderRadius: 12,
+    backgroundColor: garden.mint,
+    borderRadius: 16,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 10,
     minHeight: 44,
+    justifyContent: "center",
   },
-  buttonText: { color: "#236c19", fontWeight: "700", fontSize: 14 },
+  buttonText: { color: garden.forest, fontFamily: font.bold, fontWeight: "700", fontSize: 14, lineHeight: 20 },
   danger: { backgroundColor: "#ffe9e5" },
   disabled: { opacity: 0.45 },
   error: {
@@ -104,9 +113,9 @@ export function Button({
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[ui.button, primary && { backgroundColor: "#236c19", alignItems: "center" }, danger && ui.danger, disabled && ui.disabled]}
+      style={[ui.button, primary && { backgroundColor: garden.green, alignItems: "center", minHeight: 56 }, danger && ui.danger, disabled && ui.disabled]}
     >
-      <Text style={[ui.buttonText, primary && { color: "white", fontSize: 16 }]}>{label}</Text>
+      <Text style={[ui.buttonText, primary && { fontFamily: "Nunito_400Regular", color: garden.ink, fontSize: 16, lineHeight: 24 }]}>{label}</Text>
     </Pressable>
   );
 }

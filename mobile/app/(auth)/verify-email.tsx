@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -130,33 +129,54 @@ export default function VerifyEmailScreen() {
   }
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentTopPadding={28} fixedFooterBottom={20} fixedFooter={
+      <View style={styles.stickyFooter}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isBusy, busy: isVerifying }}
+          disabled={isBusy}
+          onPress={handleVerify}
+          style={({ pressed }) => [styles.primaryButton, pressed && !isBusy ? styles.primaryButtonPressed : null, isBusy && styles.disabled]}
+        >
+          {isVerifying ? <ActivityIndicator color="#20352b" /> : <Text style={styles.primaryButtonText}>Confirm</Text>}
+        </Pressable>
+        <Text style={styles.footerBrand}>FLUORA · GROW AT YOUR OWN PACE</Text>
+      </View>
+    }>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Back"
+        accessibilityLabel="Back to account setup"
         onPress={() => router.back()}
-        style={styles.backButton}
+        style={styles.topNavigation}
       >
-        <Ionicons name="arrow-back" size={22} color="#20352b" />
+        <Ionicons name="chevron-back" size={22} color="#236c19" />
+        <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
       </Pressable>
-
-      <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
-      <Text style={styles.title}>Verify your email</Text>
+      <Text style={styles.title}>Check your inbox</Text>
       <Text style={styles.description}>
-        {user?.email
-          ? `Enter the local verification token for ${user.email} to finish setting up your account.`
-          : "Enter your local verification token to confirm your account."}
+        {user?.email ? `Token for ${user.email}; see [dev-mail] log.` : "Paste your local verification token to finish setting up."}
       </Text>
 
-      <View style={styles.devCallout}>
-        <View style={styles.devCalloutHeader}>
-          <Ionicons name="mail-outline" size={18} color="#236c19" />
-          <Text style={styles.devCalloutTitle}>Local demo email</Text>
-        </View>
-        <Text style={styles.devCalloutBody}>
-          Email delivery is disabled. Copy the verification token from the backend terminal line prefixed with{" "}
-          <Text style={styles.devCalloutCode}>[dev-mail]</Text>.
-        </Text>
+      <View style={styles.codeCard}>
+        <TextInput
+          accessibilityLabel="Verification token"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!isBusy}
+          onChangeText={(val) => {
+            setToken(val);
+            if (error) setError(null);
+          }}
+          placeholder="Paste verification token"
+          placeholderTextColor="#236c19"
+          selectTextOnFocus
+          style={styles.tokenInput}
+          value={token}
+        />
+      </View>
+      <View style={styles.resendRow}>
+        {isResending ? <ActivityIndicator color="#236c19" /> : <Pressable accessibilityRole="button" disabled={isBusy} onPress={handleResend}><Text style={styles.resendLink}>Resend verification token</Text></Pressable>}
+        {infoMessage ? <Text style={styles.infoText}>{infoMessage}</Text> : null}
       </View>
 
       {error ? (
@@ -166,152 +186,44 @@ export default function VerifyEmailScreen() {
         </View>
       ) : null}
 
-      {infoMessage ? (
-        <View style={styles.infoContainer} accessibilityLiveRegion="polite">
-          <Ionicons name="information-circle-outline" size={18} color="#027a48" />
-          <Text style={styles.infoText}>{infoMessage}</Text>
-        </View>
-      ) : null}
-
-      <View style={styles.form}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Verification Token</Text>
-          <TextInput
-            accessibilityLabel="Verification Token"
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!isBusy}
-            onChangeText={(val) => {
-              setToken(val);
-              if (error) setError(null);
-            }}
-            placeholder="Paste verification token here"
-            placeholderTextColor="#8a9a90"
-            selectTextOnFocus
-            style={[styles.input, styles.tokenInput]}
-            value={token}
-          />
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isBusy, busy: isVerifying }}
-          disabled={isBusy}
-          onPress={handleVerify}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && !isBusy ? styles.primaryButtonPressed : null,
-            isBusy && styles.disabled,
-          ]}
-        >
-          {isVerifying ? (
-            <ActivityIndicator color="#20352b" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Verify Email</Text>
-          )}
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isBusy, busy: isResending }}
-          disabled={isBusy}
-          onPress={handleResend}
-          style={({ pressed }) => [
-            styles.secondaryButton,
-            pressed && !isBusy ? styles.secondaryButtonPressed : null,
-            isBusy && styles.disabled,
-          ]}
-        >
-          {isResending ? (
-            <ActivityIndicator color="#236c19" />
-          ) : (
-            <Text style={styles.secondaryButtonText}>Resend Verification Token</Text>
-          )}
-        </Pressable>
-      </View>
-
       <View style={styles.securityCard}>
-        <Ionicons name="shield-checkmark-outline" size={22} color="#236c19" />
         <View style={styles.securityCardCopy}>
           <Text style={styles.securityCardTitle}>Keep your account safe</Text>
           <Text style={styles.securityCardBody}>Never share this token with anyone.</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#236c19" />
       </View>
-
-      <View style={styles.footerRow}>
-        <Pressable accessibilityRole="button" onPress={handleContinue}>
-          <Text style={styles.link}>Skip for now and continue</Text>
-        </Pressable>
-      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingRight: 12,
-    marginBottom: 12,
-  },
-  eyebrow: {
-    color: "#236c19",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
+  topNavigation: { alignItems: "center", alignSelf: "flex-start", flexDirection: "row", gap: 8, height: 32, marginBottom: 16 },
+  eyebrow: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 12, lineHeight: 18 },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
-    fontSize: 30,
+    fontSize: 24,
+    lineHeight: 32,
     fontWeight: "900",
-    marginTop: 8,
   },
   description: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
-  },
-  devCallout: {
-    backgroundColor: "#eaf8de",
-    borderColor: "#d5edc5",
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    marginTop: 18,
-    gap: 6,
-  },
-  devCalloutHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  devCalloutTitle: {
-    color: "#236c19",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  devCalloutBody: {
-    color: "#52625d",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  devCalloutCode: {
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    fontWeight: "700",
-    color: "#236c19",
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 16,
   },
   securityCard: {
-    minHeight: 76,
+    minHeight: 100,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    borderColor: "#d8e8d0",
+    justifyContent: "space-between",
+    borderColor: "#dee8d9",
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "#ffffff",
-    padding: 16,
+    padding: 20,
     marginTop: 16,
   },
   securityCardCopy: {
@@ -319,13 +231,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   securityCardTitle: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
-    fontSize: 15,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: "700",
   },
   securityCardBody: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 18,
   },
   errorContainer: {
     flexDirection: "row",
@@ -340,30 +256,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#b42318",
     fontSize: 13,
     fontWeight: "600",
     flex: 1,
     lineHeight: 18,
   },
-  infoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#ecfdf3",
-    borderColor: "#a6f4c5",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: 16,
-  },
   infoText: {
+    fontFamily: "Nunito_700Bold",
     color: "#027a48",
-    fontSize: 13,
-    fontWeight: "600",
-    flex: 1,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 6,
   },
   form: {
     marginTop: 24,
@@ -373,11 +278,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 13,
     fontWeight: "700",
   },
   input: {
+    fontFamily: "Nunito_400Regular",
     backgroundColor: "#ffffff",
     borderColor: "#d8dfda",
     borderRadius: 12,
@@ -387,13 +294,10 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 16,
   },
-  tokenInput: {
-    backgroundColor: "#eaf8de",
-    borderColor: "#eaf8de",
-    minHeight: 58,
-    fontSize: 13,
-    letterSpacing: 0.4,
-  },
+  codeCard: { backgroundColor: "#eaf8de", borderRadius: 18, justifyContent: "center", marginTop: 16, minHeight: 84, paddingHorizontal: 12 },
+  tokenInput: { fontFamily: "Nunito_400Regular", color: "#236c19", fontSize: 12, letterSpacing: 0.2, minHeight: 64, textAlign: "center" },
+  resendRow: { marginTop: 16 },
+  resendLink: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 12, lineHeight: 18 },
   primaryButton: {
     alignItems: "center",
     backgroundColor: "#58cc02",
@@ -409,6 +313,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   primaryButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -427,6 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f9f7",
   },
   secondaryButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "600",
@@ -439,6 +345,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
   },
   link: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 14,
     fontWeight: "600",
@@ -453,12 +360,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 28,
     fontWeight: "900",
     textAlign: "center",
   },
   successDescription: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 15,
     lineHeight: 22,
@@ -469,4 +378,6 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: "100%",
   },
+  stickyFooter: { gap: 10 },
+  footerBrand: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 10, lineHeight: 14, textAlign: "center" },
 });

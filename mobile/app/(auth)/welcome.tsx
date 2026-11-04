@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   brand: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 20,
     fontWeight: "800",
@@ -65,12 +66,14 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 30,
     fontWeight: "800",
     lineHeight: 38,
   },
   description: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 16,
     lineHeight: 24,
@@ -88,6 +91,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   primaryButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -100,15 +104,18 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   signInPrompt: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 14,
   },
   signInLink: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 14,
     fontWeight: "700",
   },
   footer: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 10,
     fontWeight: "700",

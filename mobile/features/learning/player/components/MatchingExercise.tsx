@@ -180,6 +180,7 @@ export function MatchingExercise({ content, pairs, onChange, disabled = false }:
 const styles = StyleSheet.create({
   container: { marginVertical: 14 },
   instruction: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 13,
     fontWeight: "700",
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   columnHeader: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -215,6 +217,7 @@ const styles = StyleSheet.create({
     borderColor: "#236c19",
   },
   cardText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 14,
     fontWeight: "700",
@@ -225,6 +228,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   badgeText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "800",
@@ -237,6 +241,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   resetText: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "700",

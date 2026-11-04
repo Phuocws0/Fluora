@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   backButton: { padding: 4 },
-  navTitle: { color: "#20352b", fontSize: 18, fontWeight: "900" },
+  navTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 18, fontWeight: "900" },
   authGateContainer: { flex: 1, justifyContent: "center", padding: 24 },
   content: { padding: 20, paddingBottom: 40 },
   passportHero: {
@@ -277,9 +277,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     width: 60,
   },
-  heroEmoji: { fontSize: 30 },
-  heroTitle: { color: "#20352b", fontSize: 22, fontWeight: "900" },
+  heroEmoji: { fontFamily: "Nunito_400Regular", fontSize: 30 },
+  heroTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 22, fontWeight: "900" },
   heroSubtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     lineHeight: 19,
@@ -295,9 +296,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  progressPillText: { color: "#236c19", fontSize: 12, fontWeight: "800" },
+  progressPillText: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 12, fontWeight: "800" },
   loadingBox: { alignItems: "center", padding: 40 },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
+  loadingText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, marginTop: 12 },
   missionsGrid: { gap: 12 },
   stampCard: {
     backgroundColor: "#ffffff",
@@ -323,15 +324,17 @@ const styles = StyleSheet.create({
   stampIconEarned: {
     backgroundColor: "#eaf8de",
   },
-  stampEmoji: { fontSize: 24 },
+  stampEmoji: { fontFamily: "Nunito_400Regular", fontSize: 24 },
   stampInfo: { flex: 1 },
   stampCategory: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   stampTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -339,6 +342,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   stampDesc: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     lineHeight: 18,
@@ -351,11 +355,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   earnedDateText: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "700",
   },
   tapToView: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "700",
@@ -380,6 +386,7 @@ const styles = StyleSheet.create({
   },
   modalCategoryRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   modalCategory: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
@@ -391,9 +398,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  modalEarnedText: { color: "#236c19", fontSize: 10, fontWeight: "800" },
-  modalTitle: { color: "#20352b", fontSize: 22, fontWeight: "900" },
-  modalDesc: { color: "#52625d", fontSize: 14, lineHeight: 20, marginTop: 6 },
+  modalEarnedText: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 10, fontWeight: "800" },
+  modalTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 22, fontWeight: "900" },
+  modalDesc: { fontFamily: "Nunito_400Regular", color: "#52625d", fontSize: 14, lineHeight: 20, marginTop: 6 },
   instructionsBox: {
     backgroundColor: "#f5f8f4",
     borderRadius: 14,
@@ -401,13 +408,14 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   instructionsEyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.5,
     marginBottom: 4,
   },
-  instructionsText: { color: "#20352b", fontSize: 14, lineHeight: 21 },
+  instructionsText: { fontFamily: "Nunito_400Regular", color: "#20352b", fontSize: 14, lineHeight: 21 },
   prereqBox: {
     alignItems: "center",
     backgroundColor: "#eaf4ff",
@@ -418,6 +426,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   prereqText: {
+    fontFamily: "Nunito_400Regular",
     color: "#1967d2",
     flex: 1,
     fontSize: 12,
@@ -431,7 +440,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
   },
-  claimButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "900" },
+  claimButtonText: { fontFamily: "Nunito_800ExtraBold", color: "#ffffff", fontSize: 15, fontWeight: "900" },
   completedNotice: {
     alignItems: "center",
     flexDirection: "row",
@@ -439,6 +448,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 12,
   },
-  completedNoticeText: { color: "#236c19", fontSize: 14, fontWeight: "800" },
+  completedNoticeText: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 14, fontWeight: "800" },
   disabledButton: { opacity: 0.6 },
 });

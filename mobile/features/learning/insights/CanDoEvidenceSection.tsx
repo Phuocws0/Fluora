@@ -311,8 +311,8 @@ export function CanDoEvidenceSection() {
 const styles = StyleSheet.create({
   container: { gap: 14 },
   loadingBox: { alignItems: "center", padding: 40 },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
-  subtitle: { color: "#52625d", fontSize: 13, lineHeight: 19 },
+  loadingText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, marginTop: 12 },
+  subtitle: { fontFamily: "Nunito_400Regular", color: "#52625d", fontSize: 13, lineHeight: 19 },
   goalsList: { gap: 14 },
   goalCard: {
     backgroundColor: "#ffffff",
@@ -329,6 +329,7 @@ const styles = StyleSheet.create({
   },
   badgeRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   codeBadge: {
+    fontFamily: "Nunito_800ExtraBold",
     backgroundColor: "#eaf8de",
     borderRadius: 8,
     color: "#236c19",
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  levelSkill: { color: "#65766c", fontSize: 11, fontWeight: "700" },
+  levelSkill: { fontFamily: "Nunito_700Bold", color: "#65766c", fontSize: 11, fontWeight: "700" },
   addSampleButton: {
     alignItems: "center",
     backgroundColor: "#f5f8f4",
@@ -347,9 +348,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  addSampleText: { color: "#236c19", fontSize: 11, fontWeight: "800" },
-  goalTitle: { color: "#20352b", fontSize: 16, fontWeight: "900", marginTop: 2 },
-  goalDesc: { color: "#65766c", fontSize: 13, lineHeight: 18, marginTop: 4 },
+  addSampleText: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 11, fontWeight: "800" },
+  goalTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 16, fontWeight: "900", marginTop: 2 },
+  goalDesc: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 13, lineHeight: 18, marginTop: 4 },
   samplesArea: {
     borderTopColor: "#f0f4ee",
     borderTopWidth: 1,
@@ -357,6 +358,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   samplesHeader: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -374,9 +376,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   evidenceMain: { flex: 1 },
-  evidenceKind: { color: "#236c19", fontSize: 10, fontWeight: "800" },
-  evidenceSummary: { color: "#20352b", fontSize: 13, fontWeight: "700", marginTop: 2 },
-  evidenceRef: { color: "#65766c", fontSize: 11, marginTop: 2 },
+  evidenceKind: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 10, fontWeight: "800" },
+  evidenceSummary: { fontFamily: "Nunito_700Bold", color: "#20352b", fontSize: 13, fontWeight: "700", marginTop: 2 },
+  evidenceRef: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 11, marginTop: 2 },
   evidenceActions: { flexDirection: "row", gap: 4, paddingLeft: 8 },
   iconButton: {
     alignItems: "center",
@@ -403,8 +405,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 14,
   },
-  modalTitle: { color: "#20352b", fontSize: 20, fontWeight: "900" },
+  modalTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 20, fontWeight: "900" },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     backgroundColor: "#fff0ed",
     borderRadius: 10,
     color: "#a82c20",
@@ -414,6 +417,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   formLabel: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 10,
     fontWeight: "800",
@@ -429,9 +433,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   kindPillActive: { backgroundColor: "#236c19" },
-  kindPillText: { color: "#65766c", fontSize: 12, fontWeight: "700" },
+  kindPillText: { fontFamily: "Nunito_700Bold", color: "#65766c", fontSize: 12, fontWeight: "700" },
   kindPillTextActive: { color: "#ffffff", fontWeight: "800" },
   input: {
+    fontFamily: "Nunito_700Bold",
     backgroundColor: "#ffffff",
     borderColor: "#c5d6bf",
     borderRadius: 12,
@@ -452,6 +457,6 @@ const styles = StyleSheet.create({
     minHeight: 48,
     marginTop: 6,
   },
-  saveButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "900" },
+  saveButtonText: { fontFamily: "Nunito_800ExtraBold", color: "#ffffff", fontSize: 15, fontWeight: "900" },
   disabledButton: { opacity: 0.6 },
 });

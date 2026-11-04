@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   eyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -247,6 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#236c19",
   },
   speakerText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
@@ -255,12 +257,14 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   phraseText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 22,
     fontWeight: "900",
     lineHeight: 30,
   },
   deviceNotice: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 11,
     marginTop: 10,
@@ -274,6 +278,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   studioTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 11,
     fontWeight: "800",
@@ -303,6 +308,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#d32f2f",
   },
   micLabel: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "700",
@@ -318,6 +324,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   playbackText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "800",
@@ -328,11 +335,13 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   scorecardHeading: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 13,
     fontWeight: "800",
   },
   scorecardSubtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 12,
     marginTop: 2,
@@ -355,10 +364,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#eaf8de",
     borderColor: "#236c19",
   },
-  scoreEmoji: { fontSize: 18, marginBottom: 2 },
-  scoreText: { color: "#20352b", fontSize: 11, fontWeight: "700" },
+  scoreEmoji: { fontFamily: "Nunito_400Regular", fontSize: 18, marginBottom: 2 },
+  scoreText: { fontFamily: "Nunito_700Bold", color: "#20352b", fontSize: 11, fontWeight: "700" },
   scoreTextSelected: { color: "#236c19", fontWeight: "800" },
-  scorePercent: { color: "#65766c", fontSize: 10, fontWeight: "700", marginTop: 2 },
+  scorePercent: { fontFamily: "Nunito_700Bold", color: "#65766c", fontSize: 10, fontWeight: "700", marginTop: 2 },
   scorePercentSelected: { color: "#236c19", fontWeight: "800" },
   resultBox: {
     backgroundColor: "#eaf8de",
@@ -366,7 +375,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 10,
   },
-  resultTranscript: { color: "#20352b", fontSize: 12, lineHeight: 17 },
-  resultScore: { color: "#236c19", fontSize: 11, fontWeight: "800", marginTop: 4 },
+  resultTranscript: { fontFamily: "Nunito_400Regular", color: "#20352b", fontSize: 12, lineHeight: 17 },
+  resultScore: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 11, fontWeight: "800", marginTop: 4 },
   disabled: { opacity: 0.6 },
 });
