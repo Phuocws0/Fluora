@@ -7,7 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import { useAuth } from "../../features/auth/AuthContext";
@@ -21,7 +21,6 @@ export default function RegisterScreen() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,20 +84,32 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentTopPadding={32} fixedFooterBottom={20} fixedFooter={
+      <View style={styles.stickyFooter}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
+          disabled={isSubmitting}
+          onPress={handleRegister}
+          style={({ pressed }) => [styles.primaryButton, pressed && !isSubmitting ? styles.primaryButtonPressed : null, isSubmitting && styles.disabled]}
+        >
+          {isSubmitting ? <ActivityIndicator color="#20352b" /> : <Text style={styles.primaryButtonText}>Create account</Text>}
+        </Pressable>
+        <Text style={styles.footerBrand}>FLUORA · GROW AT YOUR OWN PACE</Text>
+      </View>
+    }>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Back to welcome"
         onPress={() => router.replace("/(auth)/welcome")}
         style={styles.backButton}
       >
-        <Ionicons name="arrow-back" size={22} color="#20352b" />
+        <Ionicons name="arrow-back" size={20} color="#236c19" />
+        <Text style={styles.eyebrow}>YOUR PERSONAL SETUP</Text>
       </Pressable>
-
-      <Text style={styles.eyebrow}>FLUORA</Text>
       <Text style={styles.title}>Create your account</Text>
       <Text style={styles.description}>
-        Save your progress and learn across your devices.
+        Save your progress and learn across your{ "\n" }devices.
       </Text>
 
       <View style={styles.progressLabelRow}>
@@ -118,7 +129,8 @@ export default function RegisterScreen() {
 
       <View style={styles.form}>
         <View style={styles.field}>
-          <Text style={styles.label}>Display Name</Text>
+          <View style={styles.inputCard}>
+            <Text style={styles.label}>Your name</Text>
           <TextInput
             accessibilityLabel="Display Name"
             autoCapitalize="words"
@@ -130,14 +142,16 @@ export default function RegisterScreen() {
               setDisplayName(val);
               if (error) setError(null);
             }}
-            placeholder="e.g. Alex Rivera"
+            placeholder="Minh Nguyễn"
             placeholderTextColor="#8a9a90"
             style={styles.input}
             value={displayName}
           />
+          </View>
         </View>
 
         <View style={styles.field}>
+          <View style={styles.inputCard}>
           <Text style={styles.label}>Email</Text>
           <TextInput
             accessibilityLabel="Email address"
@@ -150,16 +164,18 @@ export default function RegisterScreen() {
               setEmail(val);
               if (error) setError(null);
             }}
-            placeholder="you@example.com"
+            placeholder="minh@example.com"
             placeholderTextColor="#8a9a90"
             style={styles.input}
             value={email}
           />
+          </View>
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordWrapper}>
+          <View style={[styles.inputCard, styles.passwordWrapper]}>
+            <Text style={styles.label}>Create password</Text>
+          <View style={styles.passwordRow}>
             <TextInput
               accessibilityLabel="Password"
               autoCapitalize="none"
@@ -170,57 +186,21 @@ export default function RegisterScreen() {
                 setPassword(val);
                 if (error) setError(null);
               }}
-              placeholder="At least 8 characters"
+              placeholder="••••••••••"
               placeholderTextColor="#8a9a90"
-              secureTextEntry={!showPassword}
+              secureTextEntry
               style={styles.passwordInput}
               value={password}
             />
-            <Pressable
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-              accessibilityRole="button"
-              disabled={isSubmitting}
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeButton}
-            >
-              <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color="#65766c"
-              />
-            </Pressable>
+          </View>
           </View>
         </View>
+        <Text style={styles.passwordHint}>8+ characters · One number</Text>
 
         <View style={styles.termsPill}>
-          <Ionicons name="checkmark-circle" size={16} color="#236c19" />
           <Text style={styles.termsText}>Agree to Terms & Privacy</Text>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
-          disabled={isSubmitting}
-          onPress={handleRegister}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && !isSubmitting ? styles.primaryButtonPressed : null,
-            isSubmitting && styles.disabled,
-          ]}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Create Account</Text>
-          )}
-        </Pressable>
-      </View>
-
-      <View style={styles.footerRow}>
-        <Text style={styles.footerText}>Already have an account?</Text>
-        <Link href="/(auth)/login" style={styles.link}>
-          Sign in
-        </Link>
       </View>
     </ScreenContainer>
   );
@@ -228,41 +208,48 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   backButton: {
+    alignItems: "center",
     alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingRight: 12,
-    marginBottom: 12,
+    flexDirection: "row",
+    gap: 10,
+    height: 32,
+    marginBottom: 8,
   },
   eyebrow: {
-    color: "#236c19",
+    fontFamily: "Nunito_800ExtraBold",
+    color: "#65766c",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
-    fontSize: 30,
+    fontSize: 24,
+    lineHeight: 32,
     fontWeight: "900",
-    marginTop: 8,
   },
   description: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 12,
   },
   progressLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 18,
+    marginTop: 12,
   },
   progressLabelActive: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "800",
   },
   progressLabel: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "600",
@@ -293,6 +280,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#b42318",
     fontSize: 13,
     fontWeight: "600",
@@ -300,56 +288,65 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   form: {
-    marginTop: 14,
-    gap: 16,
+    marginTop: 17,
+    gap: 12,
   },
-  field: {
-    gap: 6,
+  field: {},
+  inputCard: {
+    backgroundColor: "#ffffff",
+    borderColor: "#dee8d9",
+    borderRadius: 16,
+    borderWidth: 1,
+    minHeight: 76,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 7,
   },
   label: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 18,
     fontWeight: "700",
   },
   input: {
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 12,
-    borderWidth: 1.5,
+    fontFamily: "Nunito_400Regular",
     color: "#20352b",
-    fontSize: 15,
-    minHeight: 50,
-    paddingHorizontal: 16,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 33,
+    paddingHorizontal: 0,
+    paddingVertical: 2,
   },
   passwordWrapper: {
-    flexDirection: "row",
+    paddingBottom: 3,
+  },
+  passwordRow: {
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderColor: "#d8dfda",
-    borderRadius: 12,
-    borderWidth: 1.5,
+    flexDirection: "row",
   },
   passwordInput: {
+    fontFamily: "Nunito_400Regular",
     flex: 1,
     color: "#20352b",
-    fontSize: 15,
-    minHeight: 50,
-    paddingHorizontal: 16,
-  },
-  eyeButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 32,
+    paddingHorizontal: 0,
+    paddingVertical: 2,
   },
   termsPill: {
-    minHeight: 36,
+    minHeight: 34,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    borderRadius: 18,
+    borderRadius: 17,
     backgroundColor: "#eaf8de",
     paddingHorizontal: 12,
+    marginTop: 13,
   },
   termsText: {
+    fontFamily: "Nunito_700Bold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "700",
@@ -367,6 +364,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   primaryButtonText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -374,20 +372,7 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.55,
   },
-  footerRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-    alignItems: "center",
-    marginTop: 32,
-  },
-  footerText: {
-    color: "#65766c",
-    fontSize: 14,
-  },
-  link: {
-    color: "#236c19",
-    fontSize: 14,
-    fontWeight: "700",
-  },
+  stickyFooter: { gap: 10 },
+  footerBrand: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 10, lineHeight: 14, textAlign: "center" },
+  passwordHint: { color: "#65766c", fontFamily: "Nunito_700Bold", fontSize: 12, lineHeight: 18, marginTop: -6 },
 });

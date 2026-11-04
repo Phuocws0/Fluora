@@ -122,12 +122,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 20,
     fontWeight: "900",
   },
   closeButton: { padding: 4 },
   subtitle: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     marginBottom: 16,
@@ -157,6 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardIndex: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 10,
     fontWeight: "800",
@@ -167,18 +170,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statusText: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 12,
     fontWeight: "800",
   },
   statusCorrect: { color: "#236c19" },
   statusIncorrect: { color: "#c62828" },
   feedbackText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 14,
     fontWeight: "700",
     marginTop: 2,
   },
   scoreText: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 12,
     marginTop: 4,
@@ -188,6 +194,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   loadingText: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 13,
     marginTop: 8,
@@ -196,11 +203,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   errorText: {
+    fontFamily: "Nunito_700Bold",
     color: "#a82c20",
     fontSize: 13,
     fontWeight: "700",
   },
   emptyText: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 14,
     fontStyle: "italic",
@@ -215,6 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   doneText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "800",

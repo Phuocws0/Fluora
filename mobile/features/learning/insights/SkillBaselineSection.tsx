@@ -110,7 +110,7 @@ export function SkillBaselineSection() {
 const styles = StyleSheet.create({
   container: { gap: 16 },
   loadingBox: { alignItems: "center", padding: 40 },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
+  loadingText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, marginTop: 12 },
   levelCard: {
     backgroundColor: "#eaf8de",
     borderColor: "#d2ebd0",
@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   levelEyebrow: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 10,
     fontWeight: "800",
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   levelBadge: {
+    fontFamily: "Nunito_800ExtraBold",
     backgroundColor: "#236c19",
     borderRadius: 14,
     color: "#ffffff",
@@ -140,9 +142,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   levelMeta: { flex: 1 },
-  levelTitle: { color: "#20352b", fontSize: 16, fontWeight: "900" },
-  levelSource: { color: "#52625d", fontSize: 12, marginTop: 2 },
+  levelTitle: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 16, fontWeight: "900" },
+  levelSource: { fontFamily: "Nunito_400Regular", color: "#52625d", fontSize: 12, marginTop: 2 },
   sectionTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "800",
@@ -162,8 +165,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
-  skillName: { color: "#20352b", fontSize: 15, fontWeight: "800" },
-  confidenceText: { fontSize: 14, fontWeight: "900" },
+  skillName: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 15, fontWeight: "800" },
+  confidenceText: { fontFamily: "Nunito_800ExtraBold", fontSize: 14, fontWeight: "900" },
   barTrack: {
     backgroundColor: "#e5ece2",
     borderRadius: 6,
@@ -174,5 +177,5 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     height: "100%",
   },
-  attemptsText: { color: "#65766c", fontSize: 11, marginTop: 6 },
+  attemptsText: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 11, marginTop: 6 },
 });

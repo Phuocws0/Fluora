@@ -12,4 +12,4 @@ export function FlowPlaceholder({ title, description, links = [] }: { title: str
   );
 }
 
-const styles = StyleSheet.create({ link: { color: "#236c19", fontSize: 14, fontWeight: "700", marginTop: 18 } });
+const styles = StyleSheet.create({ link: { fontFamily: "Nunito_700Bold", color: "#236c19", fontSize: 14, fontWeight: "700", marginTop: 18 } });

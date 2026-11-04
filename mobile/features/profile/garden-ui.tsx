@@ -22,6 +22,7 @@ export const font = {
 };
 
 type Action = { label: string; onPress: () => void; disabled?: boolean };
+export type GardenTab = "Learn" | "Practice" | "Tutor" | "League" | "Profile";
 
 export function GardenButton({ label, onPress, disabled = false }: Action) {
   return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={[styles.primary, disabled && { opacity: 0.45 }]}>
@@ -39,7 +40,7 @@ export function ProfileAuthGate({ children, inTab = false }: { children: ReactNo
   return <>{children}</>;
 }
 
-function Footer({ activeTab }: { activeTab: "Practice" | "Profile" }) {
+export function GardenFooter({ activeTab }: { activeTab: GardenTab }) {
   const tabs = [
     { name: "Learn", icon: "home-outline", route: "/(tabs)/learn" },
     { name: "Practice", icon: "book-outline", route: "/(tabs)/practice" },
@@ -63,7 +64,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
   eyebrow?: string;
   action?: Action;
   showFooter?: boolean;
-  activeTab?: "Practice" | "Profile";
+  activeTab?: GardenTab;
   scrollRef?: RefObject<ScrollView | null>;
 }) {
   return <SafeAreaView edges={["top", "bottom"]} style={styles.safe}>
@@ -76,8 +77,8 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
         <Text style={styles.title}>{title}</Text>
         {children}
       </ScrollView>
-      {action && <View style={styles.action}><GardenButton {...action} /></View>}
-      {showFooter && <Footer activeTab={activeTab} />}
+      {action && <View style={[styles.action, !showFooter && styles.actionAboveExternalTabs]}><GardenButton {...action} /></View>}
+      {showFooter && <GardenFooter activeTab={activeTab} />}
     </KeyboardAvoidingView>
   </SafeAreaView>;
 }
@@ -90,25 +91,27 @@ export function GardenCaption({ children }: { children: ReactNode }) {
   return <Text style={styles.caption}>{children}</Text>;
 }
 
-export function GardenSubtitle({ children }: { children: ReactNode }) {
-  return <Text style={styles.subtitle}>{children}</Text>;
+export function GardenSubtitle({ children, numberOfLines, compact = false }: { children: ReactNode; numberOfLines?: number; compact?: boolean }) {
+  return <Text numberOfLines={numberOfLines} style={[styles.subtitle, compact && styles.subtitleCompact]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "white" },
   safe: { flex: 1, backgroundColor: "white" },
   flex: { flex: 1 },
-  content: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 12, paddingBottom: 28 },
+  content: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 28 },
   breadcrumb: { flexDirection: "row", alignItems: "center", gap: 8, height: 32, marginBottom: 16 },
   back: { color: garden.forest, fontFamily: font.heavy, fontSize: 28, lineHeight: 32, width: 28 },
   eyebrow: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   title: { color: garden.ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 32, marginBottom: 8 },
   subtitle: { color: garden.muted, fontFamily: font.body, fontSize: 16, lineHeight: 24, marginBottom: 18 },
+  subtitleCompact: { fontSize: 14, lineHeight: 21, marginBottom: 14 },
   caption: { color: garden.muted, fontFamily: font.bold, fontSize: 12, lineHeight: 18, marginTop: 16, marginBottom: 12 },
   card: { borderColor: garden.line, borderWidth: 1, borderRadius: 20, padding: 16, marginVertical: 6 },
   primary: { height: 56, backgroundColor: garden.green, borderRadius: 16, alignItems: "center", justifyContent: "center", shadowColor: garden.forest, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 0, elevation: 3 },
   primaryText: { color: garden.ink, fontFamily: font.bold, fontSize: 16, lineHeight: 24 },
   action: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 10, backgroundColor: "white" },
+  actionAboveExternalTabs: { paddingBottom: 58 },
   footer: { height: 54, marginHorizontal: 24, marginBottom: 4, borderRadius: 20, backgroundColor: "white", flexDirection: "row", alignItems: "center", justifyContent: "space-between", shadowColor: garden.forest, shadowOpacity: 0.07, shadowRadius: 16, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   tab: { width: 62, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 2 },
   activeTab: { backgroundColor: garden.mint },

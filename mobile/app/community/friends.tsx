@@ -1,2 +1,2 @@
-import FriendsScreen from "../../features/community/FriendsScreen";
-export default FriendsScreen;
+import FriendsHomeScreen from "../../features/community/FriendsHomeScreen";
+export default FriendsHomeScreen;

@@ -115,6 +115,7 @@ export function SentenceTilesExercise({ content, tokens, onChange, disabled = fa
 const styles = StyleSheet.create({
   container: { marginVertical: 14 },
   sectionLabel: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#65766c",
     fontSize: 11,
     fontWeight: "800",
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   placeholderText: {
+    fontFamily: "Nunito_400Regular",
     color: "#8d9d94",
     fontSize: 14,
     fontStyle: "italic",
@@ -153,11 +155,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   arrangedTokenText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "800",
   },
   removeIcon: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 16,
     fontWeight: "800",
@@ -171,6 +175,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   clearText: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 12,
     fontWeight: "700",
@@ -203,6 +208,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   bankTileText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "800",

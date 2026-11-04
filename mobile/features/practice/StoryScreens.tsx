@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
@@ -8,28 +8,60 @@ import { parseReading } from "./reading";
 import { DictionaryPanel } from "./DictionaryPanel";
 import { isConnectionError, offlineStory } from "./downloads";
 import { readDraft, writeDraft } from "./offline.storage";
-import { useDownloads } from "./DownloadsScreen";
 import type { Bookmark, ReadingProgress } from "./practice.types";
-import { ActionState, Button, Card, Choice, Editor, Empty, GardenSubtitle, LinkCard, PracticePage, ResourceState, Section, confirmAction, s, useAction, useResource } from "./practice-ui";
+import { ActionState, Button, Card, Choice, Editor, Empty, font, GardenSubtitle, LinkCard, PracticePage, ResourceState, Section, confirmAction, s, useAction, useResource } from "./practice-ui";
 import type { EditorSpec } from "./practice-ui";
 
 export function StoryLibraryScreen() {
-  const resource = useResource(practiceApi.stories), { user } = useAuth();
-  const local = useDownloads(user?.id ?? "guest");
-  const [kind, setKind] = useState("all");
-  const visible = resource.data?.filter(story => kind === "all" || story.kind === kind) ?? [];
-  return <PracticePage title="Learn through stories">
+  const resource = useResource(practiceApi.stories);
+  const stories = resource.data ?? [];
+  const featured = stories[0];
+  const shortReads = stories.slice(1, 3);
+  const openStory = (storyId: string) => router.push({ pathname: "/stories/[storyId]", params: { storyId } });
+  return <PracticePage title="Learn through stories" action={featured ? { label: "Read first story", onPress: () => openStory(featured.id) } : undefined}>
     <GardenSubtitle>Read something fun. Learn language naturally.</GardenSubtitle>
-    <Choice value={kind} options={[{ id: "all", label: "All reads" }, { id: "article", label: "Articles" }, { id: "dialogue", label: "Dialogues" }]} onChange={setKind} />
-    <Button label="Bookmark shelf" onPress={() => router.push({ pathname: "/practice/[section]", params: { section: "bookmarks" } })} />
     <ResourceState resource={resource} />
-    {resource.data && !visible.length && <Empty text="No published reads in this category yet." />}
-    {visible.map((story, i) => <LinkCard key={story.id} title={story.title} detail={story.kind} blue={i % 2 === 1} onPress={() => router.push({ pathname: "/stories/[storyId]", params: { storyId: story.id } })} />)}
-    <Section>READY ON THIS DEVICE</Section>
-    {local.entries.filter(e => e.kind === "story" && e.status === "completed").map(story => <LinkCard key={story.id} title={story.title} detail="Available offline" onPress={() => router.push({ pathname: "/stories/[storyId]", params: { storyId: story.targetId, offline: "1" } })} />)}
-    <Button label="Manage downloads" onPress={() => router.push({ pathname: "/practice/[section]", params: { section: "downloads" } })} />
+    {resource.data && !featured && <Empty text="No published stories are available yet." />}
+    {featured && <View style={storyStyles.layout}>
+      <Pressable accessibilityRole="button" accessibilityLabel={`Featured story: ${featured.title}`} onPress={() => openStory(featured.id)} style={storyStyles.featured}>
+        <Text style={storyStyles.featuredLabel}>FEATURED / {featured.kind.toUpperCase()}</Text>
+        <Text numberOfLines={2} style={storyStyles.featuredTitle}>{featured.title}</Text>
+        <Text numberOfLines={1} style={storyStyles.featuredDescription}>A short {featured.kind} to practice your English.</Text>
+        <Text style={storyStyles.featuredMeta}>OPEN STORY · ENGLISH</Text>
+      </Pressable>
+      <Text style={storyStyles.sectionTitle}>SHORT READS FOR YOUR DAY</Text>
+      <View style={storyStyles.shortReads}>
+        {shortReads.map((story, index) => <Pressable key={story.id} accessibilityRole="button" accessibilityLabel={`Read ${story.title}`} onPress={() => openStory(story.id)} style={[storyStyles.shortRead, index % 2 === 0 ? storyStyles.shortReadBlue : storyStyles.shortReadMint]}>
+          <Text numberOfLines={2} style={storyStyles.shortReadTitle}>{story.title}</Text>
+          <Text style={storyStyles.shortReadMeta}>{story.kind.toUpperCase()} · READ</Text>
+        </Pressable>)}
+        {shortReads.length === 1 && <View style={storyStyles.shortReadPlaceholder} />}
+      </View>
+      {stories.length > 3 && <View style={storyStyles.moreStories}>
+        <Section>MORE STORIES</Section>
+        {stories.slice(3).map(story => <LinkCard key={story.id} title={story.title} detail={story.kind} onPress={() => openStory(story.id)} />)}
+      </View>}
+    </View>}
   </PracticePage>;
 }
+
+const storyStyles = StyleSheet.create({
+  layout: { minHeight: 450, position: "relative", width: "100%" },
+  featured: { backgroundColor: "#236c19", borderRadius: 16, height: 220, left: 0, overflow: "hidden", padding: 14, position: "absolute", top: 0, width: "100%" },
+  featuredLabel: { color: "#eaf8de", fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
+  featuredTitle: { color: "#ffffff", fontFamily: font.heavy, fontSize: 32, lineHeight: 40, height: 80, marginTop: 6, width: 260 },
+  featuredDescription: { color: "#ffffff", fontFamily: font.bold, fontSize: 15, lineHeight: 22, marginTop: 6, width: 270 },
+  featuredMeta: { color: "#eaf8de", fontFamily: font.bold, fontSize: 12, lineHeight: 18, marginTop: 6 },
+  sectionTitle: { color: "#65766c", fontFamily: font.bold, fontSize: 12, lineHeight: 18, left: 0, position: "absolute", top: 246, width: "100%" },
+  shortReads: { flexDirection: "row", gap: 12, left: 0, position: "absolute", top: 280, width: "100%" },
+  shortRead: { borderRadius: 16, height: 136, padding: 14, width: "48.25%" },
+  shortReadBlue: { backgroundColor: "#eaf4ff" },
+  shortReadMint: { backgroundColor: "#eaf8de" },
+  shortReadTitle: { color: "#236c19", fontFamily: font.bold, fontSize: 15, lineHeight: 22 },
+  shortReadMeta: { color: "#65766c", fontFamily: font.bold, fontSize: 12, lineHeight: 18, marginTop: 6 },
+  shortReadPlaceholder: { flex: 1 },
+  moreStories: { marginTop: 450 },
+});
 
 type LocalProgress = ReadingProgress & { dirty: boolean; reset?: boolean };
 export function StoryReaderScreen() {
@@ -108,7 +140,7 @@ function Reader({ id, forceOffline }: { id: string; forceOffline: boolean }) {
         <Text style={s.caption}>Paragraph {content.paragraphs.length ? position + 1 : 0} / {content.paragraphs.length} · Tap a word to explore its meaning</Text>
         {content.paragraphs.map((paragraph, i) => <View key={i} onLayout={event => { paragraphOffsets.current[i] = event.nativeEvent.layout.y; if (progressReady && i === position) scrollRef.current?.scrollTo({ y: event.nativeEvent.layout.y, animated: false }); }} style={{ backgroundColor: mode === "dialogue" ? i % 2 ? "#EAF4FF" : "#EAF8DE" : paragraph.quote ? "#EAF8DE" : "white", borderWidth: i === position ? 1 : 0, borderColor: "#58CC02", borderRadius: 18, padding: 16, marginVertical: 7, marginLeft: mode === "dialogue" && i % 2 ? 28 : 0 }}>
           {paragraph.speaker && <Text style={s.label}>{paragraph.speaker}</Text>}
-          <Text style={[s.body, settings?.textSize === "extra_large" ? { fontSize: 24, lineHeight: 34 } : settings?.textSize === "large" ? { fontSize: 20, lineHeight: 30 } : {}]}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</Text>
+          <Text style={[s.body, settings?.textSize === "extra_large" ? { fontFamily: "Nunito_400Regular", fontSize: 24, lineHeight: 34 } : settings?.textSize === "large" ? { fontFamily: "Nunito_400Regular", fontSize: 20, lineHeight: 30 } : {}]}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</Text>
           <Button label={isSpeaking && i === position ? "Stop reading aloud" : "Read aloud"} onPress={() => { setPosition(i); if (isSpeaking) stop(); else speak(paragraph.text); }} />
         </View>)}
         <View style={s.wrap}><Button label="Previous" disabled={!progressReady || action.busy || position === 0} onPress={() => save(position - 1)} /><Button label="Next / save position" disabled={!progressReady || action.busy || position >= content.paragraphs.length - 1} onPress={() => save(position + 1)} /><Button label="Mark read" disabled={!progressReady || action.busy || !content.paragraphs.length} onPress={() => save(Math.max(0, content.paragraphs.length - 1), true)} /></View>

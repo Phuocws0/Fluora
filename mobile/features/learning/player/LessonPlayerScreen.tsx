@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GardenFooter, font, garden } from "../../profile/garden-ui";
 import { ContentState } from "../../../components/ContentState";
 import { useAuth } from "../../auth/AuthContext";
 import { getLesson } from "../learning.service";
@@ -263,33 +264,10 @@ export function LessonPlayerScreen() {
           <View style={styles.progressBarWrapper}>
             <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Toggle audio-only mode"
-            onPress={() => setAudioOnlyMode((prev) => !prev)}
-            style={[styles.audioButton, audioOnlyMode && styles.audioButtonActive]}
-          >
-            <Ionicons
-              name={audioOnlyMode ? "headset" : "headset-outline"}
-              size={16}
-              color={audioOnlyMode ? "#ffffff" : "#236c19"}
-            />
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Get hint"
-            onPress={() => setHintModalVisible(true)}
-            style={styles.hintButton}
-          >
-            <Ionicons name="bulb-outline" size={16} color="#236c19" />
-            <Text style={styles.hintButtonText}>Hint</Text>
-          </Pressable>
-
-          <Text style={styles.stepBadge}>
-            {currentIndex + 1}/{exercises.length}
-          </Text>
+          <View accessibilityLabel="Five hearts remaining" style={styles.hearts}>
+            <Ionicons name="heart" size={15} color="#E34850" />
+            <Text style={styles.heartCount}>5</Text>
+          </View>
         </View>
 
         {audioOnlyMode ? (
@@ -305,20 +283,21 @@ export function LessonPlayerScreen() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-          <View style={styles.metaRow}>
-            <Text style={styles.lessonBreadcrumb}>
-              {lesson.unit.title} › {lesson.title}
-            </Text>
-          </View>
-
-          <Text style={styles.activityEyebrow}>
-            ACTIVITY {currentIndex + 1} · {exType.toLocaleUpperCase().replace(/_/g, " ")}
-          </Text>
           <Text style={styles.prompt}>{currentExercise.prompt}</Text>
-          {offlinePractice && <View style={styles.errorBanner}><Text style={styles.errorText}>OFFLINE PRACTICE · Answers are ungraded and XP is not saved.</Text><Pressable accessibilityRole="button" onPress={() => { setFeedback(null); if (preferOffline) setPreferOffline(false); else void refresh(); }}><Text style={styles.hintButtonText}>Reconnect / submit online</Text></Pressable></View>}
           {currentExercise.instruction ? (
             <Text style={styles.instruction}>{currentExercise.instruction}</Text>
           ) : null}
+          <View style={styles.exerciseTools}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Toggle audio-only mode" onPress={() => setAudioOnlyMode((previous) => !previous)} style={styles.utilityButton}>
+              <Ionicons name={audioOnlyMode ? "headset" : "headset-outline"} size={17} color={garden.forest} />
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={() => setHintModalVisible(true)} style={styles.utilityButton}>
+              <Ionicons name="bulb-outline" size={17} color={garden.forest} />
+              <Text style={styles.utilityLabel}>Hint</Text>
+            </Pressable>
+            <Text style={styles.stepBadge}>{currentIndex + 1} / {exercises.length}</Text>
+          </View>
+          {offlinePractice && <View style={styles.errorBanner}><Text style={styles.errorText}>OFFLINE PRACTICE · Answers are ungraded and XP is not saved.</Text><Pressable accessibilityRole="button" onPress={() => { setFeedback(null); if (preferOffline) setPreferOffline(false); else void refresh(); }}><Text style={styles.hintButtonText}>Reconnect / submit online</Text></Pressable></View>}
 
           {/* Exercise Mode Renderers */}
           {["listening_choice", "transcript_gap", "dictation"].includes(exType) && <LessonAudioPrompt content={currentExercise.content} prompt={currentExercise.prompt} />}
@@ -490,6 +469,7 @@ export function LessonPlayerScreen() {
           onClose={() => setHistoryModalVisible(false)}
         />
       </KeyboardAvoidingView>
+      <GardenFooter activeTab="Learn" />
     </SafeAreaView>
   );
 }
@@ -504,7 +484,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
   },
-  loadingText: { color: "#65766c", fontSize: 14, marginTop: 12 },
+  loadingText: { color: garden.muted, fontFamily: font.body, fontSize: 14, marginTop: 12 },
   errorContainer: {
     backgroundColor: "#ffffff",
     flex: 1,
@@ -515,39 +495,44 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
   },
-  exitButton: { padding: 4 },
+  exitButton: { padding: 2 },
   progressBarWrapper: {
-    backgroundColor: "#e5ece2",
+    backgroundColor: garden.line,
     borderRadius: 8,
     flex: 1,
     height: 10,
     overflow: "hidden",
   },
   progressBarFill: {
-    backgroundColor: "#58cc02",
+    backgroundColor: garden.green,
     borderRadius: 8,
     height: "100%",
   },
-  hintButton: {
+  exerciseTools: { alignItems: "center", flexDirection: "row", gap: 8, marginTop: 12, marginBottom: 2 },
+  utilityButton: {
     alignItems: "center",
-    backgroundColor: "#eaf8de",
-    borderRadius: 12,
+    backgroundColor: garden.mint,
+    borderRadius: 14,
     flexDirection: "row",
     gap: 4,
+    height: 32,
+    justifyContent: "center",
+    minWidth: 34,
     paddingHorizontal: 8,
-    paddingVertical: 4,
   },
+  utilityLabel: { color: garden.forest, fontFamily: font.bold, fontSize: 11, lineHeight: 16 },
   hintButtonText: {
-    color: "#236c19",
+    color: garden.forest,
+    fontFamily: font.bold,
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   audioButton: {
     alignItems: "center",
-    backgroundColor: "#eaf8de",
+    backgroundColor: garden.mint,
     borderRadius: 12,
     justifyContent: "center",
     paddingHorizontal: 8,
@@ -556,79 +541,69 @@ const styles = StyleSheet.create({
   audioButtonActive: {
     backgroundColor: "#236c19",
   },
-  stepBadge: {
-    color: "#65766c",
-    fontSize: 12,
-    fontWeight: "800",
-  },
+  stepBadge: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginLeft: "auto" },
+  hearts: { alignItems: "center", flexDirection: "row", gap: 3 },
+  heartCount: { color: "#E34850", fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 22,
+    paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 20,
   },
-  metaRow: { marginBottom: 6 },
-  lessonBreadcrumb: {
-    color: "#65766c",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  activityEyebrow: {
-    color: "#236c19",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-    marginTop: 4,
-  },
   prompt: {
-    color: "#20352b",
-    fontSize: 22,
-    fontWeight: "900",
-    lineHeight: 30,
-    marginTop: 6,
+    color: garden.ink,
+    fontFamily: font.heavy,
+    fontSize: 24,
+    fontWeight: "800",
+    lineHeight: 32,
+    marginTop: 8,
   },
   instruction: {
-    color: "#52625d",
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
+    color: garden.muted,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 8,
   },
   errorBanner: {
     alignItems: "center",
-    backgroundColor: "#fff0ed",
-    borderRadius: 12,
+    backgroundColor: "#FFF0EF",
+    borderRadius: 16,
     flexDirection: "row",
     gap: 8,
     marginTop: 14,
     padding: 12,
   },
   errorText: {
-    color: "#a82c20",
+    color: "#A82C20",
+    fontFamily: font.bold,
     flex: 1,
     fontSize: 13,
     fontWeight: "700",
   },
   bottomBar: {
     backgroundColor: "#ffffff",
-    borderTopColor: "#dee8d9",
-    borderTopWidth: 1,
-    padding: 16,
+    borderTopColor: garden.line,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
   },
   checkButton: {
     alignItems: "center",
-    backgroundColor: "#58cc02",
+    backgroundColor: garden.green,
     borderRadius: 16,
     justifyContent: "center",
-    minHeight: 52,
+    height: 56,
     paddingHorizontal: 20,
   },
   checkButtonDisabled: {
-    backgroundColor: "#e5ece2",
+    backgroundColor: garden.line,
   },
   checkButtonText: {
-    color: "#ffffff",
+    color: garden.ink,
+    fontFamily: font.bold,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   feedbackSheet: {
     borderRadius: 16,
@@ -636,8 +611,8 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   feedbackCorrect: {
-    backgroundColor: "#eaf8de",
-    borderColor: "#236c19",
+    backgroundColor: garden.mint,
+    borderColor: garden.line,
   },
   feedbackIncorrect: {
     backgroundColor: "#fff0ed",
@@ -649,6 +624,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   feedbackTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 17,
     fontWeight: "900",
   },
@@ -659,6 +635,7 @@ const styles = StyleSheet.create({
     color: "#c62828",
   },
   feedbackExplanation: {
+    fontFamily: "Nunito_400Regular",
     color: "#20352b",
     fontSize: 14,
     lineHeight: 20,
@@ -681,6 +658,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   tryAgainText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 14,
     fontWeight: "800",
@@ -694,14 +672,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   continueButtonCorrect: {
-    backgroundColor: "#236c19",
+    backgroundColor: garden.green,
   },
   continueButtonNeutral: {
     backgroundColor: "#20352b",
   },
   continueButtonText: {
-    color: "#ffffff",
+    color: garden.ink,
+    fontFamily: font.bold,
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

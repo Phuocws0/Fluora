@@ -22,7 +22,7 @@ export function Flashcards({ cards, close, onRate }: { cards: Array<{ id: string
     {card ? <>
       <Text style={s.caption}>FLASHCARD {index + 1} / {cards.length} · Self-assessed recall</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={flipped ? "Show word" : "Reveal meaning"} onPress={() => setFlipped(!flipped)} style={{ minHeight: 290, borderRadius: 28, backgroundColor: "#EAF8DE", justifyContent: "center", alignItems: "center", padding: 24, marginVertical: 18 }}>
-        <Text style={[s.cardTitle, { fontSize: 28, textAlign: "center" }]}>{flipped ? card.back : card.front}</Text>
+        <Text style={[s.cardTitle, { fontFamily: "Nunito_400Regular", fontSize: 28, textAlign: "center" }]}>{flipped ? card.back : card.front}</Text>
         {flipped && card.example ? <Text style={s.body}>{card.example}</Text> : null}
         <Text style={s.caption}>Tap to {flipped ? "show word" : "flip"}</Text>
       </Pressable>

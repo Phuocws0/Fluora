@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Page, ResourceState, useResource } from "../../features/shared/feature-ui";
+import { ScreenContainer } from "../../components/ScreenContainer";
+import { ResourceState, useResource } from "../../features/shared/feature-ui";
+import { getHomeSummary, getWeeklyLearningAnalytics } from "../../features/learning/activity.service";
 import { profileService } from "../../features/profile/service";
 import { font, GardenButton, ProfileAuthGate } from "../../features/profile/garden-ui";
 import { useAuth } from "../../features/auth/AuthContext";
@@ -11,11 +13,10 @@ const ink = "#20352B";
 
 function go(section: string) { router.push({ pathname: "/settings/[section]", params: { section } }); }
 
-function Row({ icon, title, subtitle, section }: { icon: React.ComponentProps<typeof Ionicons>["name"]; title: string; subtitle: string; section: string }) {
-  return <Pressable accessibilityRole="button" onPress={() => go(section)} style={styles.row}>
-    <View style={styles.icon}><Ionicons name={icon} size={22} color={green} /></View>
+function ProfileLink({ title, subtitle, onPress, featured = false, last = false }: { title: string; subtitle: string; onPress: () => void; featured?: boolean; last?: boolean }) {
+  return <Pressable accessibilityRole="button" onPress={onPress} style={[styles.profileLink, featured && styles.profileLinkFeatured, last && styles.profileLinkLast]}>
     <View style={{ flex: 1 }}><Text style={styles.rowTitle}>{title}</Text><Text style={styles.sub}>{subtitle}</Text></View>
-    <Ionicons name="chevron-forward" size={18} color="#78917E" />
+    <Ionicons name="chevron-forward" size={18} color="#236C19" />
   </Pressable>;
 }
 
@@ -23,47 +24,43 @@ function Home() {
   const { user } = useAuth();
   const resource = useResource(profileService.profile);
   const progress = useResource(profileService.progress);
+  const home = useResource(getHomeSummary);
+  const weekly = useResource(getWeeklyLearningAnalytics);
+  const learnerName = resource.data?.displayName || user?.displayName || "My profile";
+  const weeklyXp = weekly.data?.summary.xp;
+  const learningLanguage = home.data?.course?.language;
+  const learningLevel = home.data?.course?.level;
+  const openLearnerProfile = () => {
+    if (user?.id) router.push({ pathname: "/community/users/[userId]", params: { userId: user.id } });
+  };
 
-  return <Page title="My profile">
-    <Text style={styles.eyebrow}>YOUR PERSONAL SPACE</Text>
+  return <ScreenContainer contentTopPadding={25} fixedFooterBottom={82} fixedFooter={<View style={styles.fixedAction}><GardenButton label="Edit profile" onPress={() => go("edit-profile")} /></View>}>
+    <View style={styles.eyebrowRow}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn")} style={styles.backButton}>
+        <Text style={styles.backText}>‹</Text>
+      </Pressable>
+      <Text style={styles.eyebrow}>YOUR PERSONAL SPACE</Text>
+    </View>
+    <Text style={styles.profileName}>{learnerName}</Text>
+    <Text style={styles.profileMeta}>{learningLanguage ? `Learning ${learningLanguage}` : "Your learning plan"}{learningLevel ? ` · ${learningLevel}` : ""}</Text>
     <ResourceState resource={resource} />
+    <ResourceState resource={home} />
+    <ResourceState resource={progress} />
+    <ResourceState resource={weekly} />
     {resource.data && <>
       <View style={styles.hero}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.heroName}>{resource.data.displayName || "Learner"}</Text>
-          <Text style={styles.sub}>{resource.data.email}</Text>
-          <Text style={styles.heroCopy}>A little every day adds up. Keep growing with Flo.</Text>
-        </View>
-        <Image source={require("../../assets/profile-sprout.png")} style={styles.mascot} resizeMode="contain" />
+        <Image source={require("../../assets/profile-sprout.png")} style={styles.mascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
       </View>
-      {user && !user.emailVerified && <Pressable accessibilityRole="button" onPress={() => router.push("/(auth)/verify-email")} style={styles.verifyLink}>
-        <Ionicons name="mail-unread-outline" size={18} color={green} />
-        <Text style={styles.verifyText}>Verify your email address</Text>
-        <Ionicons name="chevron-forward" size={18} color={green} />
-      </Pressable>}
       <View style={styles.stats}>
-        <Pressable onPress={() => go("analytics")} style={styles.stat}>
-          <Text style={styles.statValue}>{progress.data?.currentStreak ?? "—"}</Text>
-          <Text style={styles.statLabel}>DAY STREAK</Text>
-        </Pressable>
-        <Pressable onPress={() => go("analytics")} style={styles.stat}>
-          <Text style={styles.statValue}>{progress.data?.xp ?? "—"}</Text>
-          <Text style={styles.statLabel}>TOTAL XP</Text>
-        </Pressable>
-        <Pressable onPress={() => go("analytics")} style={styles.stat}>
-          <Text style={styles.statValue}>{progress.data?.completedLessons ?? "—"}</Text>
-          <Text style={styles.statLabel}>LESSONS</Text>
-        </Pressable>
+        <View style={styles.stat}><Text style={styles.statValue}>{progress.data ? `${progress.data.currentStreak} days` : "—"}</Text><Text style={styles.statLabel}>Current streak</Text></View>
+        <View style={styles.stat}><Text style={styles.statValue}>{weeklyXp?.toLocaleString() ?? "—"}</Text><Text style={styles.statLabel}>Weekly XP</Text></View>
+        <View style={styles.stat}><Text style={styles.statValue}>{learningLevel ?? "—"}</Text><Text style={styles.statLabel}>Your level</Text></View>
       </View>
-      <Text style={styles.section}>YOUR SPACE</Text>
-      <Row icon="person-outline" title="Edit profile" subtitle="Name, bio and photo" section="edit-profile" />
-      <Row icon="bar-chart-outline" title="Learning analytics" subtitle="Weekly activity and XP breakdown" section="analytics" />
-      <Row icon="settings-outline" title="Account settings" subtitle="Learning, privacy and accessibility" section="general" />
-      <Row icon="help-circle-outline" title="Help center" subtitle="Answers and support requests" section="help" />
-      <Row icon="download-outline" title="Your data copy" subtitle="Request or download an export" section="exports" />
-      <View style={{ marginTop: 18 }}><GardenButton label="Edit profile" onPress={() => go("edit-profile")} /></View>
+      <ProfileLink featured title="View learner profile" subtitle="Email, learning plan and achievements" onPress={openLearnerProfile} />
+      <ProfileLink title="Learning progress" subtitle="Explore your XP and weekly goals" onPress={() => go("analytics")} last />
+      <Pressable accessibilityRole="button" onPress={() => go("general")} style={styles.settingsLink}><Text style={styles.settingsLinkText}>Account settings</Text><Text style={styles.settingsChevron}>›</Text></Pressable>
     </>}
-  </Page>;
+  </ScreenContainer>;
 }
 
 export default function ProfileScreen() {
@@ -71,20 +68,25 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  eyebrow: { color: green, fontFamily: font.heavy, fontSize: 11, letterSpacing: 2, marginTop: 3, marginBottom: 15 },
-  hero: { minHeight: 180, backgroundColor: "#E6F5DF", borderRadius: 28, padding: 22, flexDirection: "row", alignItems: "center", overflow: "hidden" },
-  mascot: { width: 135, height: 129, alignSelf: "flex-end" },
-  heroName: { color: ink, fontFamily: font.heavy, fontSize: 27, marginBottom: 4 },
-  heroCopy: { color: green, fontFamily: font.body, fontSize: 14, lineHeight: 21, marginTop: 16 },
+  eyebrowRow: { height: 32, flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 },
+  backButton: { width: 28, height: 32, justifyContent: "center" },
+  backText: { color: "#236C19", fontFamily: font.heavy, fontSize: 28, lineHeight: 32 },
+  eyebrow: { color: "#65766C", fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
+  profileName: { color: ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 32 },
+  profileMeta: { color: "#6B7F70", fontFamily: font.body, fontSize: 14, lineHeight: 21, marginTop: 12, marginBottom: 17 },
+  hero: { height: 145, backgroundColor: "#EAF8DE", borderRadius: 28, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  mascot: { width: 128, height: 122 },
   sub: { color: "#6B7F70", fontFamily: font.body, fontSize: 12, lineHeight: 18 },
-  stats: { flexDirection: "row", gap: 8, marginTop: 12 },
-  stat: { flex: 1, backgroundColor: "#EAF8DE", borderRadius: 18, paddingVertical: 14, alignItems: "center" },
-  statValue: { color: green, fontFamily: font.heavy, fontSize: 24 },
-  statLabel: { color: green, fontFamily: font.heavy, fontSize: 9, letterSpacing: 0.7 },
-  section: { color: "#64766A", fontFamily: font.heavy, fontSize: 11, letterSpacing: 1.5, marginTop: 27, marginBottom: 10 },
-  row: { backgroundColor: "#F8FAF6", borderRadius: 20, padding: 16, flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 9 },
-  rowTitle: { color: ink, fontFamily: font.bold, fontSize: 15, marginBottom: 3 },
-  icon: { width: 42, height: 42, borderRadius: 14, backgroundColor: "#E5F4DC", alignItems: "center", justifyContent: "center" },
-  verifyLink: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#EAF8DE", borderRadius: 16, padding: 14, marginTop: 12 },
-  verifyText: { flex: 1, color: green, fontFamily: font.bold, fontSize: 14 },
+  stats: { flexDirection: "row", gap: 8, marginTop: 13, marginBottom: 13 },
+  stat: { flex: 1, height: 82, backgroundColor: "#EAF8DE", borderRadius: 18, paddingHorizontal: 6, alignItems: "center", justifyContent: "center" },
+  statValue: { color: green, fontFamily: font.heavy, fontSize: 22, lineHeight: 28 },
+  statLabel: { color: "#64766A", fontFamily: font.bold, fontSize: 9, lineHeight: 14, marginTop: 3 },
+  profileLink: { minHeight: 100, backgroundColor: "white", borderColor: "#DEE8D9", borderWidth: 1, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 16, flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 13 },
+  profileLinkFeatured: { backgroundColor: "#EAF8DE" },
+  profileLinkLast: { marginBottom: 5 },
+  rowTitle: { color: ink, fontFamily: font.bold, fontSize: 15, lineHeight: 22, marginBottom: 3 },
+  settingsLink: { height: 38, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  settingsLinkText: { color: green, fontFamily: font.bold, fontSize: 14, lineHeight: 20 },
+  settingsChevron: { color: green, fontFamily: font.body, fontSize: 24, lineHeight: 28 },
+  fixedAction: { paddingBottom: 0 },
 });

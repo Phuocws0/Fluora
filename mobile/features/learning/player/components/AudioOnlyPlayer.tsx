@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 9,
     fontWeight: "900",
@@ -111,11 +112,13 @@ const styles = StyleSheet.create({
   },
   exitBtn: { padding: 4 },
   exitBtnText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#236c19",
     fontSize: 12,
     fontWeight: "800",
   },
   title: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#20352b",
     fontSize: 16,
     fontWeight: "900",
@@ -141,6 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#236c19",
   },
   playPromptLabel: {
+    fontFamily: "Nunito_700Bold",
     color: "#65766c",
     fontSize: 13,
     fontWeight: "700",
@@ -150,6 +154,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   note: {
+    fontFamily: "Nunito_400Regular",
     color: "#65766c",
     fontSize: 12,
     lineHeight: 18,

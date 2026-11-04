@@ -14,8 +14,8 @@ const green = "#236C19";
 
 function go(section: string) { router.push({ pathname: "/settings/[section]", params: { section } }); }
 
-function Tile({ title, detail, section }: { title: string; detail: string; section: string; icon?: React.ComponentProps<typeof Ionicons>["name"] }) {
-  return <Pressable onPress={() => go(section)} accessibilityRole="button" accessibilityHint={detail} style={{ backgroundColor: "white", borderRadius: 16, minHeight: 50, paddingHorizontal: 14, marginBottom: 8, flexDirection: "row", alignItems: "center" }}>
+function Tile({ title, detail, section, highlighted = false }: { title: string; detail: string; section: string; icon?: React.ComponentProps<typeof Ionicons>["name"]; highlighted?: boolean }) {
+  return <Pressable onPress={() => go(section)} accessibilityRole="button" accessibilityHint={detail} style={{ backgroundColor: highlighted ? garden.mint : "white", borderRadius: 16, minHeight: 50, paddingHorizontal: 14, marginBottom: 8, flexDirection: "row", alignItems: "center" }}>
     <Text style={{ color: green, fontFamily: font.bold, fontSize: 15, lineHeight: 22, flex: 1 }}>{title}</Text>
   </Pressable>;
 }
@@ -69,17 +69,17 @@ function General() {
     try { await logout(); } finally { router.replace("/(auth)/welcome"); }
   }, "Signed out."));
 
-  return <Page title="Make learning your own" action={{ label: "App language", onPress: () => go("language") }}><GardenSubtitle>Manage your account and learning preferences.</GardenSubtitle><ResourceState resource={resource} />
+  return <Page title="Make learning your own" back={false} eyebrow="" action={{ label: "App language", onPress: () => go("language") }}><GardenSubtitle>Manage your account and learning preferences.</GardenSubtitle><ResourceState resource={resource} />
     <GardenCaption>ACCOUNT</GardenCaption>
     <Tile icon="person-outline" title="Profile & identity" detail="Your name and bio" section="edit-profile" />
-    <Tile icon="bar-chart-outline" title="Learning analytics" detail="Weekly activity and XP breakdown" section="analytics" />
-    <Tile icon="shield-checkmark-outline" title="Sign-in & security" detail="Password, sessions and account deletion" section="security" />
+    <Tile icon="shield-checkmark-outline" title="Sign-in & devices" detail="Password, sessions and account deletion" section="security" />
     <Tile icon="language-outline" title="App language" detail="Language used in Fluora" section="language" />
     <GardenCaption>LEARNING EXPERIENCE</GardenCaption>
-    <Tile icon="flag-outline" title="Goals & commitment" detail="Daily target, promise and Flo companion" section="goals" />
     <Tile icon="notifications-outline" title="Reminders" detail="Choose what reaches you" section="notifications" />
-    <Tile icon="accessibility-outline" title="Accessibility" detail="Text size, motion and captions" section="accessibility" />
+    <Tile icon="accessibility-outline" title="Accessibility" detail="Text size, motion and captions" section="accessibility" highlighted />
     <Tile icon="eye-outline" title="Privacy & sharing" detail="Your progress and tutor history" section="privacy" />
+    <View style={{ height: 70 }} />
+    <Tile icon="flag-outline" title="Goals & commitment" detail="Daily target, promise and Flo companion" section="goals" />
     <Tile icon="leaf-outline" title="Focus mode" detail="A quieter lesson view" section="focus" />
     <Tile icon="cellular-outline" title="Low bandwidth" detail="Use less data" section="low-bandwidth" />
     <Tile icon="heart-outline" title="Wellbeing" detail="Set a break reminder" section="wellbeing" />
@@ -256,8 +256,8 @@ function Preferences({ section }: { section: string }) {
       {section === "accessibility" || section === "large-type" ? <>
         <GardenCaption>LIVE PREVIEW</GardenCaption>
         <View style={{ backgroundColor: "#EAF8DE", borderRadius: 16, padding: 14, minHeight: 152 }}>
-          <Text style={{ color: green, fontSize: draft.textSize === "extra_large" ? 28 : draft.textSize === "large" ? 24 : 20, fontWeight: "800", lineHeight: draft.textSize === "extra_large" ? 37 : 32 }}>A little, every day.</Text>
-          <Text style={{ color: ink, fontSize: draft.textSize === "extra_large" ? 22 : draft.textSize === "large" ? 18 : 16, fontWeight: "700", lineHeight: draft.textSize === "extra_large" ? 30 : 25 }}>This is how lesson text will appear.</Text>
+          <Text style={{ fontFamily: "Nunito_800ExtraBold", color: green, fontSize: draft.textSize === "extra_large" ? 28 : draft.textSize === "large" ? 24 : 20, fontWeight: "800", lineHeight: draft.textSize === "extra_large" ? 37 : 32 }}>A little, every day.</Text>
+          <Text style={{ fontFamily: "Nunito_700Bold", color: ink, fontSize: draft.textSize === "extra_large" ? 22 : draft.textSize === "large" ? 18 : 16, fontWeight: "700", lineHeight: draft.textSize === "extra_large" ? 30 : 25 }}>This is how lesson text will appear.</Text>
         </View>
         <TextSizePicker value={draft.textSize} onChange={v => set("textSize", v)} />
         {section === "accessibility" && <>

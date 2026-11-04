@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { font, garden } from "../../../profile/garden-ui";
 
 type Props = {
   options: Array<{ id: string; label: string; value: string; order: number }>;
@@ -12,7 +13,7 @@ export function ChoiceExercise({ options, selectedOptionId, onSelect, disabled =
 
   return (
     <View style={styles.container}>
-      {sorted.map((option, index) => {
+      {sorted.map((option) => {
         const isSelected = selectedOptionId === option.id;
         return (
           <Pressable
@@ -21,18 +22,9 @@ export function ChoiceExercise({ options, selectedOptionId, onSelect, disabled =
             accessibilityState={{ selected: isSelected, disabled }}
             disabled={disabled}
             onPress={() => onSelect(option.id)}
-            style={[
-              styles.optionCard,
-              isSelected && styles.optionCardSelected,
-              disabled && styles.disabled,
-            ]}
+            style={[styles.optionCard, isSelected && styles.optionCardSelected, disabled && styles.disabled]}
           >
-            <View style={[styles.indicator, isSelected && styles.indicatorSelected]}>
-              <Text style={[styles.indicatorText, isSelected && styles.indicatorTextSelected]}>
-                {String.fromCharCode(65 + index)}
-              </Text>
-            </View>
-            <Text style={[styles.label, isSelected && styles.labelSelected]}>{option.label}</Text>
+            <Text style={styles.label}>{option.label}</Text>
           </Pressable>
         );
       })}
@@ -41,55 +33,28 @@ export function ChoiceExercise({ options, selectedOptionId, onSelect, disabled =
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 10, marginVertical: 14 },
+  container: { gap: 14, marginVertical: 14 },
   optionCard: {
     alignItems: "center",
     backgroundColor: "#ffffff",
-    borderColor: "#dee8d9",
+    borderColor: garden.line,
     borderRadius: 16,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    gap: 14,
+    borderWidth: 1,
     minHeight: 56,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    justifyContent: "center",
   },
   optionCardSelected: {
-    backgroundColor: "#eaf8de",
-    borderColor: "#236c19",
-  },
-  indicator: {
-    alignItems: "center",
-    backgroundColor: "#f5f8f4",
-    borderColor: "#dee8d9",
-    borderRadius: 12,
-    borderWidth: 1,
-    height: 32,
-    justifyContent: "center",
-    width: 32,
-  },
-  indicatorSelected: {
-    backgroundColor: "#236c19",
-    borderColor: "#236c19",
-  },
-  indicatorText: {
-    color: "#65766c",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  indicatorTextSelected: {
-    color: "#ffffff",
+    backgroundColor: garden.mint,
+    borderColor: garden.forest,
   },
   label: {
-    color: "#20352b",
-    flex: 1,
+    color: garden.ink,
+    fontFamily: font.bold,
     fontSize: 15,
-    fontWeight: "700",
     lineHeight: 22,
-  },
-  labelSelected: {
-    color: "#20352b",
-    fontWeight: "800",
+    textAlign: "center",
   },
   disabled: {
     opacity: 0.6,

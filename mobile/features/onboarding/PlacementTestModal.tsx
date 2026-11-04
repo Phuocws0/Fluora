@@ -582,11 +582,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
     fontWeight: "700",
     color: "#20352b",
   },
   headerSubtitle: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 12,
     color: "#65766c",
     marginTop: 2,
@@ -610,17 +612,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   loadingText: {
+    fontFamily: "Nunito_400Regular",
     marginTop: 14,
     fontSize: 15,
     color: "#65766c",
   },
   errorTitle: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 18,
     fontWeight: "700",
     color: "#20352b",
     marginTop: 12,
   },
   errorMessage: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 14,
     color: "#65766c",
     textAlign: "center",
@@ -635,6 +640,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   retryButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#ffffff",
     fontWeight: "700",
     fontSize: 15,
@@ -658,6 +664,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   skillBadgeText: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -670,6 +677,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   promptText: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 18,
     lineHeight: 26,
     fontWeight: "600",
@@ -709,6 +717,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#236c19",
   },
   optionLetterText: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     fontWeight: "700",
     color: "#526759",
@@ -717,6 +726,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   optionLabel: {
+    fontFamily: "Nunito_700Bold",
     flex: 1,
     fontSize: 15,
     color: "#20352b",
@@ -736,6 +746,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorInlineText: {
+    fontFamily: "Nunito_400Regular",
     color: "#b42318",
     fontSize: 13,
     flex: 1,
@@ -758,6 +769,7 @@ const styles = StyleSheet.create({
     borderColor: "#d8dfda",
   },
   backNavText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontWeight: "600",
     fontSize: 15,
@@ -784,6 +796,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1c5714",
   },
   primaryButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
@@ -802,6 +815,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f8f4",
   },
   outlineButtonText: {
+    fontFamily: "Nunito_700Bold",
     color: "#20352b",
     fontSize: 15,
     fontWeight: "600",
@@ -827,12 +841,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   resultsTitle: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 24,
     fontWeight: "800",
     color: "#20352b",
     textAlign: "center",
   },
   resultsSubtitle: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 14,
     color: "#65766c",
     textAlign: "center",
@@ -852,6 +868,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   levelCardHeader: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 13,
     fontWeight: "600",
     color: "#65766c",
@@ -866,18 +883,21 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   levelBadgeText: {
+    fontFamily: "Nunito_800ExtraBold",
     color: "#ffffff",
     fontSize: 32,
     fontWeight: "900",
     letterSpacing: 1,
   },
   levelName: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 18,
     fontWeight: "700",
     color: "#20352b",
     marginBottom: 4,
   },
   levelExplanation: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
     textAlign: "center",
@@ -888,12 +908,14 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   breakdownHeader: {
+    fontFamily: "Nunito_700Bold",
     fontSize: 17,
     fontWeight: "700",
     color: "#20352b",
     marginBottom: 4,
   },
   breakdownSubheader: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 13,
     color: "#65766c",
     marginBottom: 16,
@@ -922,12 +944,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   scorecardSkillName: {
+    fontFamily: "Nunito_700Bold",
     flex: 1,
     fontSize: 14,
     fontWeight: "700",
     color: "#20352b",
   },
   scorecardPercent: {
+    fontFamily: "Nunito_800ExtraBold",
     fontSize: 14,
     fontWeight: "800",
     color: "#20352b",
@@ -944,6 +968,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   scorecardCount: {
+    fontFamily: "Nunito_400Regular",
     fontSize: 12,
     color: "#65766c",
   },

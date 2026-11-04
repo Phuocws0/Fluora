@@ -1,8 +1,9 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { BackHandler, Switch, Text, TextInput, View } from "react-native";
+import { BackHandler, Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { tutorApi } from "./tutor.service";
 import { createTutorPreview } from "./tutor.preview";
+import { useAuth } from "../auth/AuthContext";
 import type {
   ChatDetail,
   RoleChoice,
@@ -18,7 +19,6 @@ import {
   Editor,
   Empty,
   Heading,
-  Page,
   ResourceState,
   SessionGate,
   confirmAction,
@@ -27,9 +27,12 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { font, garden, GardenSubtitle, Page } from "../profile/garden-ui";
 
 export default function TutorScreen() {
+  const { isAuthenticated } = useAuth();
   const [mode, setMode] = useState<"api" | "preview" | null>(null);
+  const startTutor = () => setMode(isAuthenticated ? "api" : "preview");
   if (mode === "api")
     return (
       <SessionGate onCancel={() => setMode(null)}>
@@ -44,30 +47,38 @@ export default function TutorScreen() {
       </SessionGate>
     );
   if (mode === "preview") return <TutorPreview exit={() => setMode(null)} />;
-  return (
-    <Page title="Meet Flo">
-      <Card>
-        <Heading>Your practice companion 🌱</Heading>
-        <Copy>
-          Ask a question, explore a role-play, and keep useful phrases in your
-          learning notes.
-        </Copy>
-      </Card>
-      <View style={ui.row}>
-        <Button label="Open Tutor API" onPress={() => setMode("api")} />
-        <Button
-          label="Try interface preview"
-          onPress={() => setMode("preview")}
-        />
-      </View>
-      <Copy>
-        Tutor API uses the local backend and its configured demo provider.
-        Interface preview uses fixed examples in memory and saves no account
-        data.
-      </Copy>
-    </Page>
-  );
+  return <Page title="Meet your AI tutor" eyebrow="YOUR PERSONAL SPACE" activeTab="Tutor" showFooter={false}
+    action={{ label: "Chat with Flo", onPress: startTutor }}>
+    <GardenSubtitle>Ask questions, practice conversations and learn from mistakes.</GardenSubtitle>
+    <Image source={require("../../assets/profile-sprout.png")} style={styles.homeMascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
+    <Text style={styles.promptTitle}>What shall we grow today?</Text>
+    <Pressable accessibilityRole="button" onPress={startTutor} style={styles.askCard}>
+      <Text style={styles.askTitle}>Ask Flo anything…</Text>
+      <Text style={styles.askDetail}>Grammar, words or a tricky sentence</Text>
+    </Pressable>
+    <View style={styles.quickActions}>
+      <Pressable accessibilityRole="button" onPress={startTutor} style={[styles.quickCard, styles.quickBlue]}>
+        <Text style={styles.quickTitle}>Practice a scene</Text><Text style={styles.quickDetail}>A café · A new friend</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={startTutor} style={styles.quickCard}>
+        <Text style={styles.quickTitle}>Build a prompt</Text><Text style={styles.quickDetail}>Get a specific answer</Text>
+      </Pressable>
+    </View>
+  </Page>;
 }
+
+const styles = StyleSheet.create({
+  homeMascot: { alignSelf: "center", height: 122, marginVertical: 8, width: 128 },
+  promptTitle: { color: garden.forest, fontFamily: font.bold, fontSize: 17, lineHeight: 24, marginBottom: 22 },
+  askCard: { backgroundColor: garden.mint, borderRadius: 18, minHeight: 86, justifyContent: "center", paddingHorizontal: 14, paddingVertical: 12 },
+  askTitle: { color: garden.forest, fontFamily: font.bold, fontSize: 14, lineHeight: 20 },
+  askDetail: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginTop: 4 },
+  quickActions: { flexDirection: "row", gap: 12, marginTop: 18 },
+  quickCard: { backgroundColor: "#ffffff", borderRadius: 18, flex: 1, minHeight: 103, justifyContent: "center", paddingHorizontal: 14 },
+  quickBlue: { backgroundColor: garden.blue },
+  quickTitle: { color: garden.forest, fontFamily: font.bold, fontSize: 14, lineHeight: 20 },
+  quickDetail: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16, marginTop: 5 },
+});
 function TutorPreview({ exit }: { exit: () => void }) {
   const service = useMemo(() => createTutorPreview(), []);
   return <TutorWorkspace service={service} preview exit={exit} />;

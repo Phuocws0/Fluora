@@ -58,7 +58,7 @@ export const community = {
   removeFriend: (userId: string) => deleteJson(`/friends/${id(userId)}`),
   groups: (query: string, mine: boolean) =>
     getJson<{ groups: Group[] }>(
-      `/study-groups?query=${id(query)}&mine=${mine}`,
+      `/study-groups?${query.trim() ? `query=${id(query.trim())}&` : ""}mine=${mine}`,
     ),
   group: (groupId: string) =>
     getJson<{ group: Group }>(`/study-groups/${id(groupId)}`),

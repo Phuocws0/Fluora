@@ -18,8 +18,8 @@ export function ContentState({ title, message, actionLabel, onAction }: Props) {
 
 const styles = StyleSheet.create({
   card: { alignItems: "center", backgroundColor: "#f5f8f4", borderRadius: 20, padding: 24 },
-  title: { color: "#20352b", fontSize: 18, fontWeight: "800", textAlign: "center" },
-  message: { color: "#65766c", fontSize: 14, lineHeight: 21, marginTop: 8, textAlign: "center" },
+  title: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 18, fontWeight: "800", textAlign: "center" },
+  message: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, lineHeight: 21, marginTop: 8, textAlign: "center" },
   button: { backgroundColor: "#eaf8de", borderRadius: 14, marginTop: 16, paddingHorizontal: 18, paddingVertical: 12 },
-  buttonText: { color: "#236c19", fontSize: 14, fontWeight: "700" },
+  buttonText: { fontFamily: "Nunito_700Bold", color: "#236c19", fontSize: 14, fontWeight: "700" },
 });

@@ -18,8 +18,8 @@ export function DestinationPlaceholder({ title, description, children }: { title
 }
 
 const styles = StyleSheet.create({
-  eyebrow: { color: "#236c19", fontSize: 11, fontWeight: "800", letterSpacing: 0.5 },
-  title: { color: "#20352b", fontSize: 28, fontWeight: "900", marginTop: 8 },
-  description: { color: "#65766c", fontSize: 14, lineHeight: 21, marginTop: 8 },
+  eyebrow: { fontFamily: "Nunito_800ExtraBold", color: "#236c19", fontSize: 11, fontWeight: "800", letterSpacing: 0.5 },
+  title: { fontFamily: "Nunito_800ExtraBold", color: "#20352b", fontSize: 28, fontWeight: "900", marginTop: 8 },
+  description: { fontFamily: "Nunito_400Regular", color: "#65766c", fontSize: 14, lineHeight: 21, marginTop: 8 },
   state: { marginTop: 24 },
 });
