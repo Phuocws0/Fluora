@@ -19,7 +19,9 @@ export function ImportScreen() {
     setRows(parsed); setMapping({ front: Object.keys(parsed[0])[0], back: Object.keys(parsed[0])[1] ?? "" }); invalidate(); setValidation("");
   } catch (cause) { setValidation(cause instanceof Error ? cause.message : "Could not parse this file."); setRows([]); invalidate(); } };
   const pick = () => void action.run(async () => {
-    const result = await File.pickFileAsync({ mimeTypes: ["text/csv", "text/plain", "application/json"] });
+    // Android document providers can label CSV as Excel or octet-stream. Let
+    // the existing size/parser/preview validation decide what can be imported.
+    const result = await File.pickFileAsync({ mimeTypes: ["*/*"] });
     if (result.canceled) return;
     if (result.result.size > 1024 * 1024) throw new Error("Choose a vocabulary file up to 1 MB.");
     const content = await result.result.text();

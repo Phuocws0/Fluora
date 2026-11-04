@@ -38,22 +38,22 @@ export default function TabLayout() {
         name="learn"
         options={{
           title: "Learn",
-          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" color={color} size={size} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="practice"
         options={{
           title: "Practice",
-          tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" color={color} size={size} />,
+          tabBarIcon: ({ color }) => <Ionicons name="book-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="tutor"
         options={{
           title: "Tutor",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbubble-ellipses-outline" color={color} size={20} />
           ),
         }}
       />
@@ -61,14 +61,14 @@ export default function TabLayout() {
         name="league"
         options={{
           title: "League",
-          tabBarIcon: ({ color, size }) => <Ionicons name="trophy-outline" color={color} size={size} />,
+          tabBarIcon: ({ color }) => <Ionicons name="trophy-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" color={color} size={size} />,
+          tabBarIcon: ({ color }) => <Ionicons name="person-outline" color={color} size={20} />,
         }}
       />
     </Tabs>

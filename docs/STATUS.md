@@ -2,6 +2,10 @@
 
 ## Completed
 
+- 2026-11-04 corrective pass: exact CEFR A1–C2 selection/storage, responsive level cards, honest English-only language availability, working lesson/reader text sizes, captions, reduced-motion modals/waveforms, Focus lesson controls, and a foreground wellbeing reminder. Completed Home offers Practice/review, advances to unfinished courses, and displays real XP/exercise counts instead of fixed hearts. See [audit and disposition](qa/2026-11-04-functional-ux-audit.md).
+- Full source-controlled demo fixtures: four sign-in accounts, three courses/six units/12 lessons/22 exercises across seven modes, five reads, personal practice/planning, group/room/poll/friendship states, wallet/rewards, support/export and Tutor history. `npm run demo:setup` builds/waits/migrates/seeds; no volume reset. Fresh migrations + two seeds + preservation and 136 HTTP checks passed in an isolated disposable DB. Existing runtime setup and the 83-check demo + 56-check Practice suites passed. Demo setup/accounts: [DEMO.md](DEMO.md).
+
+- Real LLM Flo Tutor integration: optional `openai` provider over built-in fetch, backend-only gateway credentials, Docker host access, and 75-second mobile tutor send/edit timeout. Local 9Router with Antigravity `ag/gemini-3-flash` passed real backend/API checks for Vietnamese free-form chat, PostgreSQL persistence, linked-reply regeneration, and deterministic role-play branching with LLM feedback. Disposable QA data was removed. Typecheck, backend build, 25 Node regression checks, and Android export passed. Curated exercise hints remain local; microphone transcription/grading is not implemented. Setup: [README.md](../README.md).
 - Issue #11 Practice/vocabulary/reading/offline implementation: API-backed Practice Hub; personal deck/card/review/bookmark CRUD; CSV/JSON picker, mapping, validation and selected-row import; reusable flashcards and scheduled recall; guided listening, pronunciation/rhythm/recording, writing, dictionary, grammar/verb, word-map and situation tools; article/dialogue/comprehension reader with save/resume/reset and existing-player challenges; account-scoped device downloads, optional media, cancel/remove/retry, cached playback and local reading sync. Backend adds an optional all-scheduled review query and two repeatable story seeds; no new models or migrations. `expo-audio`/`expo-speech` are aligned with SDK 57. Typecheck, backend build, Prisma validation, Android export, all 18 Node checks, native microphone configuration and 56 real HTTP/PostgreSQL practice checks passed. CI now runs the focused regression checks. Native-device acceptance is still pending; see [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 
 - Issue #7 mobile learning flow, interactive lesson player, progress, and insights hub are implemented; Android device/live-backend acceptance remains:
@@ -14,6 +18,7 @@
   - Review fixes align Mission and Can-Do models with Prisma/API fields, allow retrying a failed lesson completion, prevent duplicate submissions, and select the first unfinished lesson from completed IDs. Audio recording uses native metering and explicit self-assessment; no automatic transcription or pronunciation grading is implemented. Typecheck and Android export are the static checks; microphone/playback and screen interactions still need a physical-device pass.
 
 - Documentation foundation and second consistency audit against the selected Figma scope.
+- Android Page 10 UI alignment pass: safe-area spacing, Learning Home composition, tab icon sizing, unit title, and transparent Flo Tutor artwork updated. Home, Practice, Profile, Tutor, and League were opened on the API 35 emulator; visual comparison notes and intentional differences are in [UI_FIGMA_NOTES.md](UI_FIGMA_NOTES.md). This is a selected-screen smoke review, not pixel-parity sign-off for every Figma frame.
 - Initial npm-workspaces monorepo scaffold: Expo TypeScript app, Express TypeScript API with database-backed health check, Prisma/PostgreSQL schema and migrations, Docker Compose local runtime, and GitHub Actions CI.
 - Created the GitHub backlog and four milestones; the open feature issues now include the 17 promoted Page 10 concepts and expanded learner-owned CRUD scope.
 - Repository is public and `main` is protected: pull requests, one approval, and passing CI are required; only the owner can update or merge into `main`.
@@ -26,6 +31,8 @@
 - Issue #33 help articles, owner-scoped support-request CRUD, and local JSON exports of current learner-owned data are implemented. Exports omit passwords, bearer sessions, and authentication-token hashes.
 - Issue #32 Flo Tutor backend: provider status, three curated A1 role-play scenarios with branching turns and a hint ladder, owner-scoped chats with question/exercise/mistake/explain context and feedback, learner-message edit/delete that regenerates or removes the linked reply, saved notes CRUD, temporary chats when `saveTutorHistory` is off, and confirmed clear-history. The default `local` provider is an offline, rule-based demo tutor; `TUTOR_PROVIDER=off` returns `503` without blocking lessons. Exports (`version:3`) and account deletion include tutor data. A scripted Docker smoke test covered 34 success, validation, ownership, privacy, concurrency, provider-off, export, and deletion checks; the #35 and auth smoke tests still pass.
 - Issue #4 mobile account and onboarding experience is implemented: Welcome, Register, Login, local email verification and password recovery/reset, Profile progress and sign-out, and an onboarding wizard for languages, motivation, level/placement, independent daily goal and time budget, reminders, learning promise, and Flo companion. Auth tokens and onboarding drafts use SecureStore; invalid private sessions are cleared on `UNAUTHORIZED` responses without treating invalid login credentials as an expired session. Guest placement answers are submitted after registration, and the device time zone is saved with settings. Local verification/reset tokens remain opaque and are read from `[dev-mail]` backend log lines. Typecheck and Android bundle export pass.
+
+- Android corrective acceptance passed: seeded email sign-in, completed Home and large text, C1 summary, captions/Focus, actual 5-minute break reminder, native CSV pick/mapping/import with DB verification, microphone record/playback, and cached-library cold start while backend was unavailable. Additional import MIME, dictation copy/transcript and speaking-transcription-label bugs were fixed. Detailed evidence and limits: [report](qa/2026-11-04-functional-ux-audit.md). Latest workspace typecheck/build, 33 Node regressions and Android export passed.
 
 ## In Progress
 
@@ -49,16 +56,17 @@
 
 ## Known limitations
 
-- Practice study tools use guided demo samples and self-assessment; no automatic pronunciation/writing grading. The dictionary currently has three terms. Offline exercises do not submit answers or earn XP; reading changes sync explicitly. These limits and storage behavior are documented in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
+- Page 10 visual comparison covers the listed implemented flows; it does not establish pixel parity for every design exploration. See [UI_FIGMA_NOTES.md](UI_FIGMA_NOTES.md).
+- Practice study tools use guided demo samples and self-assessment; no automatic pronunciation/writing grading. The dictionary has 30 curated terms. Offline exercises do not submit answers or earn XP; reading changes sync explicitly. These limits and storage behavior are documented in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 - Login, forgot-password, and resend have no rate limiting in this local demo.
 - No email is sent: verification and reset tokens are only written to the backend log (`[dev-mail]` lines).
-- League tiers, quest targets, and reward prices are calibrated to the four seeded lessons (52 XP in total per learner); scale them when more content is seeded.
+- League tiers retain the original A1 starter thresholds (four lessons/52 XP); the expanded catalog offers 12 lessons/164 XP. The demo shop remains small.
 - The "finish 1 story" quest counts a story whose reading progress is completed and was last saved today.
 - Study reminders appear only when the learner opens notifications; there is no push delivery or scheduler. Room messages and polls refresh by request (no real-time delivery).
-- Re-running the seed moves the demo learners' lesson completions to the current time so the weekly leaderboard keeps data.
+- Re-running the seed refreshes time-sensitive dedicated demo activity and can recreate deleted fixture rows. It preserves ordinary account data and existing fixture edits/passwords; it is not a pristine reset. See [DEMO.md](DEMO.md).
 - Existing feature controllers (`learning`, `support`, `practice`, `activity`) still use their own error/UUID helpers; they can adopt `backend/src/http/*` later.
-- Enrollment-aware home selection is not implemented.
-- The Flo Tutor has no real AI provider yet: the `local` provider matches keywords against curated topics and role-play replies, so free-form questions outside those topics get a fallback answer. A provider can be added behind `TutorProvider` without changing the API.
+- Home advances through published courses with unfinished lessons; explicit enrollment/course-selection persistence is not implemented. The interface currently supports English only, with unavailable translations disabled.
+- Real LLM replies require `TUTOR_PROVIDER=openai` plus a reachable API URL, key, model, and authorized gateway account with quota. The default `local` mode remains a rule-based demo. Neither mode automatically transcribes or grades microphone audio. Gateway availability and model support can change independently of the app.
 - Temporary (unsaved) tutor chats are deleted on the learner's next tutor request after 60 minutes of inactivity, so an expired chat can remain in the database until then.
 
 ## Blocked

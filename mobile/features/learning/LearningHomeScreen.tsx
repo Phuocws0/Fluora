@@ -1,12 +1,14 @@
+import { LearningText as Text } from "../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { useAuth } from "../auth/AuthContext";
 import { getCourse, getCourses } from "./learning.service";
 import { getHomeSummary } from "./activity.service";
+import { firstUnfinishedLesson } from "./next-lesson";
 import type { CourseOverview, CourseSummary, HomeSummary } from "../../types/learning";
 import { font, garden } from "../profile/garden-ui";
 
@@ -66,8 +68,7 @@ function LearningHomeContent() {
           durationMinutes: lesson.durationMinutes,
         })),
       );
-      const completedIds = new Set(summary?.progress.completedLessonIds ?? []);
-      setNextLesson(allLessons.find((item) => !completedIds.has(item.id)) ?? allLessons[0] ?? null);
+      setNextLesson(firstUnfinishedLesson(allLessons, summary?.progress.completedLessonIds ?? []));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not load courses.");
     } finally {
@@ -84,6 +85,8 @@ function LearningHomeContent() {
   );
   const completedIds = new Set(homeSummary?.progress.completedLessonIds ?? []);
   const completedInUnit = currentUnit?.lessons.filter((lesson) => completedIds.has(lesson.id)).length ?? 0;
+  const lessonCount = courseDetail?.units.reduce((total, unit) => total + unit.lessons.length, 0) ?? 0;
+  const courseComplete = lessonCount > 0 && nextLesson === null;
   const learnerName = (user?.displayName || user?.email.split("@")[0] || "there").trim().split(/\s+/)[0];
 
   const openCourse = () => {
@@ -91,12 +94,13 @@ function LearningHomeContent() {
     if (courseId) router.push({ pathname: "/course/[courseId]", params: { courseId } });
   };
   const startLesson = () => {
-    if (nextLesson) router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: nextLesson.id } });
+    if (courseComplete) router.push("/(tabs)/practice");
+    else if (nextLesson) router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: nextLesson.id } });
     else openCourse();
   };
 
   return (
-    <ScreenContainer contentTopPadding={28} fixedFooter={!loading && !error && courseDetail ? <Pressable accessibilityRole="button" onPress={startLesson} style={styles.startButton}><Text style={styles.startButtonText}>{nextLesson ? "Start next lesson" : "Explore units"}</Text></Pressable> : undefined}>
+    <ScreenContainer contentTopPadding={28} fixedFooter={!loading && !error && courseDetail ? <Pressable accessibilityRole="button" onPress={startLesson} style={styles.startButton}><Text style={styles.startButtonText}>{courseComplete ? "Practice what you learned" : nextLesson ? "Start next lesson" : "Explore units"}</Text></Pressable> : undefined}>
       <View style={styles.topBar}>
         <View style={styles.brand}>
           <Ionicons name="grid-outline" size={22} color={garden.forest} />
@@ -121,8 +125,8 @@ function LearningHomeContent() {
         <>
           <Pressable accessibilityRole="button" accessibilityLabel={`Open ${courseDetail.title}`} onPress={openCourse} style={styles.courseCard}>
             <View style={styles.courseCopy}>
-              <Text style={styles.courseEyebrow}>{currentUnit ? `UNIT ${String(currentUnit.order).padStart(2, "0")} · ${courseDetail.level}` : `${courseDetail.language} · ${courseDetail.level}`}</Text>
-              <Text numberOfLines={1} style={styles.courseTitle}>{currentUnit?.title ?? courseDetail.title}</Text>
+              <Text style={styles.courseEyebrow}>{courseComplete ? `COURSE COMPLETE · ${courseDetail.level}` : currentUnit ? `UNIT ${String(currentUnit.order).padStart(2, "0")} · ${courseDetail.level}` : `${courseDetail.language} · ${courseDetail.level}`}</Text>
+              <Text style={styles.courseTitle}>{currentUnit?.title ?? courseDetail.title}</Text>
             </View>
             <Image source={require("../../assets/profile-sprout.png")} style={styles.mascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
             <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${currentUnit?.lessons.length ? Math.min(100, Math.round((completedInUnit / currentUnit.lessons.length) * 100)) : 0}%` }]} /></View>
@@ -134,10 +138,10 @@ function LearningHomeContent() {
           <View style={styles.statsRow}>
             <View style={[styles.statCard, styles.statPeach]}><Text style={styles.statValue}>{homeSummary?.streak ?? 0}</Text><Text style={styles.statLabel}>streak</Text></View>
             <View style={[styles.statCard, styles.statBlue]}><Text style={styles.statValue}>{homeSummary?.wallet.gems ?? 0}</Text><Text style={styles.statLabel}>gems</Text></View>
-            <View style={[styles.statCard, styles.statMint]}><Text style={styles.statValue}>5</Text><Text style={styles.statLabel}>hearts</Text></View>
+            <View style={[styles.statCard, styles.statMint]}><Text style={styles.statValue}>{homeSummary?.progress.xp ?? 0}</Text><Text style={styles.statLabel}>XP</Text></View>
           </View>
 
-          <Text style={styles.sectionTitle}>Your next little steps</Text>
+          <Text style={styles.sectionTitle}>{courseComplete ? "Review your lessons" : "Your next little steps"}</Text>
           <View style={styles.steps}>
             {(currentUnit?.lessons ?? []).slice(0, 3).map((lesson, index) => {
               const complete = completedIds.has(lesson.id);
@@ -147,7 +151,7 @@ function LearningHomeContent() {
                   <View style={[styles.stepMarker, complete && styles.stepComplete, active && styles.stepActive]}>
                     <Text style={[styles.stepNumber, (complete || active) && styles.stepNumberActive]}>{complete ? "✓" : String(index + 1)}</Text>
                   </View>
-                  <Text numberOfLines={1} style={styles.stepLabel}>{lesson.title}</Text>
+                  <Text style={styles.stepLabel}>{lesson.title}</Text>
                 </Pressable>
               );
             })}
@@ -163,7 +167,7 @@ function LearningHomeContent() {
             <SecondaryAction label="Study planner" onPress={() => router.push("/planner")} />
             <SecondaryAction label="Mission passport" onPress={() => router.push("/missions/passport")} />
             <SecondaryAction label="Learning insights" onPress={() => router.push("/learning/insights")} />
-            {courses.length > 1 && courses.slice(1).map((course) => <SecondaryAction key={course.id} label={course.title} onPress={() => router.push({ pathname: "/course/[courseId]", params: { courseId: course.id } })} />)}
+            {courses.filter(course => course.id !== courseDetail.id).map((course) => <SecondaryAction key={course.id} label={course.title} onPress={() => router.push({ pathname: "/course/[courseId]", params: { courseId: course.id } })} />)}
           </View>
         </>
       ) : (
@@ -183,32 +187,32 @@ const styles = StyleSheet.create({
   brandText: { color: garden.muted, fontFamily: font.bold, fontSize: 10, lineHeight: 15 },
   floButton: { alignItems: "center", backgroundColor: garden.mint, borderRadius: 14, justifyContent: "center", minWidth: 74, paddingHorizontal: 14, paddingVertical: 7 },
   floText: { color: garden.forest, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
-  greeting: { color: garden.ink, fontFamily: font.heavy, fontSize: 28, lineHeight: 36 },
-  subtitle: { color: garden.muted, fontFamily: font.body, fontSize: 14, lineHeight: 21, marginTop: 14, marginBottom: 12 },
-  courseCard: { backgroundColor: garden.mint, borderColor: garden.line, borderRadius: 20, borderWidth: 1, height: 176, marginBottom: 12, overflow: "hidden", padding: 16, position: "relative" },
-  courseCopy: { maxWidth: "75%" },
-  courseEyebrow: { color: garden.forest, fontFamily: font.bold, fontSize: 11, lineHeight: 16 },
-  courseTitle: { color: garden.ink, fontFamily: font.heavy, fontSize: 22, lineHeight: 28, marginTop: 4 },
+  greeting: { color: garden.ink, fontFamily: font.heavy, fontSize: 30, lineHeight: 38 },
+  subtitle: { color: garden.muted, fontFamily: font.body, fontSize: 14, lineHeight: 22, marginTop: 14, marginBottom: 12 },
+  courseCard: { backgroundColor: garden.mint, borderColor: garden.line, borderRadius: 20, borderWidth: 1, minHeight: 176, marginBottom: 12, overflow: "hidden", padding: 20, position: "relative" },
+  courseCopy: { maxWidth: "68%", minHeight: 88 },
+  courseEyebrow: { color: garden.forest, fontFamily: font.bold, fontSize: 12, lineHeight: 18 },
+  courseTitle: { color: garden.ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 30, marginTop: 4 },
   mascot: { height: 103, position: "absolute", right: 7, top: 20, width: 108 },
-  progressTrack: { backgroundColor: "#ffffff", borderRadius: 5, bottom: 38, height: 8, left: 16, overflow: "hidden", position: "absolute", right: 16 },
-  progressFill: { backgroundColor: garden.green, borderRadius: 5, height: 8 },
-  progressCaption: { bottom: 15, color: garden.forest, fontFamily: font.bold, fontSize: 11, lineHeight: 16, left: 16, position: "absolute" },
+  progressTrack: { backgroundColor: "#ffffff", borderRadius: 4, height: 7, marginTop: 12, overflow: "hidden" },
+  progressFill: { backgroundColor: garden.green, borderRadius: 4, height: 7 },
+  progressCaption: { color: garden.forest, fontFamily: font.bold, fontSize: 12, lineHeight: 16, marginTop: 8 },
   statsRow: { flexDirection: "row", gap: 8, marginBottom: 17 },
-  statCard: { alignItems: "center", borderRadius: 18, flex: 1, height: 66, justifyContent: "center" },
+  statCard: { alignItems: "center", borderRadius: 18, flex: 1, minHeight: 66, paddingVertical: 8, justifyContent: "center" },
   statPeach: { backgroundColor: "#FFF0EF" },
   statBlue: { backgroundColor: garden.blue },
-  statMint: { backgroundColor: garden.mint },
-  statValue: { color: garden.forest, fontFamily: font.heavy, fontSize: 21, lineHeight: 25 },
-  statLabel: { color: garden.muted, fontFamily: font.bold, fontSize: 10, lineHeight: 14 },
-  sectionTitle: { color: garden.ink, fontFamily: font.bold, fontSize: 17, lineHeight: 24, marginBottom: 8 },
-  steps: { gap: 5, marginBottom: 10 },
-  stepRow: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 52 },
+  statMint: { backgroundColor: "#FFFFFF" },
+  statValue: { color: garden.forest, fontFamily: font.heavy, fontSize: 24, lineHeight: 29 },
+  statLabel: { color: garden.muted, fontFamily: font.bold, fontSize: 11, lineHeight: 16 },
+  sectionTitle: { color: garden.ink, fontFamily: font.bold, fontSize: 18, lineHeight: 23, marginBottom: 8 },
+  steps: { gap: 6, marginBottom: 10 },
+  stepRow: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 48 },
   stepMarker: { alignItems: "center", backgroundColor: garden.mint, borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
   stepActive: { backgroundColor: garden.green },
   stepComplete: { backgroundColor: garden.green },
   stepNumber: { color: garden.muted, fontFamily: font.heavy, fontSize: 15, lineHeight: 21 },
   stepNumberActive: { color: garden.ink },
-  stepLabel: { color: garden.ink, flex: 1, fontFamily: font.bold, fontSize: 14, lineHeight: 21 },
+  stepLabel: { color: garden.ink, flex: 1, fontFamily: font.bold, fontSize: 14, lineHeight: 20 },
   startButton: { alignItems: "center", backgroundColor: garden.green, borderRadius: 16, height: 56, justifyContent: "center", marginTop: 2, shadowColor: garden.forest, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 0, elevation: 3 },
   startButtonText: { color: garden.ink, fontFamily: font.bold, fontSize: 16, lineHeight: 24 },
   secondaryActions: { gap: 4, marginTop: 18 },

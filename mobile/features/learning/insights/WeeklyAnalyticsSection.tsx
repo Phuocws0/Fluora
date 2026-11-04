@@ -1,6 +1,7 @@
+import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import { getWeeklyLearningAnalytics, type WeeklyLearningAnalytics } from "../activity.service";
 

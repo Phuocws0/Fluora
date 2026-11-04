@@ -78,6 +78,7 @@ Route → Controller → Service → Prisma → PostgreSQL
 - Group code by domain/module where useful, but keep abstractions proportional to the project.
 - Do not add repository wrappers over Prisma or dependency-injection frameworks without a clear need.
 - Validate incoming data where appropriate and keep response shapes consistent with `docs/API.md`.
+- For demo-data changes, read `docs/DEMO.md`. Keep fixtures in the checked-in seed, use stable keys, preserve ordinary user data, and verify re-seeding. Do not commit database volumes or reset a database to refresh fixtures.
 
 ## After coding
 

@@ -1,5 +1,6 @@
+import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useEffect, useState } from "react";
-import { Modal, Switch, Text, View } from "react-native";
+import { Switch, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { getCourse, getCourses } from "../learning/learning.service";

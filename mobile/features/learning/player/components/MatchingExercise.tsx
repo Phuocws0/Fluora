@@ -1,5 +1,6 @@
+import { LearningText as Text } from "../../../../components/LearningText";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 type Props = {
   content: unknown;

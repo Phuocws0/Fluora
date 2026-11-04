@@ -14,11 +14,13 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspace @fluora/backend",
     "test:unit": "node --experimental-vm-modules --test scripts/*.test.mjs",
+    "test:seed": "npm run build && node scripts/demo-seed-smoke.mjs",
     "check:mobile": "npm run check --workspace @fluora/mobile",
     "prisma:generate": "npm run prisma:generate --workspace @fluora/backend",
     "prisma:validate": "npm run prisma:validate --workspace @fluora/backend",
     "db:migrate": "npm run db:migrate --workspace @fluora/backend",
     "db:deploy": "npm run db:deploy --workspace @fluora/backend",
-    "db:seed": "npm run db:seed --workspace @fluora/backend"
+    "db:seed": "npm run db:seed --workspace @fluora/backend",
+    "demo:setup": "docker compose up --build -d --wait && docker compose exec -T backend npm run db:seed --workspace @fluora/backend"
   }
 }

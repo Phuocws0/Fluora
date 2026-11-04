@@ -1,6 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -30,9 +30,9 @@ export default function WelcomeScreen() {
 
         <View style={styles.signInRow}>
           <Text style={styles.signInPrompt}>Already have an account?</Text>
-          <Link href="/(auth)/login" style={styles.signInLink}>
-            Sign in
-          </Link>
+          <Pressable accessibilityRole="button" accessibilityLabel="Sign in" hitSlop={12} onPress={() => router.push("/(auth)/login")}>
+            <Text style={styles.signInLink}>Sign in</Text>
+          </Pressable>
         </View>
       </View>
       <Text style={styles.footer}>FLUORA · GROW AT YOUR OWN PACE</Text>

@@ -1,6 +1,8 @@
+import { LearningText as Text } from "../../../../components/LearningText";
+import { PreferenceModal as Modal } from "../../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { getExerciseHint } from "../../activity.service";
 import type { ExerciseHintResult } from "../../../../types/learning";
 

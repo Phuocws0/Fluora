@@ -1,3 +1,5 @@
+import { seedAdditionalContent } from "./demo-content.js";
+import { seedFullDemo } from "./seed-demo.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import { assertScenarioGraph, type RolePlayTurn } from "../features/tutor/role-play.js";
 import { prisma } from "./prisma.js";
@@ -42,7 +44,7 @@ const courseSeed = {
 const unitSeeds: UnitSeed[] = [
   {
     slug: "first-conversations",
-    title: "First conversations",
+    title: "First greetings",
     description: "Practice greetings, introductions, and simple questions.",
     lessons: [
       {
@@ -407,13 +409,6 @@ const peerReviewSeeds = [
   },
 ];
 
-/** Password-less demo learners (they can't sign in) so search, profiles, and the League have data. */
-const demoLearnerSeeds = [
-  { email: "demo.linh@fluora.local", displayName: "Linh (demo)", lessonCount: 0 },
-  { email: "demo.minh@fluora.local", displayName: "Minh (demo)", lessonCount: 2 },
-  { email: "demo.an@fluora.local", displayName: "An (demo)", lessonCount: 4 },
-];
-
 async function seedCommunityAndLeague() {
   for (const quest of questSeeds) {
     await prisma.quest.upsert({ where: { slug: quest.slug }, create: quest, update: quest });
@@ -428,34 +423,7 @@ async function seedCommunityAndLeague() {
     await prisma.peerReviewSubmission.upsert({ where: { slug: submission.slug }, create: submission, update: submission });
   }
 
-  const lessons = await prisma.lesson.findMany({
-    where: { unit: { course: { slug: courseSeed.slug } } },
-    orderBy: [{ unit: { order: "asc" } }, { order: "asc" }],
-    select: { id: true, _count: { select: { exercises: true } } },
-  });
-  const now = new Date();
-  for (const demo of demoLearnerSeeds) {
-    const user = await prisma.user.upsert({
-      where: { email: demo.email },
-      create: { email: demo.email, displayName: demo.displayName, emailVerifiedAt: now },
-      update: { displayName: demo.displayName },
-    });
-    await prisma.userSettings.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id, discoverable: true, progressVisibility: "public" },
-      update: { discoverable: true, progressVisibility: "public" },
-    });
-    // Keep the demo XP inside the current League week so the leaderboard always has data.
-    for (const lesson of lessons.slice(0, demo.lessonCount)) {
-      await prisma.lessonCompletion.upsert({
-        where: { userId_lessonId: { userId: user.id, lessonId: lesson.id } },
-        create: { userId: user.id, lessonId: lesson.id, xpEarned: 10 + lesson._count.exercises * 2, completedAt: now },
-        update: { completedAt: now },
-      });
-    }
-  }
-
-  console.log("Seeded quests, achievements, rewards, peer-review samples, and demo learners.");
+  console.log("Seeded quests, achievements, rewards and peer-review samples.");
 }
 
 type ScenarioSeed = {
@@ -749,6 +717,8 @@ async function seed() {
   await seedLearningContent();
   await seedCommunityAndLeague();
   await seedTutor();
+  await seedAdditionalContent();
+  await seedFullDemo();
 }
 
 seed()

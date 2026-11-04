@@ -24,6 +24,12 @@ services:
       PORT: "4000"
       GOOGLE_CLIENT_IDS: "${GOOGLE_CLIENT_IDS:-}"
       TUTOR_PROVIDER: "${TUTOR_PROVIDER:-local}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      LLM_MODEL: "${LLM_MODEL:-}"
+      DEMO_PASSWORD: "${DEMO_PASSWORD:-}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${PORT:-4000}:4000"
     depends_on:

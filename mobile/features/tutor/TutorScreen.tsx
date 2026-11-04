@@ -50,7 +50,7 @@ export default function TutorScreen() {
   return <Page title="Meet your AI tutor" eyebrow="YOUR PERSONAL SPACE" activeTab="Tutor" showFooter={false}
     action={{ label: "Chat with Flo", onPress: startTutor }}>
     <GardenSubtitle>Ask questions, practice conversations and learn from mistakes.</GardenSubtitle>
-    <Image source={require("../../assets/profile-sprout.png")} style={styles.homeMascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
+    <Image source={require("../../assets/fluora-flo-sprout.png")} style={styles.homeMascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
     <Text style={styles.promptTitle}>What shall we grow today?</Text>
     <Pressable accessibilityRole="button" onPress={startTutor} style={styles.askCard}>
       <Text style={styles.askTitle}>Ask Flo anything…</Text>

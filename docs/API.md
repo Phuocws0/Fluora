@@ -68,7 +68,7 @@ Exports are marked ready immediately and assembled from current records when dow
 
 | Field | Type and rule | Default |
 | --- | --- | --- |
-| `appLanguage` | language code `^[a-z]{2}(-[A-Z]{2})?$`, not null | `"en"` |
+| `appLanguage` | `"en"` only in this demo; unsupported translations return `400` | `"en"` |
 | `courseLanguage` | language code or `null` | `null` |
 | `motivation`, `floCompanion` | slug `^[a-z0-9_-]{1,40}$` or `null`; option lists are owned by mobile | `null` |
 | `startingLevel` | `A1`–`C2` or `null` | `null` |
@@ -87,6 +87,8 @@ Exports are marked ready immediately and assembled from current records when dow
 | `onboardingCompleted` | boolean; set once with `onboardingCompleted:true` and never cleared | `false` |
 
 An unknown field, a wrong type, or an empty body returns `400` and nothing is written. Onboarding answers collected before registration can be sent in one `PATCH` right after register or login. `discoverable` and `progressVisibility` control search, profiles, friends' progress, and the leaderboard; the notification and reminder fields control notifications (see League and community).
+
+Mobile preference behavior: `textSize` scales lesson/learning and reader text by 100%/120%/140%, retaining OS scaling. `captions` shows the listening transcript. Focus mode hides lesson navigation distractions; reduced motion disables preference-aware modal transitions and moving waveforms. The wellbeing reminder counts foreground time in the current app session, pauses in background, and offers a break/continue action; it is not a persisted countdown or push reminder. Unsupported interface-language choices are disabled in mobile; old stored non-English preferences remain readable with an availability notice.
 
 ## Learning content and progress
 
@@ -124,7 +126,7 @@ Course, unit, lesson, story, study-tool, help, and reward definitions are curate
 | `GET /api/learning/misconceptions` | Implemented | Read recurring error patterns derived from answers → `{items:[...]}` | `401` |
 | `PATCH /api/learning/misconceptions/:itemId` | Implemented | Dismiss/restore a learner's misconception card; `{dismissed}` → `{item}` | `400`, `401`, `404` |
 
-Issue #27 implements core learning activity persistence. Private routes use the verified bearer session from issue #3 and return `401` without one. `GET /api/home` uses the first published course (enrollment-aware selection is still planned), XP/streak from completions, and the real gem balance from the wallet ledger. Its `progress` includes `lastCompletedLesson` and `completedLessonIds:string[]`, so mobile can select the first unfinished lesson even when lessons were completed out of order. `GET /api/progress` returns the same derived gem balance.
+Issue #27 implements core learning activity persistence. Private routes use the verified bearer session from issue #3 and return `401` without one. `GET /api/home` selects the first published course with an unfinished lesson (ordered by course order/title); if all are complete it returns the first course for review. Explicit enrollment selection is still planned. It returns XP/streak from completions, and the real gem balance from the wallet ledger. The mobile completed-course state offers Practice/review rather than claiming another new lesson exists. Its `progress` includes `lastCompletedLesson` and `completedLessonIds:string[]`, so mobile can select the first unfinished lesson even when lessons were completed out of order. `GET /api/progress` returns the same derived gem balance.
 
 The implemented course, unit, lesson, and learning-path reads are public curated content and do not require authentication. The course detail response is the course syllabus. Lesson responses omit exercise answer keys, correctness flags, and feedback explanations; those remain server-side until an answer is submitted.
 
@@ -185,7 +187,7 @@ Practice, review, vocabulary, bookmark, and reading mutations are scoped to the 
 
 The offline queue, audio recordings, transfer progress, storage limit, and downloaded files are device-local. The mobile app manages create/read/update/remove states locally; no server-side CRUD for device media/downloads is proposed. Account-scoped snapshots include existing course/unit/lesson/story responses and optionally their available media; text-only snapshots omit remote media references. Offline exercise answers are ungraded and are not queued or awarded XP. Reading progress saved offline has an explicit sync action using the existing reading-progress PUT/DELETE endpoints; it does not add an offline API. See [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 
-Study-tool endpoints return metadata, not grading or generated feedback. Mobile tools use curated Figma examples with local checks and explicitly labeled self-assessment. The current dictionary supports only its seeded terms (`hello`, `morning`, `name`); an unknown word returns `404`. Expanding content or adding automated pronunciation/writing assessment is separate work.
+Study-tool endpoints return metadata, not grading or generated feedback. Mobile tools use curated Figma examples with local checks and explicitly labeled self-assessment. The dictionary supports 30 curated terms from `backend/src/features/practice/reference-vocabulary.ts`, also used for demo decks; an unknown word returns `404`. Automatic pronunciation/writing assessment is not implemented.
 
 ## League, rewards, community, and notifications
 
@@ -207,7 +209,7 @@ Study-tool endpoints return metadata, not grading or generated feedback. Mobile 
 
 Quest, achievement, and reward definitions are curated seed data; wallet transactions are append-only (`quest_reward`, `redemption`, `refund`) and the balance is their sum. Learners cannot edit balances, claims, or awards. Spends and refunds take a per-learner lock, so parallel redemptions cannot overspend.
 
-- **Tiers** are derived from lifetime lesson XP: Seedling 0, Sprout 15, Bloom 30, Grove 45, Forest 52. The thresholds are calibrated to the demo seed (four lessons worth 52 XP in total).
+- **Tiers** are derived from lifetime lesson XP: Seedling 0, Sprout 15, Bloom 30, Grove 45, Forest 52. The thresholds are calibrated to the original A1 starter course (four lessons worth 52 XP); the expanded demo catalog also contains A2/B1 courses.
 - **Quest metrics** are derived for the current UTC day: lessons completed, XP earned, review answers, and stories marked completed (a story counts when its reading progress is completed and was last saved today).
 - **Achievements** are derived from lifetime totals (lessons, XP, streak, friends, groups joined, quests claimed). The first time a learner qualifies, `earnedAt` is recorded and stays stable.
 
@@ -325,7 +327,7 @@ All tutor routes require a session (`401` without one). Chats, messages, and not
 
 | Method / path | Status | Purpose; request → response | Errors |
 | --- | --- | --- | --- |
-| `GET /api/tutor/status` | Implemented | Whether Flo can reply right now → `{available,provider}` (`provider`: `local` or `off`) | `401` |
+| `GET /api/tutor/status` | Implemented | Read provider configuration → `{available,provider}` (`provider`: `local`, `openai`, or `off`). `openai` is available when its URL/key/model configuration is valid; this is not a live upstream quota/reachability probe. | `401` |
 | `GET /api/tutor/role-plays` | Implemented | Read curated branching role-play scenarios → `{scenarios:[{id,slug,title,description,level,turnCount}]}` | `401` |
 | `GET /api/tutor/chats?before=&limit=` | Implemented | Read the learner's chats, newest first: saved chats and still-active temporary ones → `{chats:[...],nextBefore}` | `400`, `401` |
 | `POST /api/tutor/chats` | Implemented | Start a chat or role-play; `{scenarioId?,title?}` → `201 {chat}`. A role-play stores Flo's opening line and returns `currentTurn`. Works while the tutor is unavailable. | `400`, `401`, `404` |
@@ -366,12 +368,14 @@ In a role-play, a message without `context` is a reply to the current turn. Flo 
 
 ### Flo Tutor behavior
 
-- **Provider:** `TUTOR_PROVIDER` selects the tutor. `local` (default) is an offline, rule-based demo tutor with curated topics and role-play grading; it needs no key. `off`, or an unknown value, makes Flo unavailable. A real AI provider can be added later behind the same contract.
+- **Provider:** `TUTOR_PROVIDER` selects the tutor. `local` (default) is an offline, rule-based demo tutor; `openai` calls an OpenAI-compatible chat API using backend-only `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL` (including a locally configured 9Router gateway). `off`, an unknown value, or incomplete LLM configuration makes Flo unavailable. The request/response contract remains the same.
+- **LLM boundaries:** free chat, authorized mistake context, and explanations use the model. Unsubmitted exercise help returns the curated first hint without an upstream call. Role-play verdicts, corrections, choice keys, and next-turn lines remain curated/deterministic; the LLM adds short feedback before the next line. A provider cannot award XP or change stored learning scores.
+- **Timeouts and errors:** the LLM call has a 60-second timeout and a 64 KiB response limit. Empty, malformed, truncated, and oversized completions are rejected. Mobile permits 75 seconds for tutor send/edit requests; other API calls keep their existing timeout. Upstream credential, quota, transport, and response errors become `503 TUTOR_UNAVAILABLE`; there is no automatic substitution with sample answers.
 - **Unavailable tutor:** sending or editing a message returns `503 TUTOR_UNAVAILABLE` and stores nothing, so mobile can keep the draft. Status, scenarios, chat history, creating chats, notes, lessons, and exercise hints keep working.
 - **Saved history:** a new chat's `saved` follows `saveTutorHistory`. Unsaved chats are temporary and are deleted, with their messages, 60 minutes after their last activity (checked on the learner's next tutor request; there is no scheduler). Turning the setting off does not delete existing saved chats; clear history for that. `PATCH {saved:false}` makes a chat temporary from that moment.
 - **Linked replies:** each learner message has at most one Flo reply. Editing the learner message regenerates that reply in place (same ID); deleting it deletes the reply. Flo's messages can't be edited or deleted directly. In a role-play only your latest message can be edited or deleted; deleting a role-play reply rewinds the chat to that turn.
 - **Clear history:** `DELETE /api/tutor/chats {confirm:true}` deletes every chat and message of the learner, saved or temporary. Saved notes are kept; their `chatId`/`messageId` become `null`, as when one chat is deleted.
-- **Privacy:** voice input is transcribed on the device and sent as text; no audio is accepted or stored. A provider receives only the message, up to the last 10 messages of that chat, the current role-play turn, and the referenced exercise or answer. It never receives the learner's email, name, or settings. Message text is not logged.
+- **Privacy:** the Tutor accepts text only; it does not transcribe or grade recordings. The LLM receives the learner's message, up to the last 10 messages of that chat, and authorized mistake/explanation data or curated role-play feedback as needed. Unsubmitted exercise context is handled locally. Fluora does not add the learner's email, name, or settings to the request. Text the learner types may itself contain personal information. `saveTutorHistory:false` controls Fluora storage, not the upstream provider's retention. Fluora does not log prompts, replies, or credentials; gateway/provider logging is configured separately in that service.
 - Tutor activity does not earn XP, gems, or quest progress.
 
 ## CRUD coverage and deliberate boundaries

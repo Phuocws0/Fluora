@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useAuth } from "../../auth/AuthContext";
 
 type Props = {
   active: boolean;
@@ -7,11 +8,13 @@ type Props = {
 };
 
 export function WaveformVisualizer({ active, meteringLevel = 0.1, barCount = 20 }: Props) {
+  const { settings } = useAuth();
+  const steady = settings?.reducedMotion || settings?.focusMode;
   const bars = Array.from({ length: barCount }, (_, index) => {
     // Generate organic wave contour using sine & metering
     const normalizedIndex = index / barCount;
     const wave = Math.sin(normalizedIndex * Math.PI);
-    const baseHeight = active ? 12 + wave * meteringLevel * 48 : 8;
+    const baseHeight = active ? 12 + wave * (steady ? 0.25 : meteringLevel) * 48 : 8;
     const clampedHeight = Math.min(60, Math.max(6, baseHeight));
 
     return (

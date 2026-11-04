@@ -1,14 +1,8 @@
+import { LearningText as Text } from "../../../../components/LearningText";
+import { PreferenceModal as Modal } from "../../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { getLessonAnswers } from "../../activity.service";
 import type { UserAnswerHistoryItem } from "../../../../types/learning";
 

@@ -27,11 +27,11 @@ function Toggle({ title, detail, value, onChange }: { title: string; detail?: st
   </View>;
 }
 
-function Choice<T extends string>({ title, value, choices, onChange }: { title: string; value: T; choices: { value: T; label: string }[]; onChange: (v: T) => void }) {
+function Choice<T extends string>({ title, value, choices, onChange }: { title: string; value: T; choices: { value: T; label: string; disabled?: boolean }[]; onChange: (v: T) => void }) {
   return <View style={{ marginVertical: 12 }}><Text style={ui.heading}>{title}</Text><View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{choices.map(c =>
-    <Pressable key={c.value} onPress={() => onChange(c.value)} accessibilityRole="radio" accessibilityState={{ selected: value === c.value }}
+    <Pressable key={c.value} disabled={c.disabled} onPress={() => onChange(c.value)} accessibilityRole="radio" accessibilityState={{ selected: value === c.value, disabled: c.disabled }}
       style={{ borderWidth: 1, borderColor: value === c.value ? green : "#DCE7D8", backgroundColor: value === c.value ? "#E8F8DF" : "white", borderRadius: 15, paddingVertical: 11, paddingHorizontal: 14 }}>
-      <Text style={{ color: ink, fontWeight: "700" }}>{c.label}</Text>
+      <Text style={{ color: c.disabled ? garden.muted : ink, fontWeight: "700" }}>{c.label}</Text>
     </Pressable>)}</View></View>;
 }
 
@@ -47,7 +47,7 @@ function TextSizePicker({ value, onChange }: { value: Settings["textSize"]; onCh
     { value: "extra_large", label: "140%" },
   ];
   return <View style={{ marginVertical: 18 }}>
-    <View style={{ flexDirection: "row", justifyContent: "space-between" }}><Text style={ui.heading}>Text size</Text><Text style={[ui.heading, { color: green }]}>{sizes.find(size => size.value === value)?.label}</Text></View>
+    <View style={{ flexDirection: "row", justifyContent: "space-between" }}><Text style={ui.heading}>Lesson & reading text size</Text><Text style={[ui.heading, { color: green }]}>{sizes.find(size => size.value === value)?.label}</Text></View>
     <View style={{ height: 36, justifyContent: "center" }}>
       <View style={{ height: 8, borderRadius: 4, backgroundColor: garden.line, position: "absolute", left: 0, right: 0 }} />
       <View style={{ height: 8, borderRadius: 4, backgroundColor: garden.green, position: "absolute", left: 0, width: value === "default" ? "17%" : value === "large" ? "50%" : "84%" }} />
@@ -251,7 +251,7 @@ function Preferences({ section }: { section: string }) {
   return <Page title={titles[section] || "Preferences"} eyebrow={section === "low-bandwidth" || section === "wellbeing" ? "ACCESSIBILITY" : "YOUR PERSONAL SPACE"} onBack={back} action={{ label: action.busy ? "Saving…" : "Save preferences", onPress: () => void save(), disabled: action.busy || !dirty || (section === "wellbeing" && draft?.wellbeingTimerMinutes !== null && (!Number.isInteger(draft?.wellbeingTimerMinutes) || (draft?.wellbeingTimerMinutes ?? 0) < 5 || (draft?.wellbeingTimerMinutes ?? 0) > 180)) }}>
     {subtitles[section] && <GardenSubtitle>{subtitles[section]}</GardenSubtitle>}<ResourceState resource={resource} />
     {draft && <>
-      {section === "language" && <Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt" }, { value: "es", label: "Español" }, { value: "fr", label: "Français" }]} onChange={v => set("appLanguage", v)} />}
+      {section === "language" && <><Copy>The demo interface is available in English. Other translations are not available yet.</Copy>{draft.appLanguage !== "en" && <Copy>Your previous preference is saved, but English is the active interface language. Select English to update the saved preference.</Copy>}<Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt — unavailable", disabled: true }, { value: "es", label: "Español — unavailable", disabled: true }, { value: "fr", label: "Français — unavailable", disabled: true }]} onChange={v => set("appLanguage", v)} /></>}
 
       {section === "accessibility" || section === "large-type" ? <>
         <GardenCaption>LIVE PREVIEW</GardenCaption>
@@ -278,7 +278,7 @@ function Preferences({ section }: { section: string }) {
 
       {section === "wellbeing" && <><GardenCaption>A HEALTHY PAUSE</GardenCaption><View style={{ alignSelf: "center", width: 204, height: 204, borderRadius: 102, backgroundColor: garden.mint, alignItems: "center", justifyContent: "center", marginVertical: 28 }}><View style={{ width: 134, height: 134, borderRadius: 67, backgroundColor: "white", alignItems: "center", justifyContent: "center" }}><Text style={{ color: green, fontFamily: font.heavy, textAlign: "center", fontSize: 38 }}>{draft.wellbeingTimerMinutes ? String(draft.wellbeingTimerMinutes).padStart(2, "0") + ":00" : "Off"}</Text></View></View><Text style={{ color: ink, fontFamily: font.heavy, textAlign: "center", fontSize: 21 }}>Break reminder</Text><View style={{ flexDirection: "row", gap: 14, marginVertical: 28 }}><Text style={{ flex: 1, textAlign: "center", backgroundColor: garden.blue, color: "#286CB5", borderRadius: 16, padding: 8, fontFamily: font.bold, fontSize: 12 }}>Breathe in · 4 sec</Text><Text style={{ flex: 1, textAlign: "center", backgroundColor: garden.mint, color: green, borderRadius: 16, padding: 8, fontFamily: font.bold, fontSize: 12 }}>Breathe out · 6 sec</Text></View><Text style={{ color: garden.muted, fontFamily: font.body, textAlign: "center", marginBottom: 18 }}>Return when you feel ready.</Text>
         <Choice title="Break reminder" value={String(draft.wellbeingTimerMinutes ?? "off")} choices={["off", "5", "15", "30", "60"].map(v => ({ value: v, label: v === "off" ? "Off" : v + " min" }))} onChange={v => set("wellbeingTimerMinutes", v === "off" ? null : Number(v))} />
-        <Copy>Custom interval (5–180 minutes)</Copy><TextInput style={ui.input} accessibilityLabel="Custom break interval" keyboardType="number-pad" value={draft.wellbeingTimerMinutes === null ? "" : String(draft.wellbeingTimerMinutes)} onChangeText={v => set("wellbeingTimerMinutes", v ? Number(v) : null)} />
+        <Copy>Custom interval (5–180 minutes)</Copy><Copy>The reminder appears after this much foreground time in Fluora. It pauses while the app is in the background.</Copy><TextInput style={ui.input} accessibilityLabel="Custom break interval" keyboardType="number-pad" value={draft.wellbeingTimerMinutes === null ? "" : String(draft.wellbeingTimerMinutes)} onChangeText={v => set("wellbeingTimerMinutes", v ? Number(v) : null)} />
       </>}
 
       {section === "privacy" && <><GardenCaption>WHO CAN SEE YOUR LEARNING?</GardenCaption>

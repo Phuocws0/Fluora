@@ -1,5 +1,6 @@
+import { LearningText as Text } from "../../components/LearningText";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { getLearningPaths, compareLearningPaths } from "./learning.service";

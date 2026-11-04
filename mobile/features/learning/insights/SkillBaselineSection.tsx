@@ -1,6 +1,7 @@
+import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import { getSkillBaseline } from "../activity.service";
 import type { SkillBaselineResult } from "../../../types/learning";
