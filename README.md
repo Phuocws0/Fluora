@@ -74,18 +74,24 @@ Each token appears once on a line starting with `[dev-mail]`.
 
 The Flo Tutor uses `TUTOR_PROVIDER=local` by default: an offline, rule-based demo tutor that needs no API key. Set `TUTOR_PROVIDER=off` in `.env` and recreate the backend container to check the "Flo is unavailable" state.
 
-Google sign-in uses a native module, so it needs a development build and does not run in Expo Go. Set the public web client ID in `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, and include that same ID in `GOOGLE_CLIENT_IDS` so the backend accepts the returned ID token. For Android, register package `com.fluora.mobile` and the development build's SHA-1 fingerprint in Google Cloud Console. For iOS, also set `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`; the app config uses it to register the callback URL scheme. These OAuth client IDs are public identifiers, not secrets. After changing `.env`, recreate the backend container.
-
-Build and start the native Android app in a second terminal. From the repository root, load the environment values first so Expo receives the Google client IDs:
+Mobile sign-in and registration use email and password; no Google OAuth configuration is needed for the demo. To run on an iPhone with Expo Go, start Expo from `mobile/` and point it at the host machine's LAN address:
 
 ```sh
-set -a
-. ./.env
-set +a
-npm run android --workspace @fluora/mobile
+cd mobile
+EXPO_PUBLIC_API_URL=http://<computer-LAN-IP>:4000 npx expo start --go --lan
 ```
 
-The native Google module requires a development build; Expo Go cannot load it. `npm run ios --workspace @fluora/mobile` builds the iOS app when an iOS client ID is configured. For a physical device or a different backend host, set `EXPO_PUBLIC_API_URL` to an address reachable from that device before building or starting Metro, for example `EXPO_PUBLIC_API_URL=http://192.168.1.20:4000 npm run android --workspace @fluora/mobile`.
+Keep the iPhone and development computer on the same Wi-Fi network, then scan the displayed QR code with Expo Go. Verification and password-reset tokens appear in backend logs as described above.
+
+To build and start the native Android app or an iOS app on macOS:
+
+```sh
+npm run android --workspace @fluora/mobile
+# On macOS with Xcode:
+npm run ios --workspace @fluora/mobile
+```
+
+For Android or a different backend host, set `EXPO_PUBLIC_API_URL` to an address reachable from that device before building or starting Metro, for example `EXPO_PUBLIC_API_URL=http://192.168.1.20:4000 npm run android --workspace @fluora/mobile`.
 
 Stop local containers while keeping the database volume:
 

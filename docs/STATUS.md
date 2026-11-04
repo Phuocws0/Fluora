@@ -37,7 +37,7 @@
 
 - Issue #17 League/community mobile screens and service methods cover rewards, friends, groups, discussion/challenges, rooms/messages/polls, peer review, planning/whiteboard, and notifications. Typecheck/build checks pass; database-backed Android acceptance remains.
 - Issue #22 Flo Tutor mobile UI is connected to the implemented Tutor API contract, with an explicit in-memory preview. It supports chats, role-play hints, message actions, notes, and history privacy controls. Live Android/backend acceptance remains.
-- Mobile Google sign-in is implemented for native builds and connects to `POST /api/auth/google`. End-to-end sign-in requires a development build and valid Google OAuth client IDs.
+- The mobile demo uses email/password authentication and can run in Expo Go without OAuth credentials. The backend retains an optional Google sign-in endpoint, but it is not used by the mobile demo.
 - [PR #43](https://github.com/Phuocws0/Fluora/pull/43) merged the learning-data and mobile starter work.
 - The remaining backlog is consolidated into 12 domain issues plus one Android QA issue. BE work is grouped by domain and can proceed independently; each corresponding FE issue records its API dependency. Issue #20 is assigned to Thành.
 
@@ -52,7 +52,6 @@
 - Practice study tools use guided demo samples and self-assessment; no automatic pronunciation/writing grading. The dictionary currently has three terms. Offline exercises do not submit answers or earn XP; reading changes sync explicitly. These limits and storage behavior are documented in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 - Login, forgot-password, and resend have no rate limiting in this local demo.
 - No email is sent: verification and reset tokens are only written to the backend log (`[dev-mail]` lines).
-- Google sign-in can only be verified end to end with a real OAuth client ID; without `GOOGLE_CLIENT_IDS` it returns `503`.
 - League tiers, quest targets, and reward prices are calibrated to the four seeded lessons (52 XP in total per learner); scale them when more content is seeded.
 - The "finish 1 story" quest counts a story whose reading progress is completed and was last saved today.
 - Study reminders appear only when the learner opens notifications; there is no push delivery or scheduler. Room messages and polls refresh by request (no real-time delivery).

@@ -10,9 +10,6 @@ import {
 import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
-import {
-  signInWithGoogle,
-} from "../../services/auth";
 import { useAuth } from "../../features/auth/AuthContext";
 import { getLearnerSettings } from "../../features/onboarding/onboarding.service";
 import { ScreenContainer } from "../../components/ScreenContainer";
@@ -20,12 +17,11 @@ import { font, garden } from "../../features/profile/garden-ui";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, refreshSession } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSigningInGoogle, setIsSigningInGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const validate = (): string | null => {
@@ -77,39 +73,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function handleGoogleSignIn() {
-    setError(null);
-    setIsSigningInGoogle(true);
-    try {
-      const user = await signInWithGoogle();
-      if (user) {
-        await refreshSession();
-        try {
-          const settings = await getLearnerSettings();
-          if (settings.onboardingCompleted) {
-            router.replace("/(tabs)/learn");
-          } else {
-            router.replace("/(auth)/onboarding");
-          }
-        } catch {
-          router.replace("/(tabs)/learn");
-        }
-      }
-    } catch (cause) {
-      const message = cause instanceof Error ? cause.message : "Google sign-in could not be completed.";
-      setError(
-        cause instanceof ApiError
-          ? cause.message
-          : message.startsWith("Set EXPO_PUBLIC_GOOGLE")
-            ? "Google sign-in is not configured for this local build."
-            : message,
-      );
-    } finally {
-      setIsSigningInGoogle(false);
-    }
-  }
-
-  const isBusy = isSubmitting || isSigningInGoogle;
+  const isBusy = isSubmitting;
   const initial = email.trim().charAt(0).toUpperCase() || "M";
 
   return (
@@ -195,30 +159,10 @@ export default function LoginScreen() {
         </View>
       </View>
       <Link href="/(auth)/forgot-password" style={styles.forgotLink}>Forgot password?</Link>
-
-      <View style={styles.dividerRow}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
+      <View style={styles.accountPrompt}>
+        <Text style={styles.accountPromptText}>New to Fluora?</Text>
+        <Link href="/(auth)/register" style={styles.accountLink}>Create account</Link>
       </View>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{
-          disabled: isBusy,
-          busy: isSigningInGoogle,
-        }}
-        disabled={isBusy}
-        onPress={handleGoogleSignIn}
-        style={({ pressed }) => [
-          styles.googleButton,
-          pressed && !isBusy ? styles.googleButtonPressed : null,
-          isBusy && styles.disabled,
-        ]}
-      >
-        {isSigningInGoogle ? <ActivityIndicator color="#236c19" /> : <Text style={styles.googleButtonText}>Continue with Google</Text>}
-      </Pressable>
-
     </ScreenContainer>
   );
 }
@@ -349,41 +293,10 @@ const styles = StyleSheet.create({
   },
   stickyFooter: { gap: 8 },
   footer: { color: garden.muted, fontFamily: font.bold, fontSize: 10, lineHeight: 15, textAlign: "center" },
+  accountPrompt: { alignItems: "center", flexDirection: "row", gap: 6, justifyContent: "center", marginTop: 24 },
+  accountPromptText: { color: garden.muted, fontFamily: font.body, fontSize: 13, lineHeight: 20 },
+  accountLink: { color: garden.forest, fontFamily: font.bold, fontSize: 13, lineHeight: 20 },
   disabled: {
     opacity: 0.55,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e1e8e3",
-  },
-  dividerText: {
-    fontFamily: "Nunito_700Bold",
-    color: "#8a9a90",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  googleButton: {
-    alignItems: "flex-start",
-    backgroundColor: garden.blue,
-    borderRadius: 16,
-    justifyContent: "center",
-    height: 58,
-    paddingHorizontal: 14,
-  },
-  googleButtonPressed: {
-    backgroundColor: "#EAF4FF",
-  },
-  googleButtonText: {
-    fontFamily: font.bold,
-    color: garden.forest,
-    fontSize: 15,
-    fontWeight: "700",
   },
 });
