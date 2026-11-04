@@ -36,7 +36,7 @@ The prototype footer has five tabs in this order: **Learn, Practice, Tutor, Leag
 ### Account and onboarding
 
 - Splash/welcome; choose course language and app language.
-- Register, sign in (including the designed Google option), verify email, sign out, recover/reset password, and view account security and signed-in sessions.
+- Register and sign in with email and password, verify email, sign out, recover/reset password, and view account security and signed-in sessions.
 - Set learning motivation, starting level, daily goal, reminders, a daily time budget, a learning promise, app preferences, and optional placement/skill baseline.
 - Handle validation, sign-in, reset, and connection states.
 
