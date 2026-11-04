@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import {
@@ -240,9 +240,9 @@ export default function VerifyEmailScreen() {
       </View>
 
       <View style={styles.footerRow}>
-        <Link href="/(tabs)/learn" style={styles.link}>
-          Skip for now and continue
-        </Link>
+        <Pressable accessibilityRole="button" onPress={handleContinue}>
+          <Text style={styles.link}>Skip for now and continue</Text>
+        </Pressable>
       </View>
     </ScreenContainer>
   );

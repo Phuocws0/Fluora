@@ -35,6 +35,7 @@ The mobile app connects learning, account/onboarding, profile/settings, Practice
 - Node.js 24 and npm
 - Docker with Docker Compose
 - An Android emulator or device for the mobile demo; Expo also provides iOS and web start commands
+- Native Android builds also need a JDK and Android SDK (Android Studio can manage these). The QA environment uses JDK 21, SDK platform/build-tools 36, and NDK `27.1.12297006`; Gradle installs missing licensed native build packages. Set `ANDROID_HOME` to your SDK directory and make `adb` available on `PATH`. Enable USB debugging for a device, or start an emulator with hardware acceleration.
 
 ## Run locally
 
