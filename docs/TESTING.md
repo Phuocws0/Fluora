@@ -46,7 +46,7 @@ Where available, verify:
 
 For each implemented endpoint, verify a valid request, input validation, expected success shape, relevant error response, and the database operation. The current health endpoint should return `503` when its database connection is unavailable.
 
-For the learning-content API, seed the local database and check the course catalog, course syllabus, ordered units/lessons/exercises, lesson search filters, and comparison of at least two learning paths. Confirm lesson responses do not expose answer keys, option correctness flags, or feedback explanations before an answer is submitted.
+For the learning-content API, seed the local database and check the course catalog, course syllabus, ordered units/lessons/exercises, lesson search filters (including `cafe` matching `café`), and comparison of at least two learning paths. Confirm lesson responses do not expose answer keys, option correctness flags, or feedback explanations before an answer is submitted.
 
 For learning activity, check each seeded exercise answer mode, reject raw audio payloads, require lesson answers before completion, and confirm a repeated completion earns zero additional XP. Verify answer history ownership, UTC streak/weekly totals, planner/evidence ownership, mission eligibility, and misconception dismiss/restore without changing answer history.
 

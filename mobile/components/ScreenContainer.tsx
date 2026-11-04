@@ -7,14 +7,15 @@ type Props = { children: ReactNode; scroll?: boolean; contentTopPadding?: number
 export function ScreenContainer({ children, scroll = true, contentTopPadding = 16, fixedFooter, fixedFooterBottom = 82 }: Props) {
   const insets = useSafeAreaInsets();
   const topPadding = Math.max(0, contentTopPadding - Math.max(0, insets.top - 24));
+  const contentBottomPadding = fixedFooter ? Math.max(112, fixedFooterBottom + 56 + 20) : 112;
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {scroll ? (
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: topPadding }]} showsVerticalScrollIndicator={false}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingTop: topPadding, paddingBottom: contentBottomPadding }]} showsVerticalScrollIndicator={false}>
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.content, { paddingTop: topPadding }]}>{children}</View>
+        <View style={[styles.content, { paddingTop: topPadding, paddingBottom: contentBottomPadding }]}>{children}</View>
       )}
       {fixedFooter ? <View style={[styles.fixedFooter, { bottom: fixedFooterBottom }]}>{fixedFooter}</View> : null}
     </SafeAreaView>

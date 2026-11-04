@@ -93,6 +93,8 @@ try {
   }
   const { an, linh, minh } = accounts;
   const home = await call(an, "GET", "/api/home"); assert.equal(home.progress.completedLessons, 12); assert.equal(home.wallet.gems, 85);
+  const unaccentedCafeSearch = await call(null, "GET", "/api/lessons/search?query=cafe");
+  assert(unaccentedCafeSearch.lessons.some((lesson) => lesson.title === "Ordering at a café"), "Unaccented search should match accented lesson titles");
   assert.equal((await db.query(`SELECT count(*) FROM reward_redemptions rr JOIN rewards r ON r.id=rr."rewardId" WHERE rr.status IN ('pending','cancelled') AND r.fulfillment <> 'deferred'`)).rows[0].count, "0");
   await call(an, "PATCH", "/api/users/me/settings", { appLanguage: "vi", dailyGoalMinutes: 40 }, 400);
   assert.equal((await call(an, "GET", "/api/users/me/settings")).settings.dailyGoalMinutes, 10);

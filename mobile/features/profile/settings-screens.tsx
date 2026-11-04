@@ -14,8 +14,8 @@ const green = "#236C19";
 
 function go(section: string) { router.push({ pathname: "/settings/[section]", params: { section } }); }
 
-function Tile({ title, detail, section, highlighted = false }: { title: string; detail: string; section: string; icon?: React.ComponentProps<typeof Ionicons>["name"]; highlighted?: boolean }) {
-  return <Pressable onPress={() => go(section)} accessibilityRole="button" accessibilityHint={detail} style={{ backgroundColor: highlighted ? garden.mint : "white", borderRadius: 16, minHeight: 50, paddingHorizontal: 14, marginBottom: 8, flexDirection: "row", alignItems: "center" }}>
+function Tile({ title, detail, section }: { title: string; detail: string; section: string; icon?: React.ComponentProps<typeof Ionicons>["name"] }) {
+  return <Pressable onPress={() => go(section)} accessibilityRole="button" accessibilityHint={detail} style={{ backgroundColor: "white", borderRadius: 16, minHeight: 50, paddingHorizontal: 14, marginBottom: 8, flexDirection: "row", alignItems: "center" }}>
     <Text style={{ color: green, fontFamily: font.bold, fontSize: 15, lineHeight: 22, flex: 1 }}>{title}</Text>
   </Pressable>;
 }
@@ -69,14 +69,14 @@ function General() {
     try { await logout(); } finally { router.replace("/(auth)/welcome"); }
   }, "Signed out."));
 
-  return <Page title="Make learning your own" back={false} eyebrow="" action={{ label: "App language", onPress: () => go("language") }}><GardenSubtitle>Manage your account and learning preferences.</GardenSubtitle><ResourceState resource={resource} />
+  return <Page title="Make learning your own" eyebrow="" activeTab="Profile"><GardenSubtitle>Manage your account and learning preferences.</GardenSubtitle><ResourceState resource={resource} />
     <GardenCaption>ACCOUNT</GardenCaption>
     <Tile icon="person-outline" title="Profile & identity" detail="Your name and bio" section="edit-profile" />
     <Tile icon="shield-checkmark-outline" title="Sign-in & devices" detail="Password, sessions and account deletion" section="security" />
     <Tile icon="language-outline" title="App language" detail="Language used in Fluora" section="language" />
     <GardenCaption>LEARNING EXPERIENCE</GardenCaption>
     <Tile icon="notifications-outline" title="Reminders" detail="Choose what reaches you" section="notifications" />
-    <Tile icon="accessibility-outline" title="Accessibility" detail="Text size, motion and captions" section="accessibility" highlighted />
+    <Tile icon="accessibility-outline" title="Accessibility" detail="Text size, motion and captions" section="accessibility" />
     <Tile icon="eye-outline" title="Privacy & sharing" detail="Your progress and tutor history" section="privacy" />
     <View style={{ height: 70 }} />
     <Tile icon="flag-outline" title="Goals & commitment" detail="Daily target, promise and Flo companion" section="goals" />

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GardenFooter, font, garden } from "../../profile/garden-ui";
+import { font, garden } from "../../profile/garden-ui";
 import { ContentState } from "../../../components/ContentState";
 import { useAuth } from "../../auth/AuthContext";
 import { getLesson } from "../learning.service";
@@ -461,7 +461,6 @@ export function LessonPlayerScreen() {
           onClose={() => setHistoryModalVisible(false)}
         />
       </KeyboardAvoidingView>
-      {!focusMode && <GardenFooter activeTab="Learn" />}
     </SafeAreaView>
   );
 }
