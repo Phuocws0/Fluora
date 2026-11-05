@@ -1,11 +1,12 @@
 import { LearningText as Text } from "../../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useAudioPlayer } from "expo-audio";
 import { useSpeechPrompt } from "../../audio/useSpeechPrompt";
 import { useAudioRecorderStudio } from "../../audio/useAudioRecorderStudio";
 import { WaveformVisualizer } from "../../components/WaveformVisualizer";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   content: unknown;
@@ -116,7 +117,7 @@ export function SpeakingExercise({
           </Pressable>
         </View>
 
-        <Text style={styles.phraseText}>{targetPhrase}</Text>
+        <Text style={styles.phraseText} translate={false}>{targetPhrase}</Text>
         <Text style={styles.deviceNotice}>
           🔒 On-device recording. Your voice sample never leaves your phone.
         </Text>

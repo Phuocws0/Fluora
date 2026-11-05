@@ -2,7 +2,7 @@ import { LearningText as Text } from "../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { useAuth } from "../auth/AuthContext";
@@ -11,6 +11,7 @@ import { getHomeSummary } from "./activity.service";
 import { firstUnfinishedLesson } from "./next-lesson";
 import type { CourseOverview, CourseSummary, HomeSummary } from "../../types/learning";
 import { font, garden } from "../profile/garden-ui";
+import { LocalizedPressable as Pressable } from "../i18n/i18n";
 
 type NextLessonInfo = {
   id: string;
@@ -126,7 +127,7 @@ function LearningHomeContent() {
           <Pressable accessibilityRole="button" accessibilityLabel={`Open ${courseDetail.title}`} onPress={openCourse} style={styles.courseCard}>
             <View style={styles.courseCopy}>
               <Text style={styles.courseEyebrow}>{courseComplete ? `COURSE COMPLETE · ${courseDetail.level}` : currentUnit ? `UNIT ${String(currentUnit.order).padStart(2, "0")} · ${courseDetail.level}` : `${courseDetail.language} · ${courseDetail.level}`}</Text>
-              <Text style={styles.courseTitle}>{currentUnit?.title ?? courseDetail.title}</Text>
+              <Text style={styles.courseTitle} translate={false}>{currentUnit?.title ?? courseDetail.title}</Text>
             </View>
             <Image source={require("../../assets/profile-sprout.png")} style={styles.mascot} resizeMode="contain" accessibilityLabel="Flo, the Fluora garden mascot" />
             <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${currentUnit?.lessons.length ? Math.min(100, Math.round((completedInUnit / currentUnit.lessons.length) * 100)) : 0}%` }]} /></View>
@@ -151,7 +152,7 @@ function LearningHomeContent() {
                   <View style={[styles.stepMarker, complete && styles.stepComplete, active && styles.stepActive]}>
                     <Text style={[styles.stepNumber, (complete || active) && styles.stepNumberActive]}>{complete ? "✓" : String(index + 1)}</Text>
                   </View>
-                  <Text style={styles.stepLabel}>{lesson.title}</Text>
+                  <Text style={styles.stepLabel} translate={false}>{lesson.title}</Text>
                 </Pressable>
               );
             })}

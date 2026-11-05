@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { font } from "../../features/profile/garden-ui";
+import { t, useAppLanguage } from "../../features/i18n/i18n";
 
 const ACTIVE = "#236c19";
 const MUTED = "#65766c";
 
 export default function TabLayout() {
+  useAppLanguage();
   return (
     <Tabs
       screenOptions={{
@@ -14,7 +16,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: ACTIVE,
         tabBarInactiveTintColor: MUTED,
         tabBarActiveBackgroundColor: "#eaf8de",
-        tabBarLabelStyle: { fontFamily: font.bold, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: font.bold, fontSize: 10 },
         tabBarItemStyle: { borderRadius: 14, marginHorizontal: 2, marginVertical: 4 },
         tabBarStyle: {
           backgroundColor: "#ffffff",
@@ -38,21 +40,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="learn"
         options={{
-          title: "Learn",
+          title: t("Learn"),
           tabBarIcon: ({ color }) => <Ionicons name="home-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="practice"
         options={{
-          title: "Practice",
+          title: t("Practice"),
           tabBarIcon: ({ color }) => <Ionicons name="book-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="tutor"
         options={{
-          title: "Tutor",
+          title: t("Tutor"),
           tabBarIcon: ({ color }) => (
             <Ionicons name="chatbubble-ellipses-outline" color={color} size={20} />
           ),
@@ -61,14 +63,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="league"
         options={{
-          title: "League",
+          title: t("League"),
           tabBarIcon: ({ color }) => <Ionicons name="trophy-outline" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: t("Profile"),
           tabBarIcon: ({ color }) => <Ionicons name="person-outline" color={color} size={20} />,
         }}
       />

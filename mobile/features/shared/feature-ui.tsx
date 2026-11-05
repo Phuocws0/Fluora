@@ -2,12 +2,13 @@ import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect, router } from "expo-router";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { ContentState } from "../../components/ContentState";
 import { ApiError, getJson, postJson } from "../../services/api";
 import { getAccessToken, saveAccessToken } from "../../services/session";
 import { font, garden } from "../profile/garden-ui";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../i18n/i18n";
 
 export const ui = StyleSheet.create({
   title: {
@@ -89,12 +90,14 @@ export function Button({
   disabled,
   danger,
   primary,
+  translateLabel = true,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   danger?: boolean;
   primary?: boolean;
+  translateLabel?: boolean;
 }) {
   return (
     <Pressable
@@ -104,29 +107,31 @@ export function Button({
       onPress={onPress}
       style={[ui.button, primary && { backgroundColor: garden.green, alignItems: "center", minHeight: 56 }, danger && ui.danger, disabled && ui.disabled]}
     >
-      <Text style={[ui.buttonText, primary && { fontFamily: "Nunito_400Regular", color: garden.ink, fontSize: 16, lineHeight: 24 }]}>{label}</Text>
+      <Text translate={translateLabel} style={[ui.buttonText, primary && { fontFamily: "Nunito_400Regular", color: garden.ink, fontSize: 16, lineHeight: 24 }]}>{label}</Text>
     </Pressable>
   );
 }
 export function Card({ children }: { children: ReactNode }) {
   return <View style={ui.card}>{children}</View>;
 }
-export function Heading({ children }: { children: ReactNode }) {
-  return <Text style={ui.heading}>{children}</Text>;
+export function Heading({ children, translate = true }: { children: ReactNode; translate?: boolean }) {
+  return <Text translate={translate} style={ui.heading}>{children}</Text>;
 }
-export function Copy({ children }: { children: ReactNode }) {
-  return <Text style={ui.text}>{children}</Text>;
+export function Copy({ children, translate = true }: { children: ReactNode; translate?: boolean }) {
+  return <Text translate={translate} style={ui.text}>{children}</Text>;
 }
 export function Page({
   title,
   children,
   back = false,
   onBack,
+  translateTitle = true,
 }: {
   title: string;
   children: ReactNode;
   back?: boolean;
   onBack?: () => void;
+  translateTitle?: boolean;
 }) {
   return (
     <KeyboardAvoidingView
@@ -147,7 +152,7 @@ export function Page({
             }
           />
         )}
-        <Text style={ui.title}>{title}</Text>
+        <Text translate={translateTitle} style={ui.title}>{title}</Text>
         {children}
       </ScreenContainer>
     </KeyboardAvoidingView>

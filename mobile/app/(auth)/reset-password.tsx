@@ -1,17 +1,11 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import { resetPassword } from "../../services/auth";
 import { ScreenContainer } from "../../components/ScreenContainer";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../../features/i18n/i18n";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();

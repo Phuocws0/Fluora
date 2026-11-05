@@ -2,7 +2,7 @@ import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ContentState } from "../../../components/ContentState";
 import { useAuth } from "../../auth/AuthContext";
@@ -10,6 +10,7 @@ import { SkillBaselineSection } from "./SkillBaselineSection";
 import { MisconceptionMapSection } from "./MisconceptionMapSection";
 import { CanDoEvidenceSection } from "./CanDoEvidenceSection";
 import { WeeklyAnalyticsSection } from "./WeeklyAnalyticsSection";
+import { LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 type TabKey = "baseline" | "misconceptions" | "evidence" | "analytics";
 

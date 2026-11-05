@@ -1,7 +1,7 @@
 import { LearningText } from "../../components/LearningText";
 import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
@@ -13,6 +13,7 @@ import { readDraft, writeDraft } from "./offline.storage";
 import type { Bookmark, ReadingProgress } from "./practice.types";
 import { ActionState, Button, Card, Choice, Editor, Empty, font, GardenSubtitle, LinkCard, PracticePage, ResourceState, Section, confirmAction, s, useAction, useResource } from "./practice-ui";
 import type { EditorSpec } from "./practice-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 export function StoryLibraryScreen() {
   const resource = useResource(practiceApi.stories);
@@ -27,14 +28,14 @@ export function StoryLibraryScreen() {
     {featured && <View style={storyStyles.layout}>
       <Pressable accessibilityRole="button" accessibilityLabel={`Featured story: ${featured.title}`} onPress={() => openStory(featured.id)} style={storyStyles.featured}>
         <Text style={storyStyles.featuredLabel}>FEATURED / {featured.kind.toUpperCase()}</Text>
-        <Text numberOfLines={2} style={storyStyles.featuredTitle}>{featured.title}</Text>
+        <Text numberOfLines={2} style={storyStyles.featuredTitle} translate={false}>{featured.title}</Text>
         <Text numberOfLines={1} style={storyStyles.featuredDescription}>A short {featured.kind} to practice your English.</Text>
         <Text style={storyStyles.featuredMeta}>OPEN STORY · ENGLISH</Text>
       </Pressable>
       <Text style={storyStyles.sectionTitle}>SHORT READS FOR YOUR DAY</Text>
       <View style={storyStyles.shortReads}>
         {shortReads.map((story, index) => <Pressable key={story.id} accessibilityRole="button" accessibilityLabel={`Read ${story.title}`} onPress={() => openStory(story.id)} style={[storyStyles.shortRead, index % 2 === 0 ? storyStyles.shortReadBlue : storyStyles.shortReadMint]}>
-          <Text numberOfLines={2} style={storyStyles.shortReadTitle}>{story.title}</Text>
+          <Text numberOfLines={2} style={storyStyles.shortReadTitle} translate={false}>{story.title}</Text>
           <Text style={storyStyles.shortReadMeta}>{story.kind.toUpperCase()} · READ</Text>
         </Pressable>)}
         {shortReads.length === 1 && <View style={storyStyles.shortReadPlaceholder} />}
@@ -130,7 +131,7 @@ function Reader({ id, forceOffline }: { id: string; forceOffline: boolean }) {
     }
     setPosition(0);
   }, "Reading position reset."));
-  return <PracticePage title={resource.data?.story.title ?? "Your story"} scrollRef={scrollRef}>
+  return <PracticePage title={resource.data?.story.title ?? "Your story"} translateTitle={!resource.data?.story.title} scrollRef={scrollRef}>
     <ResourceState resource={resource} />
     {resource.data && <>
       {resource.data.offline && <Text style={s.caption}>OFFLINE COPY · Reading progress stays on this device until you sync.</Text>}
@@ -141,15 +142,15 @@ function Reader({ id, forceOffline }: { id: string; forceOffline: boolean }) {
       {mode !== "comprehension" && <>
         <Text style={s.caption}>Paragraph {content.paragraphs.length ? position + 1 : 0} / {content.paragraphs.length} · Tap a word to explore its meaning</Text>
         {content.paragraphs.map((paragraph, i) => <View key={i} onLayout={event => { paragraphOffsets.current[i] = event.nativeEvent.layout.y; if (progressReady && i === position) scrollRef.current?.scrollTo({ y: event.nativeEvent.layout.y, animated: false }); }} style={{ backgroundColor: mode === "dialogue" ? i % 2 ? "#EAF4FF" : "#EAF8DE" : paragraph.quote ? "#EAF8DE" : "white", borderWidth: i === position ? 1 : 0, borderColor: "#58CC02", borderRadius: 18, padding: 16, marginVertical: 7, marginLeft: mode === "dialogue" && i % 2 ? 28 : 0 }}>
-          {paragraph.speaker && <Text style={s.label}>{paragraph.speaker}</Text>}
-          <LearningText style={s.body}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</LearningText>
+          {paragraph.speaker && <Text style={s.label} translate={false}>{paragraph.speaker}</Text>}
+          <LearningText style={s.body} translate={false}>{paragraph.text.split(/(\s+)/).map((token, index) => <Text key={index} onPress={token.trim() ? () => setWord(token.replace(/[^\p{L}'-]/gu, "").toLowerCase()) : undefined}>{token}</Text>)}</LearningText>
           <Button label={isSpeaking && i === position ? "Stop reading aloud" : "Read aloud"} onPress={() => { setPosition(i); if (isSpeaking) stop(); else speak(paragraph.text); }} />
         </View>)}
         <View style={s.wrap}><Button label="Previous" disabled={!progressReady || action.busy || position === 0} onPress={() => save(position - 1)} /><Button label="Next / save position" disabled={!progressReady || action.busy || position >= content.paragraphs.length - 1} onPress={() => save(position + 1)} /><Button label="Mark read" disabled={!progressReady || action.busy || !content.paragraphs.length} onPress={() => save(Math.max(0, content.paragraphs.length - 1), true)} /></View>
       </>}
       {mode === "comprehension" && <>
         <GardenSubtitle>Follow the story → choose your response → open the graded lesson challenge. These reflection choices are not automatically graded.</GardenSubtitle>
-        {content.questions.map((question, i) => <Card key={i}><Text style={s.cardTitle}>{question.question}</Text><View style={{ height: 24, width: 2, alignSelf: "center", backgroundColor: "#236c19" }} /><Choice value={selections[i] ?? ""} options={question.options.map(o => ({ id: o, label: o }))} onChange={v => setSelections(s => ({ ...s, [i]: v }))} />{selections[i] && <><Text style={s.label}>Find the sentence that proves your choice</Text><Choice value={evidence[i] ?? ""} options={content.paragraphs.map((p, index) => ({ id: String(index), label: p.text }))} onChange={v => setEvidence(e => ({ ...e, [i]: v }))} />{evidence[i] !== undefined && <Text style={s.caption}>You linked “{selections[i]}” to paragraph {Number(evidence[i]) + 1}. Reread it to check your reasoning.</Text>}</>}</Card>)}
+        {content.questions.map((question, i) => <Card key={i}><Text style={s.cardTitle} translate={false}>{question.question}</Text><View style={{ height: 24, width: 2, alignSelf: "center", backgroundColor: "#236c19" }} /><Choice value={selections[i] ?? ""} options={question.options.map(o => ({ id: o, label: o, translate: false }))} onChange={v => setSelections(s => ({ ...s, [i]: v }))} />{selections[i] && <><Text style={s.label}>Find the sentence that proves your choice</Text><Choice value={evidence[i] ?? ""} options={content.paragraphs.map((p, index) => ({ id: String(index), label: p.text, translate: false }))} onChange={v => setEvidence(e => ({ ...e, [i]: v }))} />{evidence[i] !== undefined && <Text style={s.caption}>You linked “{selections[i]}” to paragraph {Number(evidence[i]) + 1}. Reread it to check your reasoning.</Text>}</>}</Card>)}
         {!content.questions.length && <Empty text="No comprehension prompts are published for this story." />}
         {content.challenge && <Button primary label="Open graded challenge in lesson player" onPress={() => { stop(); router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: content.challenge!.lessonId } }); }} />}
       </>}
@@ -168,7 +169,7 @@ export function BookmarkShelfScreen() {
   const visible = resource.data?.filter(mark => filter === "all" || mark.targetType === filter) ?? [];
   return <PracticePage title="Your reading shelf"><GardenSubtitle>Saved stories and words, with your own notes and tags.</GardenSubtitle><Choice value={filter} options={[{ id: "all", label: "All" }, { id: "story", label: "Stories" }, { id: "word", label: "Words" }]} onChange={setFilter} /><ResourceState resource={resource} /><ActionState action={action} />
     {resource.data && !visible.length && <Empty text="Save a story or a dictionary word to see it here." />}
-    {visible.map(mark => <Card key={mark.id}><LinkCard title={mark.targetType === "story" ? stories.data?.find(story => story.id === mark.targetId)?.title ?? "Saved story" : mark.targetId} detail={mark.note ?? mark.tag ?? mark.targetType} onPress={() => mark.targetType === "story" ? router.push({ pathname: "/stories/[storyId]", params: { storyId: mark.targetId } }) : setWord(mark.targetId)} /><View style={s.wrap}><Button label="Edit note / tag" onPress={() => edit(mark)} /><Button label="Remove" danger disabled={action.busy} onPress={() => confirmAction("Remove bookmark?", "The original story or dictionary word is unchanged.", () => void action.run(async () => { await practiceApi.removeBookmark(mark.id); await resource.refresh(); }, "Bookmark removed."))} /></View></Card>)}
+    {visible.map(mark => <Card key={mark.id}><LinkCard title={mark.targetType === "story" ? stories.data?.find(story => story.id === mark.targetId)?.title ?? "Saved story" : mark.targetId} detail={mark.note ?? mark.tag ?? mark.targetType} onPress={() => mark.targetType === "story" ? router.push({ pathname: "/stories/[storyId]", params: { storyId: mark.targetId } }) : setWord(mark.targetId)} translateTitle={mark.targetType === "story" && !stories.data?.some(story => story.id === mark.targetId)} translateDetail={false} /><View style={s.wrap}><Button label="Edit note / tag" onPress={() => edit(mark)} /><Button label="Remove" danger disabled={action.busy} onPress={() => confirmAction("Remove bookmark?", "The original story or dictionary word is unchanged.", () => void action.run(async () => { await practiceApi.removeBookmark(mark.id); await resource.refresh(); }, "Bookmark removed."))} /></View></Card>)}
     <Editor spec={editor} close={() => setEditor(null)} />
     {word && <Modal visible onRequestClose={() => setWord(null)}><PracticePage title="Saved word" onBack={() => setWord(null)}><Button label="Close" onPress={() => setWord(null)} /><DictionaryPanel initialWord={word} /></PracticePage></Modal>}
   </PracticePage>;

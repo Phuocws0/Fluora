@@ -2,12 +2,13 @@ import { LearningText as Text } from "../../components/LearningText";
 import { LearningTextInput as TextInput } from "../../components/LearningText";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { LearningCard } from "../../components/LearningCard";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { searchLessons } from "./learning.service";
 import type { LessonSummary } from "../../types/learning";
+import { LocalizedPressable as Pressable } from "../i18n/i18n";
 
 const levels = ["", "A1", "A2"];
 const skills = ["", "speaking", "listening", "reading", "writing"];
@@ -83,6 +84,7 @@ export function LessonSearchScreen() {
           {lessons.map((lesson) => (
             <LearningCard
               key={lesson.id}
+              translateContent={false}
               title={lesson.title}
               subtitle={`${lesson.skill} · ${lesson.level}`}
               description={`${lesson.unit.title} · ${lesson.unit.course.title}`}

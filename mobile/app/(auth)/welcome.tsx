@@ -1,16 +1,37 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useAppLanguage } from "../../features/i18n/i18n";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../../features/i18n/i18n";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { language, setLanguage } = useAppLanguage();
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.brand}>Fluora</Text>
+        <View style={styles.topRow}>
+          <Text style={styles.brand}>Fluora</Text>
+          <View style={styles.languageSwitch} accessibilityRole="radiogroup" accessibilityLabel="App language">
+            {(["en", "vi"] as const).map((option) => (
+              <Pressable
+                key={option}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: language === option }}
+                accessibilityLabel={option === "en" ? "English interface" : "Vietnamese interface"}
+                onPress={() => setLanguage(option)}
+                style={[styles.languageOption, language === option && styles.languageOptionSelected]}
+              >
+                <Text style={[styles.languageOptionText, language === option && styles.languageOptionTextSelected]}>
+                  {option.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
         <Image
-          accessibilityLabel="Flo growing in a language learning garden"
+          accessibilityLabel={language === "vi" ? "Linh vật Flo trong khu vườn học ngôn ngữ" : "Flo growing in a language learning garden"}
           resizeMode="contain"
           source={require("../../assets/fluora-welcome-garden.png")}
           style={styles.illustration}
@@ -58,6 +79,38 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     marginBottom: 20,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  languageSwitch: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 3,
+    borderRadius: 12,
+    backgroundColor: "#f4f8f2",
+    marginBottom: 20,
+  },
+  languageOption: {
+    minWidth: 40,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 9,
+    paddingHorizontal: 8,
+  },
+  languageOptionSelected: {
+    backgroundColor: "#eaf8de",
+  },
+  languageOptionText: {
+    color: "#65766c",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 12,
+  },
+  languageOptionTextSelected: {
+    color: "#236c19",
   },
   illustration: {
     alignSelf: "center",

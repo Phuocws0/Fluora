@@ -3,13 +3,14 @@ import { PreferenceModal as Modal } from "../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ContentState } from "../../../components/ContentState";
 import { useAuth } from "../../auth/AuthContext";
 import { completeMission, getMissionPassport } from "../activity.service";
 import type { MissionPassportItem } from "../../../types/learning";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 export function MissionPassportScreen() {
   const router = useRouter();
@@ -139,8 +140,8 @@ export function MissionPassportScreen() {
                   </View>
                   <View style={styles.stampInfo}>
                     <Text style={styles.stampCategory}>LANGUAGE MISSION</Text>
-                    <Text style={styles.stampTitle}>{mission.title}</Text>
-                    <Text style={styles.stampDesc} numberOfLines={2}>
+                    <Text style={styles.stampTitle} translate={false}>{mission.title}</Text>
+                    <Text style={styles.stampDesc} numberOfLines={2} translate={false}>
                       {mission.description}
                     </Text>
                     {isEarned ? (
@@ -188,8 +189,8 @@ export function MissionPassportScreen() {
                   </Pressable>
                 </View>
 
-                <Text style={styles.modalTitle}>{selectedMission.title}</Text>
-                <Text style={styles.modalDesc}>{selectedMission.description}</Text>
+                <Text style={styles.modalTitle} translate={false}>{selectedMission.title}</Text>
+                <Text style={styles.modalDesc} translate={false}>{selectedMission.description}</Text>
 
                 {selectedMission.requiredLessonId && !selectedMission.completedAt ? (
                   <Pressable accessibilityRole="button" onPress={() => {

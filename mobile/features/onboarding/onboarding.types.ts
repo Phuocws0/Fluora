@@ -29,7 +29,7 @@ export type PlacementAttemptResult = {
 };
 
 export type LearnerSettings = {
-  appLanguage: string;
+  appLanguage: "en" | "vi";
   courseLanguage: string | null;
   motivation: string | null;
   startingLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null;
@@ -58,7 +58,7 @@ export type LearnerSettings = {
 };
 
 export type OnboardingDraft = {
-  appLanguage: string;
+  appLanguage: "en" | "vi";
   courseLanguage: string;
   motivation: string | null;
   startingLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null;

@@ -1,6 +1,6 @@
 import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useEffect, useState } from "react";
-import { Switch, Text, View } from "react-native";
+import { Switch, View } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { getCourse, getCourses } from "../learning/learning.service";
@@ -9,6 +9,7 @@ import { addDownload, cancelDownload, downloadError, downloadSnapshot, eraseDown
 import { readPackage, STORAGE_LIMIT } from "./offline.storage";
 import type { DownloadEntry, DownloadKind, OfflinePackage } from "./offline.storage";
 import { ActionState, Button, Card, Empty, GardenSubtitle, PracticePage, ResourceState, Section, confirmAction, garden, s, useAction, useResource } from "./practice-ui";
+import { LocalizedText as Text } from "../i18n/i18n";
 
 const loadCatalog = async () => { const [courses, stories] = await Promise.all([getCourses(), practiceApi.stories()]); return { courses, stories }; };
 export function useDownloads(owner: string) {
@@ -46,7 +47,7 @@ export function DownloadsScreen() {
     {local.error && <Text style={s.error}>{local.error}</Text>}
     <ActionState action={action} /><Section>DOWNLOAD QUEUE</Section>
     {!local.loading && !local.entries.length && <Empty text="Download a course, unit, lesson or story while connected." />}
-    {local.entries.map(entry => <Card key={entry.id}><Text style={s.cardTitle}>{entry.title}</Text><Text style={s.caption}>{entry.status.toUpperCase()} · {entry.progress}% · {(entry.bytes / 1024).toFixed(1)} KB · {entry.includeMedia ? "With available media" : "Text-first"}</Text>
+    {local.entries.map(entry => <Card key={entry.id}><Text style={s.cardTitle} translate={false}>{entry.title}</Text><Text style={s.caption}>{entry.status.toUpperCase()} · {entry.progress}% · {(entry.bytes / 1024).toFixed(1)} KB · {entry.includeMedia ? "With available media" : "Text-first"}</Text>
       {entry.status === "downloading" && <View style={{ height: 6, backgroundColor: garden.line }}><View style={{ height: 6, backgroundColor: garden.green, width: `${entry.progress}%` }} /></View>}
       {entry.error && <Text style={s.error}>{entry.error}</Text>}
       <View style={s.wrap}>{entry.status === "completed" && <Button label="Open offline" onPress={() => open(entry)} />}
@@ -60,9 +61,9 @@ export function DownloadsScreen() {
     <View style={s.wrap}><Switch accessibilityLabel="Include available audio and images" value={includeMedia} onValueChange={setIncludeMedia} /><Text style={s.caption}>Include available media {!includeMedia ? "· Low bandwidth / text-first" : ""}</Text></View>
     <Text style={s.caption}>Current demo lessons are mostly text. Speech uses an installed device voice; download that voice in your device settings for offline playback. Offline practice does not award XP or submit answers.</Text>
     <ResourceState resource={catalog} />
-    {catalog.data?.courses.map(c => <Card key={c.id}><Text style={s.cardTitle}>{c.title}</Text><View style={s.wrap}><Button label="Download course" disabled={action.busy} onPress={() => queue("course", c.id, c.title)} /><Button label="Choose unit / lesson" onPress={() => setCourseId(courseId === c.id ? "" : c.id)} /></View></Card>)}
-    {courseId && <><ResourceState resource={course} />{course.data?.units.map(unit => <Card key={unit.id}><Button label={`Download unit: ${unit.title}`} onPress={() => queue("unit", unit.id, unit.title)} />{unit.lessons.map(lesson => <Button key={lesson.id} label={`↓ ${lesson.title}`} onPress={() => queue("lesson", lesson.id, lesson.title)} />)}</Card>)}</>}
-    {catalog.data?.stories.map(story => <Button key={story.id} label={`Download story: ${story.title}`} onPress={() => queue("story", story.id, story.title)} />)}
-    {opened && <Modal visible onRequestClose={() => setOpened(null)}><PracticePage title={opened.course?.title ?? opened.unit?.title ?? "Downloaded lesson"} onBack={() => setOpened(null)}><Button label="Close" onPress={() => setOpened(null)} />{opened.lessons.map(lesson => <Button key={lesson.id} label={lesson.title} onPress={() => { setOpened(null); router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id, offline: "1" } }); }} />)}</PracticePage></Modal>}
+    {catalog.data?.courses.map(c => <Card key={c.id}><Text style={s.cardTitle} translate={false}>{c.title}</Text><View style={s.wrap}><Button label="Download course" disabled={action.busy} onPress={() => queue("course", c.id, c.title)} /><Button label="Choose unit / lesson" onPress={() => setCourseId(courseId === c.id ? "" : c.id)} /></View></Card>)}
+    {courseId && <><ResourceState resource={course} />{course.data?.units.map(unit => <Card key={unit.id}><Button label={`Download unit: ${unit.title}`} onPress={() => queue("unit", unit.id, unit.title)} translateLabel={false} />{unit.lessons.map(lesson => <Button key={lesson.id} label={`↓ ${lesson.title}`} onPress={() => queue("lesson", lesson.id, lesson.title)} translateLabel={false} />)}</Card>)}</>}
+    {catalog.data?.stories.map(story => <Button key={story.id} label={`Download story: ${story.title}`} onPress={() => queue("story", story.id, story.title)} translateLabel={false} />)}
+    {opened && <Modal visible onRequestClose={() => setOpened(null)}><PracticePage title={opened.course?.title ?? opened.unit?.title ?? "Downloaded lesson"} onBack={() => setOpened(null)} translateTitle={!opened.course && !opened.unit}><Button label="Close" onPress={() => setOpened(null)} />{opened.lessons.map(lesson => <Button key={lesson.id} label={lesson.title} onPress={() => { setOpened(null); router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id, offline: "1" } }); }} translateLabel={false} />)}</PracticePage></Modal>}
   </PracticePage>;
 }

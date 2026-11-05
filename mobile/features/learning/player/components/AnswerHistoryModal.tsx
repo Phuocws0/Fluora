@@ -2,9 +2,10 @@ import { LearningText as Text } from "../../../../components/LearningText";
 import { PreferenceModal as Modal } from "../../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { getLessonAnswers } from "../../activity.service";
 import type { UserAnswerHistoryItem } from "../../../../types/learning";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   visible: boolean;
@@ -80,7 +81,7 @@ export function AnswerHistoryModal({ visible, lessonId, onClose }: Props) {
                       </Text>
                     </View>
                   </View>
-                  <Text style={styles.feedbackText}>{item.feedback}</Text>
+                  <Text style={styles.feedbackText} translate={false}>{item.feedback}</Text>
                   <Text style={styles.scoreText}>Score: {item.score}/100</Text>
                 </View>
               ))}

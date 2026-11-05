@@ -2,7 +2,7 @@ import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { font, garden } from "../../profile/garden-ui";
 import { ContentState } from "../../../components/ContentState";
@@ -26,6 +26,7 @@ import type {
   ExerciseAnswerResult,
   LessonCompletionResult,
 } from "../../../types/learning";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 export function LessonPlayerScreen() {
   const { lessonId = "", offline } = useLocalSearchParams<{ lessonId: string; offline?: string }>();
@@ -275,9 +276,9 @@ export function LessonPlayerScreen() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-          <Text style={styles.prompt}>{currentExercise.prompt}</Text>
+          <Text style={styles.prompt} translate={false}>{currentExercise.prompt}</Text>
           {currentExercise.instruction ? (
-            <Text style={styles.instruction}>{currentExercise.instruction}</Text>
+            <Text style={styles.instruction} translate={false}>{currentExercise.instruction}</Text>
           ) : null}
           <View style={styles.exerciseTools}>
             {!focusMode && <Pressable accessibilityRole="button" accessibilityLabel="Toggle audio-only mode" onPress={() => setAudioOnlyMode((previous) => !previous)} style={styles.utilityButton}>
@@ -381,10 +382,10 @@ export function LessonPlayerScreen() {
                 </Text>
               </View>
 
-              {feedback.offline && <Text style={styles.feedbackExplanation}>{feedback.feedback}</Text>}
+              {feedback.offline && <Text style={styles.feedbackExplanation} translate={false}>{feedback.feedback}</Text>}
 
               {feedback.explanation ? (
-                <Text style={styles.feedbackExplanation}>{feedback.explanation}</Text>
+                <Text style={styles.feedbackExplanation} translate={false}>{feedback.explanation}</Text>
               ) : null}
 
               <View style={styles.feedbackButtons}>

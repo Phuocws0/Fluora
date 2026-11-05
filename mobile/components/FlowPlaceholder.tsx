@@ -1,6 +1,7 @@
 import { Link } from "expo-router";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import { DestinationPlaceholder } from "./DestinationPlaceholder";
+import { LocalizedText as Text } from "../features/i18n/i18n";
 
 type LinkItem = { label: string; href: "/login" | "/register" | "/forgot-password" | "/onboarding" | "/welcome" };
 

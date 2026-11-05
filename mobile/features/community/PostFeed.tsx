@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 import { postFeed } from "./community.service";
 import type { Post } from "./community.types";
 import {
@@ -18,6 +18,7 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { formatUiDate, LocalizedTextInput as TextInput, useAppLanguage } from "../i18n/i18n";
 export function PostFeed({
   kind,
   parentId,
@@ -31,6 +32,7 @@ export function PostFeed({
   writable?: boolean;
   editable?: boolean;
 }) {
+  const { language } = useAppLanguage();
   const service = useMemo(
     () => postFeed(kind, parentId, postId),
     [kind, parentId, postId],
@@ -103,15 +105,15 @@ export function PostFeed({
             <Card key={p.id}>
               <Copy>
                 {p.author.displayName ?? "Learner"} ·{" "}
-                {new Date(p.createdAt).toLocaleString()}
+                {formatUiDate(p.createdAt, language, { dateStyle: "medium", timeStyle: "short" })}
                 {p.editedAt ? " · edited" : ""}
               </Copy>
               {p.replyTo && (
-                <Copy>
+                <Copy translate={false}>
                   ↳ {p.replyTo.author.displayName}: {p.replyTo.excerpt}
                 </Copy>
               )}
-              <Copy>{p.body}</Copy>
+              <Copy translate={false}>{p.body}</Copy>
               <View style={ui.row}>
                 {kind === "discussion" && (
                   <Button

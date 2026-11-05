@@ -16,7 +16,9 @@ import {
   useAction,
   useResource,
 } from "../shared/feature-ui";
+import { formatUiDate, useAppLanguage } from "../i18n/i18n";
 export default function NotificationsScreen() {
+  const { language } = useAppLanguage();
   const r = useResource(useCallback(() => community.notices(), []));
   const a = useAction();
   const [older, setOlder] = useState<Notice[]>([]);
@@ -74,7 +76,7 @@ export default function NotificationsScreen() {
                 {n.title}
               </Heading>
               <Copy>{n.body}</Copy>
-              <Copy>{new Date(n.createdAt).toLocaleString()}</Copy>
+              <Copy>{formatUiDate(n.createdAt, language, { dateStyle: "medium", timeStyle: "short" })}</Copy>
               <View style={ui.row}>
                 <Button
                   label={n.read ? "Mark unread" : "Mark read"}

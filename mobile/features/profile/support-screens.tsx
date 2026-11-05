@@ -3,13 +3,15 @@ import * as ImagePicker from "expo-image-picker";
 import * as Sharing from "expo-sharing";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Platform, View } from "react-native";
 import { ActionState, Button, Card, Copy, Empty, Heading, ResourceState, confirmAction, ui, useAction, useResource } from "../../features/shared/feature-ui";
 import { profileService } from "./service";
 import { font, garden, GardenCaption, GardenCard, GardenSubtitle, Page } from "./garden-ui";
+import { formatUiDate, LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput, useAppLanguage } from "../i18n/i18n";
 
 function go(section: string) { router.push({ pathname: "/settings/[section]", params: { section } }); }
 function Help() {
+  const { language } = useAppLanguage();
   const articles = useResource(profileService.articles);
   const requests = useResource(profileService.requests);
   const [query, setQuery] = useState("");
@@ -22,10 +24,11 @@ function Help() {
     <ResourceState resource={articles} />
     {!articles.loading && !articles.error && (visible.length ? visible.map((article, index) => <Pressable key={article.id} accessibilityRole="button" accessibilityState={{ expanded: expanded === article.id }} onPress={() => setExpanded(expanded === article.id ? null : article.id)} style={{ borderRadius: 16, backgroundColor: expanded === article.id || (!expanded && !query && category === "all" && index === 0) ? garden.mint : "white", padding: 14, minHeight: expanded === article.id || (!expanded && !query && category === "all" && index === 0) ? 116 : 52, marginBottom: 10 }}><Text style={{ color: garden.forest, fontFamily: font.bold, fontSize: 15 }}>{article.title}{expanded !== article.id && (query || category !== "all" || index !== 0) ? "  +" : ""}</Text>{(expanded === article.id || (!expanded && !query && category === "all" && index === 0)) && <Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 13, lineHeight: 19, marginTop: 8 }}>{article.body}</Text>}</Pressable>) : <Empty text="No matching articles. Try another search or contact support." />)}
     <GardenCaption>YOUR REQUESTS</GardenCaption><ResourceState resource={requests} />
-    {!requests.loading && !requests.error && (requests.data?.length ? requests.data.map(r => <Pressable key={r.id} onPress={() => go("support")} style={ui.card}><Text style={{ fontWeight: "700", color: "#20352B" }}>{r.status === "open" ? "Open" : "Closed"} · {new Date(r.createdAt).toLocaleDateString()}</Text><Text style={ui.text} numberOfLines={2}>{r.message}</Text></Pressable>) : <Empty text="You have no support requests yet." />)}
+    {!requests.loading && !requests.error && (requests.data?.length ? requests.data.map(r => <Pressable key={r.id} onPress={() => go("support")} style={ui.card}><Text style={{ fontWeight: "700", color: "#20352B" }}>{r.status === "open" ? "Open" : "Closed"} · {formatUiDate(r.createdAt, language, { dateStyle: "medium" })}</Text><Text style={ui.text} numberOfLines={2} translate={false}>{r.message}</Text></Pressable>) : <Empty text="You have no support requests yet." />)}
   </Page>;
 }
 function Support() {
+  const { language } = useAppLanguage();
   const resource = useResource(profileService.requests);
   const action = useAction();
   const [issueCategory, setIssueCategory] = useState("learning");
@@ -68,13 +71,14 @@ function Support() {
     <GardenCaption>YOUR REQUESTS</GardenCaption>
     {!resource.loading && !resource.error && (resource.data?.length ? resource.data.map(r => <Card key={r.id}>
       <Text style={{ color: r.status === "open" ? "#236c19" : "#65766c", fontWeight: "800" }}>{r.status.toUpperCase()}</Text>
-      <Text style={ui.text}>{r.message}</Text><Text style={ui.small}>#{r.id.slice(0, 8)} · {new Date(r.createdAt).toLocaleString()}</Text>
+      <Text style={ui.text} translate={false}>{r.message}</Text><Text style={ui.small}>#{r.id.slice(0, 8)} · {formatUiDate(r.createdAt, language, { dateStyle: "medium", timeStyle: "short" })}</Text>
       {r.status === "open" && <View style={ui.row}><Button label="Edit" onPress={() => { setEditing(r.id); setIssueCategory(r.deviceDetails?.issueCategory || "learning"); setMessage(r.message); setAttachedImage(r.screenshot?.startsWith("data:image/") ? r.screenshot : null); setScreenshot(r.screenshot?.startsWith("data:image/") ? "" : r.screenshot || ""); }} />
         <Button label="Cancel request" danger disabled={action.busy} onPress={() => confirmAction("Cancel this request?", "The open support request will be deleted.", () => void action.run(async () => { await profileService.cancelRequest(r.id); if (editing === r.id) clear(); await resource.refresh(); }, "Request cancelled."))} /></View>}
     </Card>) : <Empty text="No support requests yet." />)}
   </Page>;
 }
 function Exports() {
+  const { language } = useAppLanguage();
   const resource = useResource(profileService.exports);
   const action = useAction();
   const download = async (id: string) => {
@@ -96,7 +100,7 @@ function Exports() {
     <Button primary label={action.busy ? "Please wait…" : "Request export"} disabled={action.busy} onPress={() => void action.run(async () => { await profileService.createExport(); await resource.refresh(); }, "Your data copy is ready.")} />
     <Heading>EXPORT REQUESTS</Heading>
     {!resource.loading && !resource.error && (resource.data?.length ? resource.data.map(e => <Card key={e.id}>
-      <Text style={{ color: "#20352B", fontWeight: "800" }}>Data copy · {new Date(e.createdAt).toLocaleDateString()}</Text>
+      <Text style={{ color: "#20352B", fontWeight: "800" }}>Data copy · {formatUiDate(e.createdAt, language, { dateStyle: "medium" })}</Text>
       <Text style={{ color: e.status === "ready" ? "#236c19" : "#A35B00", fontWeight: "700" }}>Status: {e.status}</Text>
       <Text style={ui.small}>#{e.id.slice(0, 8)}</Text>
       {e.status !== "ready" && <Text style={ui.error}>This export is currently unavailable. Refresh its status or request a new copy.</Text>}

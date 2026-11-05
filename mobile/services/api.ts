@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { getAccessToken } from "./session";
+import { translateApiError } from "../features/i18n/translations";
 
 const defaultHost =
   Platform.OS === "android" ? "http://10.0.2.2:4000" : "http://localhost:4000";
@@ -20,7 +21,7 @@ export class ApiError extends Error {
     readonly status?: number,
     readonly code?: string,
   ) {
-    super(message);
+    super(translateApiError(message, code));
     this.name = "ApiError";
   }
 }

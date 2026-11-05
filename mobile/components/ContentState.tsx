@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../features/i18n/i18n";
 
 type Props = { title: string; message: string; actionLabel?: string; onAction?: () => void };
 

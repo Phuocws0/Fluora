@@ -1,4 +1,5 @@
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { LocalizedText as Text } from "../features/i18n/i18n";
 
 export function SectionTitle({ children }: { children: string }) {
   return <Text style={styles.title}>{children}</Text>;

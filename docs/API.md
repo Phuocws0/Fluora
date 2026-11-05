@@ -68,7 +68,7 @@ Exports are marked ready immediately and assembled from current records when dow
 
 | Field | Type and rule | Default |
 | --- | --- | --- |
-| `appLanguage` | `"en"` only in this demo; unsupported translations return `400` | `"en"` |
+| `appLanguage` | `"en"` or `"vi"` (`"es"`, `"fr"`, and other codes are unsupported and return `400`) | `"en"` |
 | `courseLanguage` | language code or `null` | `null` |
 | `motivation`, `floCompanion` | slug `^[a-z0-9_-]{1,40}$` or `null`; option lists are owned by mobile | `null` |
 | `startingLevel` | `A1`–`C2` or `null` | `null` |
@@ -88,7 +88,7 @@ Exports are marked ready immediately and assembled from current records when dow
 
 An unknown field, a wrong type, or an empty body returns `400` and nothing is written. Onboarding answers collected before registration can be sent in one `PATCH` right after register or login. `discoverable` and `progressVisibility` control search, profiles, friends' progress, and the leaderboard; the notification and reminder fields control notifications (see League and community).
 
-Mobile preference behavior: `textSize` scales lesson/learning and reader text by 100%/120%/140%, retaining OS scaling. `captions` shows the listening transcript. Focus mode hides lesson navigation distractions; reduced motion disables preference-aware modal transitions and moving waveforms. The wellbeing reminder counts foreground time in the current app session, pauses in background, and offers a break/continue action; it is not a persisted countdown or push reminder. Unsupported interface-language choices are disabled in mobile; old stored non-English preferences remain readable with an availability notice.
+Mobile preference behavior: the interface supports English and Vietnamese, selected during onboarding or in Settings and stored in `appLanguage`; guests keep their choice on the device. Course, exercise, story, and user-authored content remains in its stored/learning language. `textSize` scales lesson/learning and reader text by 100%/120%/140%, retaining OS scaling. `captions` shows the listening transcript. Focus mode hides lesson navigation distractions; reduced motion disables preference-aware modal transitions and moving waveforms. The wellbeing reminder counts foreground time in the current app session, pauses in background, and offers a break/continue action; it is not a persisted countdown or push reminder.
 
 ## Learning content and progress
 

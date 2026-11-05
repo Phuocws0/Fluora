@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { router } from "expo-router";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 import { community } from "./community.service";
 import {
   ActionState,
@@ -17,6 +17,7 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { LocalizedTextInput as TextInput } from "../i18n/i18n";
 export default function GroupsScreen() {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -89,8 +90,8 @@ export default function GroupsScreen() {
           )}
           {r.data.groups.map((g) => (
             <Card key={g.id}>
-              <Heading>{g.name}</Heading>
-              <Copy>{g.goal}</Copy>
+              <Heading translate={false}>{g.name}</Heading>
+              <Copy translate={false}>{g.goal}</Copy>
               <Copy>
                 {g.memberCount} members · {g.visibility} ·{" "}
                 {g.myRole ?? "not joined"}

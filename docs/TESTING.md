@@ -29,7 +29,7 @@ The emulator corrective pass verified native CSV picking/import, recording contr
 
 ## Full-seed acceptance
 
-Run `npm run test:seed` with the local PostgreSQL server running and a role allowed to create databases. It builds the backend and creates a uniquely named disposable database, deploys all migrations, seeds twice, checks fixture counts and preservation of ordinary user settings/edited cards, then runs 136 HTTP assertions. It covers all 22 exercises/seven modes, idempotent XP, Home course advancement, all four sign-ins, CEFR persistence, unsupported-language validation, private-group/owner access, community pagination/CRUD, open/closed polls and rooms, wallet/quests, support/export, and Tutor fixtures. The test uses the local Tutor and deletes only its own temporary database. It does not reset the configured project DB or run in the existing DB-free CI job.
+Run `npm run test:seed` with the local PostgreSQL server running and a role allowed to create databases. It builds the backend and creates a uniquely named disposable database, deploys all migrations, seeds twice, checks fixture counts and preservation of ordinary user settings/edited cards, then runs the HTTP assertions. It covers all 22 exercises/seven modes, idempotent XP, Home course advancement, all four sign-ins, CEFR persistence, English/Vietnamese settings persistence and rejection of unsupported language codes, private-group/owner access, community pagination/CRUD, open/closed polls and rooms, wallet/quests, support/export, and Tutor fixtures. The test uses the local Tutor and deletes only its own temporary database. It does not reset the configured project DB or run in the existing DB-free CI job.
 
 `npm run test:unit` includes regressions for exact CEFR labels/values, completed Home, course advancement, text-size factors, foreground-only break timing and seed mode/ID consistency. The learning-preference Android checks and remaining hardware limits are recorded in the [functional/UX report](qa/2026-11-04-functional-ux-audit.md). Demo accounts and reproducible walkthrough: [DEMO.md](DEMO.md).
 
@@ -87,6 +87,8 @@ For implemented screens/flows, verify layout, navigation, major controls, loadin
 Do not treat each Figma frame as a route. Test route navigation and the contained UI states together.
 
 iOS verification is desirable but not mandatory for each local task unless the change involves iOS behavior.
+
+For interface-language changes, check English and Vietnamese from the welcome/onboarding selector and saved account setting. Visit authentication, Home, course/unit/lesson, Practice, Tutor, League, Profile, and Settings screens; verify buttons, placeholders, dialogs, accessibility labels, and long Vietnamese labels. Confirm that English learning prompts and learner-entered text remain unchanged, the saved preference survives app restart/login, and fixed actions or tab labels do not clip or overlap on a narrow Android screen.
 
 ## CRUD and design-gap checks
 

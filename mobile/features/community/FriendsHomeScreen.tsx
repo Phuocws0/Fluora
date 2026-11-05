@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { community } from "./community.service";
 import { Empty, ResourceState, SessionGate, useResource } from "../shared/feature-ui";
 import { font, garden, GardenSubtitle, Page } from "../profile/garden-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 export default function FriendsHomeScreen() {
   return <SessionGate feature="Friends">{() => <FriendsHome />}</SessionGate>;
@@ -25,9 +26,9 @@ function FriendsHome() {
           ? `Earned ${friend.progress.weeklyXp.toLocaleString()} XP this week`
           : "Learning alongside you";
       return <View key={friend.id} style={styles.friendRow}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{(friend.displayName ?? "L").trim().charAt(0).toLocaleUpperCase()}</Text></View>
+        <View style={styles.avatar}><Text style={styles.avatarText} translate={false}>{(friend.displayName ?? "L").trim().charAt(0).toLocaleUpperCase()}</Text></View>
         <View style={styles.friendCopy}>
-          <Text numberOfLines={1} style={styles.friendName}>{friend.displayName ?? "Learner"}</Text>
+          <Text numberOfLines={1} style={styles.friendName} translate={!friend.displayName}>{friend.displayName ?? "Learner"}</Text>
           <Text numberOfLines={1} style={styles.friendDetail}>{detail}</Text>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/community/users/[userId]", params: { userId: friend.id } })} style={styles.profileAction}>
             <Text style={styles.profileActionText}>View profile</Text>

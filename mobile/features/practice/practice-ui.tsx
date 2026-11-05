@@ -1,14 +1,15 @@
 import type { ReactNode, RefObject } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { font, garden, GardenButton, Page } from "../profile/garden-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../i18n/i18n";
 export { font, garden, GardenButton, GardenCard, GardenSubtitle, GardenCaption } from "../profile/garden-ui";
 export { ActionState, Button, Card, Copy, Editor, Empty, ResourceState, confirmAction, useAction, useResource, ui } from "../shared/feature-ui";
 export type { EditorSpec } from "../shared/feature-ui";
 
-export function PracticePage({ title, children, tab = false, action, scrollRef, onBack }: { title: string; children: ReactNode; tab?: boolean; action?: { label: string; onPress: () => void; disabled?: boolean }; scrollRef?: RefObject<ScrollView | null>; onBack?: () => void }) {
-  return <Page title={title} back={!tab} showFooter={!tab} activeTab="Practice" eyebrow="PRACTICE & EXPLORE" action={action} scrollRef={scrollRef} onBack={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn"))}>{children}</Page>;
+export function PracticePage({ title, children, tab = false, action, scrollRef, onBack, translateTitle = true }: { title: string; children: ReactNode; tab?: boolean; action?: { label: string; onPress: () => void; disabled?: boolean }; scrollRef?: RefObject<ScrollView | null>; onBack?: () => void; translateTitle?: boolean }) {
+  return <Page title={title} translateTitle={translateTitle} back={!tab} showFooter={!tab} activeTab="Practice" eyebrow="PRACTICE & EXPLORE" action={action} scrollRef={scrollRef} onBack={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn"))}>{children}</Page>;
 }
 export function PracticeGate({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated } = useAuth();
@@ -20,11 +21,11 @@ export function Section({ children }: { children: ReactNode }) { return <Text st
 export function Field({ label, value, onChange, multiline, maxLength, editable = true }: { label: string; value: string; onChange: (text: string) => void; multiline?: boolean; maxLength?: number; editable?: boolean }) {
   return <View style={{ marginVertical: 8 }}><Text style={s.label}>{label}</Text><TextInput accessibilityLabel={label} style={[s.input, multiline && { minHeight: 110, textAlignVertical: "top" }]} value={value} onChangeText={onChange} multiline={multiline} maxLength={maxLength} editable={editable} autoCapitalize="none" /></View>;
 }
-export function Choice({ value, options, onChange, disabled = false }: { value: string; options: Array<{ id: string; label: string }>; onChange: (id: string) => void; disabled?: boolean }) {
-  return <View style={s.wrap}>{options.map(option => <Pressable key={option.id} accessibilityRole="radio" accessibilityState={{ selected: option.id === value, disabled }} disabled={disabled} style={[s.chip, option.id === value && { backgroundColor: garden.mint, borderColor: garden.forest }]} onPress={() => onChange(option.id)}><Text style={s.label}>{option.label}</Text></Pressable>)}</View>;
+export function Choice({ value, options, onChange, disabled = false, translateOptions = true }: { value: string; options: Array<{ id: string; label: string; translate?: boolean }>; onChange: (id: string) => void; disabled?: boolean; translateOptions?: boolean }) {
+  return <View style={s.wrap}>{options.map(option => <Pressable key={option.id} accessibilityRole="radio" accessibilityState={{ selected: option.id === value, disabled }} disabled={disabled} style={[s.chip, option.id === value && { backgroundColor: garden.mint, borderColor: garden.forest }]} onPress={() => onChange(option.id)}><Text translate={option.translate ?? translateOptions} style={s.label}>{option.label}</Text></Pressable>)}</View>;
 }
-export function LinkCard({ title, detail, onPress, blue = false }: { title: string; detail?: string; onPress: () => void; blue?: boolean }) {
-  return <Pressable accessibilityRole="button" onPress={onPress} style={[s.linkCard, blue && { backgroundColor: garden.blue }]}><Text style={s.cardTitle}>{title}</Text>{detail && <Text style={s.caption}>{detail}</Text>}</Pressable>;
+export function LinkCard({ title, detail, onPress, blue = false, translateTitle = true, translateDetail = true }: { title: string; detail?: string; onPress: () => void; blue?: boolean; translateTitle?: boolean; translateDetail?: boolean }) {
+  return <Pressable accessibilityRole="button" onPress={onPress} style={[s.linkCard, blue && { backgroundColor: garden.blue }]}><Text translate={translateTitle} style={s.cardTitle}>{title}</Text>{detail && <Text translate={translateDetail} style={s.caption}>{detail}</Text>}</Pressable>;
 }
 export const s = StyleSheet.create({
   body: { color: garden.ink, fontFamily: font.body, fontSize: 16, lineHeight: 25, marginVertical: 8 },

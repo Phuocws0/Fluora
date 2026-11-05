@@ -1,10 +1,11 @@
 import { LearningText as Text } from "../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import { getMisconceptions, setMisconceptionDismissed } from "../activity.service";
 import type { MisconceptionItem } from "../../../types/learning";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 export function MisconceptionMapSection() {
   const [items, setItems] = useState<MisconceptionItem[]>([]);
@@ -117,7 +118,7 @@ export function MisconceptionMapSection() {
           {displayedItems.map((item) => (
             <View key={item.id} style={styles.patternCard}>
               <View style={styles.cardHeader}>
-                <Text style={styles.lessonMeta}>
+                <Text style={styles.lessonMeta} translate={false}>
                   {item.lesson.title} · {item.lesson.skill}
                 </Text>
                 <View style={styles.mistakeBadge}>
@@ -125,12 +126,12 @@ export function MisconceptionMapSection() {
                 </View>
               </View>
 
-              <Text style={styles.prompt}>{item.prompt}</Text>
+              <Text style={styles.prompt} translate={false}>{item.prompt}</Text>
 
               {item.explanation ? (
                 <View style={styles.explanationBox}>
                   <Text style={styles.explanationTitle}>KEY TAKEAWAY:</Text>
-                  <Text style={styles.explanationText}>{item.explanation}</Text>
+                  <Text style={styles.explanationText} translate={false}>{item.explanation}</Text>
                 </View>
               ) : null}
 

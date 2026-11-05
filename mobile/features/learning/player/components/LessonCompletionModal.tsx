@@ -1,8 +1,9 @@
 import { LearningText as Text } from "../../../../components/LearningText";
 import { PreferenceModal as Modal } from "../../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { LessonCompletionResult } from "../../../../types/learning";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   visible: boolean;
@@ -33,7 +34,7 @@ export function LessonCompletionModal({
           </View>
 
           <Text style={styles.title}>Lesson Complete!</Text>
-          <Text style={styles.subtitle}>{lessonTitle}</Text>
+          <Text style={styles.subtitle} translate={false}>{lessonTitle}</Text>
 
           <View style={styles.statBox}>
             <Text style={styles.statEyebrow}>XP REWARD</Text>

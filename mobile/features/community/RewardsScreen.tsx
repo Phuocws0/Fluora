@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { community } from "./community.service";
 import type { Reward } from "./community.types";
 import {
@@ -17,7 +17,9 @@ import {
   useResource,
 } from "../shared/feature-ui";
 import { font, garden, GardenSubtitle, Page as GardenPage } from "../profile/garden-ui";
+import { formatUiDate, LocalizedPressable as Pressable, LocalizedText as Text, useAppLanguage } from "../i18n/i18n";
 export default function RewardsScreen() {
+  const { language } = useAppLanguage();
   const r = useResource(
     useCallback(async () => {
       const [shop, history, wallet] = await Promise.all([
@@ -121,7 +123,7 @@ export default function RewardsScreen() {
               <Copy>
                 {t.amount > 0 ? "+" : ""}
                 {t.amount} · {t.reason} ·{" "}
-                {new Date(t.createdAt).toLocaleDateString()}
+                {formatUiDate(t.createdAt, language, { dateStyle: "medium" })}
               </Copy>
             </View>
           ))}

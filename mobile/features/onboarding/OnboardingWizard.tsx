@@ -1,11 +1,12 @@
 import { ONBOARDING_LEVELS as STARTING_LEVELS } from "./onboarding-levels";
 import { PreferenceModal as Modal } from "../../components/PreferenceModal";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
+import { useAppLanguage } from "../i18n/i18n";
 import { ApiError } from "../../services/api";
 import { getDeviceTimeZone } from "./onboarding.service";
 import { loadOnboardingDraft, saveOnboardingDraft } from "./onboarding.storage";
@@ -14,6 +15,7 @@ import type {
   PlacementAttemptResult,
 } from "./onboarding.types";
 import { PlacementTestModal } from "./PlacementTestModal";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../i18n/i18n";
 
 type StepNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -147,7 +149,8 @@ export function OnboardingWizard() {
   const insets = useSafeAreaInsets();
   const headerTopPadding = Math.max(0, 28 - Math.max(0, insets.top - 24));
   const router = useRouter();
-  const { isAuthenticated, completeOnboarding } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, completeOnboarding } = useAuth();
+  const { language, ready: languageReady, setLanguage } = useAppLanguage();
 
   const [step, setStep] = useState<StepNumber>(1);
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
@@ -156,9 +159,15 @@ export function OnboardingWizard() {
   const [customTimeInput, setCustomTimeInput] = useState("20:00");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const languageRef = useRef(language);
+
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
 
   // Load existing draft if present
   useEffect(() => {
+    if (!languageReady || authLoading) return;
     let isMounted = true;
     loadOnboardingDraft()
       .then((saved) => {
@@ -167,7 +176,7 @@ export function OnboardingWizard() {
           ...prev,
           ...saved,
           courseLanguage: saved.courseLanguage === "en" ? "en" : prev.courseLanguage,
-          appLanguage: "en",
+          appLanguage: languageRef.current,
           motivation: MOTIVATIONS.some((item) => item.id === saved.motivation)
             ? saved.motivation
             : prev.motivation,
@@ -196,7 +205,12 @@ export function OnboardingWizard() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [languageReady, authLoading]);
+
+  useEffect(() => {
+    if (!languageReady) return;
+    setDraft((previous) => ({ ...previous, appLanguage: language }));
+  }, [languageReady, language]);
 
   // Sync draft to persistent storage whenever it changes
   function updateDraft(updater: (prev: OnboardingDraft) => OnboardingDraft) {
@@ -360,9 +374,32 @@ export function OnboardingWizard() {
                 );
               })}
             </View>
-            <Text style={styles.appLanguageNote}>
-              App language: English (demo)
-            </Text>
+            <Text style={styles.appLanguageNote}>App language</Text>
+            <View style={styles.appLanguageChoices}>
+              {([
+                { value: "en", label: "English" },
+                { value: "vi", label: "Tiếng Việt" },
+              ] as const).map((option) => {
+                const selected = draft.appLanguage === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={option.value === "en" ? "English interface" : "Vietnamese interface"}
+                    onPress={() => {
+                      updateDraft((previous) => ({ ...previous, appLanguage: option.value }));
+                      setLanguage(option.value);
+                    }}
+                    style={[styles.appLanguageOption, selected && styles.appLanguageOptionSelected]}
+                  >
+                    <Text style={[styles.appLanguageOptionText, selected && styles.appLanguageOptionTextSelected]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         )}
 
@@ -934,7 +971,7 @@ export function OnboardingWizard() {
 
               <View style={styles.summaryPromiseBox}>
                 <Text style={styles.summaryPromiseLabel}>Pledge:</Text>
-                <Text style={styles.summaryPromiseText}>
+                <Text translate={false} style={styles.summaryPromiseText}>
                   "{draft.learningPromise}"
                 </Text>
               </View>
@@ -1176,6 +1213,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     marginTop: 16,
+  },
+  appLanguageChoices: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+  },
+  appLanguageOption: {
+    flex: 1,
+    minHeight: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#dee8d9",
+    backgroundColor: "#ffffff",
+  },
+  appLanguageOptionSelected: {
+    backgroundColor: "#eaf8de",
+    borderColor: "#236c19",
+  },
+  appLanguageOptionText: {
+    color: "#20352b",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  appLanguageOptionTextSelected: {
+    color: "#236c19",
   },
   sectionLabel: {
     fontFamily: "Nunito_700Bold",

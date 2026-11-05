@@ -117,7 +117,7 @@ The seven findings above describe the original audit state. A subsequent owner-a
 | Finding | Resolution |
 | --- | --- |
 | H1 | CEFR labels and values are identical A1–C2, shared with selection/summary; regression and API persistence checks cover all six. |
-| H2 | The demo explicitly supports English only; unsupported choices are disabled and API writes reject them atomically. Onboarding copy no longer promises Vietnamese. Existing legacy preferences remain readable with a notice. |
+| H2 | The 2026-11-04 pass explicitly limited the interface to English and rejected other language codes. On 2026-11-05, the owner requested Vietnamese UI; the app now supports English/Vietnamese and rejects unsupported codes. Curated course and exercise content stays in its learning language. |
 | H3 | Shared text wrappers apply 100%/120%/140% sizes to learning/lesson components and readers while retaining OS scaling. Home cards and labels wrap instead of truncating larger text. |
 | M1 | Focus hides lesson distractions; captions expose listening transcripts; modal/waveform behavior consumes reduced motion; a foreground-only break reminder consumes the configured interval. |
 | M2 | Home selects a course with unfinished lessons, then offers Practice/review after completion without awarding duplicate XP. |

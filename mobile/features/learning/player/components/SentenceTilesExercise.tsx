@@ -1,5 +1,6 @@
 import { LearningText as Text } from "../../../../components/LearningText";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   content: unknown;
@@ -71,7 +72,7 @@ export function SentenceTilesExercise({ content, tokens, onChange, disabled = fa
                 onPress={() => handleRemoveToken(index)}
                 style={styles.arrangedToken}
               >
-                <Text style={styles.arrangedTokenText}>{token}</Text>
+                <Text style={styles.arrangedTokenText} translate={false}>{token}</Text>
                 <Text style={styles.removeIcon}>×</Text>
               </Pressable>
             ))}
@@ -102,7 +103,7 @@ export function SentenceTilesExercise({ content, tokens, onChange, disabled = fa
                 disabled && styles.disabled,
               ]}
             >
-              <Text style={[styles.bankTileText, isUsed && styles.bankTileTextUsed]}>
+              <Text style={[styles.bankTileText, isUsed && styles.bankTileTextUsed]} translate={false}>
                 {tile}
               </Text>
             </Pressable>

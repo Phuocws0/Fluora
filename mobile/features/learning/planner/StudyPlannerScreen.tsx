@@ -4,7 +4,7 @@ import { PreferenceModal as Modal } from "../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ContentState } from "../../../components/ContentState";
@@ -16,6 +16,7 @@ import {
   updatePlannerEntry,
 } from "../activity.service";
 import type { PlannerEntry, PlannerInput } from "../../../types/learning";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 function getTodayString(): string {
   const now = new Date();
@@ -222,7 +223,7 @@ export function StudyPlannerScreen() {
                     <Text style={styles.entryDate}>{item.date}</Text>
                     <Text style={styles.entryTime}>at {item.time}</Text>
                   </View>
-                  <Text style={styles.entryTitle}>
+                  <Text style={styles.entryTitle} translate={!item.label}>
                     {item.label || "Language Study Session"}
                   </Text>
                   <Text style={styles.entryDuration}>

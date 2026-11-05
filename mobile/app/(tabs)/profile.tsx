@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { ResourceState, useResource } from "../../features/shared/feature-ui";
 import { getHomeSummary, getWeeklyLearningAnalytics } from "../../features/learning/activity.service";
 import { profileService } from "../../features/profile/service";
 import { font, GardenButton, ProfileAuthGate } from "../../features/profile/garden-ui";
 import { useAuth } from "../../features/auth/AuthContext";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../../features/i18n/i18n";
 
 const green = "#265E32";
 const ink = "#20352B";
@@ -38,7 +39,7 @@ function Home() {
     <View style={styles.eyebrowRow}>
       <Text style={styles.eyebrow}>YOUR PERSONAL SPACE</Text>
     </View>
-    <Text style={styles.profileName}>{learnerName}</Text>
+    <Text translate={!resource.data?.displayName && !user?.displayName} style={styles.profileName}>{learnerName}</Text>
     <Text style={styles.profileMeta}>{learningLanguage ? `Learning ${learningLanguage}` : "Your learning plan"}{learningLevel ? ` · ${learningLevel}` : ""}</Text>
     <ResourceState resource={resource} />
     <ResourceState resource={home} />
