@@ -4,7 +4,7 @@ Fluora is a mobile language-learning app intended for local demonstration. The p
 
 ## Stack
 
-- Mobile: React Native, Expo SDK 57, TypeScript
+- Mobile: Expo SDK 58, React Native 0.88.1, React 19.3, Expo Router 58, TypeScript
 - Backend: Node.js 24, Express 5, TypeScript, Prisma ORM 7
 - Database: PostgreSQL 17
 - Local runtime: Docker Compose for backend and PostgreSQL; Expo runs on the host
@@ -34,8 +34,8 @@ The mobile app connects learning, account/onboarding, profile/settings, Practice
 
 - Node.js 24 and npm
 - Docker with Docker Compose
-- An Android emulator or device for the mobile demo; Expo also provides iOS and web start commands
-- Native Android builds also need a JDK and Android SDK (Android Studio can manage these). The QA environment uses JDK 21, SDK platform/build-tools 36, and NDK `27.1.12297006`; Gradle installs missing licensed native build packages. Set `ANDROID_HOME` to your SDK directory and make `adb` available on `PATH`. Enable USB debugging for a device, or start an emulator with hardware acceleration.
+- An iPhone with Expo Go for SDK 58, or an Android emulator/device. Expo runs on the host; the phone needs network access to both Expo and the backend.
+- Native Android builds also need a JDK and Android SDK (Android Studio can manage these). The earlier Android QA build used JDK 21 and Android SDK 36. Any custom native project must be generated for the current SDK 58 dependencies; Gradle installs missing licensed native build packages. Set `ANDROID_HOME` to your SDK directory and make `adb` available on `PATH`. Enable USB debugging for a device, or start an emulator with hardware acceleration.
 
 ## Run locally
 
@@ -95,12 +95,14 @@ Mobile sign-in and registration use email and password; no Google OAuth configur
 
 ```sh
 cd mobile
-EXPO_PUBLIC_API_URL=http://<computer-LAN-IP>:4000 npx expo start --go --lan
+EXPO_PUBLIC_API_URL=http://<computer-LAN-IP>:4000 npx expo start --go --lan --clear
 ```
 
-Keep the iPhone and development computer on the same Wi-Fi network, then scan the displayed QR code with Expo Go. Verification and password-reset tokens appear in backend logs as described above.
+The project targets SDK 58 for the matching Expo Go client; see [Expo Go version compatibility](https://docs.expo.dev/troubleshooting/expo-go-version-mismatch/). Replace `<computer-LAN-IP>` with the computer's actual Wi-Fi address, without an `/api` suffix. Keep the iPhone and computer on the same Wi-Fi, allow local-network access for Expo Go, then scan the QR code using the iPhone Camera and open it in Expo Go. First open `http://<computer-LAN-IP>:4000/health` in Safari to confirm the backend is reachable. `localhost` and Android's `10.0.2.2` do not point to the computer from an iPhone. An Expo tunnel exposes Metro only; it does not expose the local backend. Verification and password-reset tokens appear in backend logs as described above.
 
-To build and start the native Android app or an iOS app on macOS:
+Expo Go does not require a native build. If you previously generated the ignored `mobile/android` or `mobile/ios` folders with an older SDK, regenerate them with `npx expo prebuild --clean` from `mobile/` before a custom native build. This replaces generated native folders; preserve any manual native changes first. A development client built for an older SDK cannot run the SDK 58 bundle.
+
+To build and start a custom native Android app or an iOS app on macOS:
 
 ```sh
 npm run android --workspace @fluora/mobile

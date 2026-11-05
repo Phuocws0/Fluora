@@ -56,7 +56,7 @@ export function DownloadsScreen() {
         <Button label="Remove" danger onPress={() => confirmAction("Remove download?", "This deletes only the local copy. Your account progress stays on the server.", () => void action.run(() => cancelDownload(owner, entry.id, true), "Local copy removed."))} />
       </View>
     </Card>)}
-    <Button label="Clear this account's local library" danger onPress={() => confirmAction("Clear local library and drafts?", "Downloaded content and device drafts for this account will be deleted.", () => void action.run(async () => eraseDownloads(owner), "Local library cleared."))} />
+    <Button label="Clear this account's local library" danger onPress={() => confirmAction("Clear local library and drafts?", "Downloaded content and device drafts for this account will be deleted.", () => void action.run(() => eraseDownloads(owner), "Local library cleared."))} />
     <Section>ADD A DOWNLOAD</Section>
     <View style={s.wrap}><Switch accessibilityLabel="Include available audio and images" value={includeMedia} onValueChange={setIncludeMedia} /><Text style={s.caption}>Include available media {!includeMedia ? "· Low bandwidth / text-first" : ""}</Text></View>
     <Text style={s.caption}>Current demo lessons are mostly text. Speech uses an installed device voice; download that voice in your device settings for offline playback. Offline practice does not award XP or submit answers.</Text>

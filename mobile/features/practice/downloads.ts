@@ -1,4 +1,5 @@
 import { File } from "expo-file-system";
+import { createDownloadResumable } from "expo-file-system/legacy";
 import { ApiError } from "../../services/api";
 import { getCourse, getLesson, getUnit } from "../learning/learning.service";
 import { practiceApi } from "./practice.service";
@@ -8,7 +9,7 @@ import type { DownloadEntry, DownloadKind, OfflinePackage } from "./offline.stor
 const states = new Map<string, DownloadEntry[]>(), initialized = new Map<string, Promise<void>>(), running = new Set<string>();
 const listeners = new Set<() => void>();
 const errors = new Map<string, string>();
-const activeTasks = new Map<string, { cancel: () => void }>();
+const activeTasks = new Map<string, { cancelAsync: () => Promise<void> }>();
 export function downloadError(owner: string) { return errors.get(owner) ?? null; }
 export function subscribeDownloads(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; }
 export function downloadSnapshot(owner: string) { return states.get(owner) ?? []; }
@@ -36,7 +37,7 @@ export async function cancelDownload(owner: string, id: string, remove = false) 
   await initializeDownloads(owner);
   if (remove) publish(owner, downloadSnapshot(owner).filter(e => e.id !== id));
   else update(owner, id, { status: "cancelled", error: null });
-  activeTasks.get(`${owner}:${id}`)?.cancel();
+  await activeTasks.get(`${owner}:${id}`)?.cancelAsync();
   removePackage(owner, id);
 }
 export async function retryDownload(owner: string, id: string) {
@@ -45,7 +46,12 @@ export async function retryDownload(owner: string, id: string) {
   if (!entry) throw new Error("Download not found.");
   await addDownload(owner, entry.kind, entry.targetId, entry.title, entry.includeMedia);
 }
-export function eraseDownloads(owner: string) { for (const [key, task] of activeTasks) if (key.startsWith(`${owner}:`)) task.cancel(); clearLibrary(owner); states.set(owner, []); initialized.delete(owner); errors.delete(owner); listeners.forEach(fn => fn()); }
+export async function eraseDownloads(owner: string) {
+  // Invalidate the queue before awaiting native cancellation.
+  publish(owner, []);
+  await Promise.all([...activeTasks].filter(([key]) => key.startsWith(`${owner}:`)).map(([, task]) => task.cancelAsync()));
+  clearLibrary(owner); states.set(owner, []); initialized.delete(owner); errors.delete(owner); listeners.forEach(fn => fn());
+}
 function mediaUrls(value: unknown, urls = new Set<string>()): Set<string> {
   if (Array.isArray(value)) value.forEach(v => mediaUrls(v, urls));
   else if (value && typeof value === "object") for (const [key, child] of Object.entries(value)) {
@@ -82,13 +88,21 @@ async function runDownloads(owner: string) {
         const urls = job.includeMedia ? [...mediaUrls(data)] : [];
         for (const [index, url] of urls.entries()) {
           const extension = new URL(url).pathname.match(/\.([a-zA-Z0-9]{1,5})$/)?.[1] ?? "bin";
-          const task = File.createDownloadTask(url, new File(packageDir(owner, job.id), `media-${index}.${extension}`), { onProgress: progress => {
-            if (valid()) update(owner, job.id, { bytes: mediaBytes + progress.bytesWritten, progress: 70 + Math.round((index + (progress.totalBytes > 0 ? progress.bytesWritten / progress.totalBytes : 0)) / urls.length * 25) });
-          } });
+          const file = new File(packageDir(owner, job.id), `media-${index}.${extension}`);
+          // The legacy entry point still provides transfer progress and cancellation.
+          const task = createDownloadResumable(url, file.uri, {}, progress => {
+            if (valid()) update(owner, job.id, { bytes: mediaBytes + progress.totalBytesWritten, progress: 70 + Math.round((index + (progress.totalBytesExpectedToWrite > 0 ? progress.totalBytesWritten / progress.totalBytesExpectedToWrite : 0)) / urls.length * 25) });
+          });
           activeTasks.set(`${owner}:${job.id}`, task);
-          let file: File | null;
-          try { file = await task.downloadAsync(); } finally { activeTasks.delete(`${owner}:${job.id}`); task.release(); }
-          if (!file) throw new Error("Download paused before completion. Tap Retry.");
+          try {
+            const result = await task.downloadAsync();
+            if (!result) throw new Error("Download paused before completion. Tap Retry.");
+            if (result.status < 200 || result.status >= 300) throw new Error(`Media download failed (HTTP ${result.status}). Tap Retry.`);
+          } finally {
+            activeTasks.delete(`${owner}:${job.id}`);
+            // Also removes the legacy progress listener after success or failure.
+            await task.cancelAsync();
+          }
           mediaBytes += file.size;
           data.media[url] = file.uri;
           if (!valid()) break;

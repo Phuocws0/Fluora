@@ -25,7 +25,7 @@ For the integrated demo (#24), migrate/seed the local runtime, then run `node sc
 
 For issue #11, after migrations and `npm run db:seed`, run `node --experimental-vm-modules scripts/practice-api-smoke.mjs` against the default `http://localhost:4000` (override with `FLUORA_API_URL`). It drives the actual mobile practice service, creates two disposable accounts, checks 56 API success/validation/ownership/history paths, and deletes the accounts in cleanup. Use a local demonstration database. Unit queue tests use a native-filesystem substitute and cannot establish physical-device correctness.
 
-The emulator corrective pass verified native CSV picking/import, recording controls, and cached cold start with the backend unavailable. Physical-device Practice acceptance must still include CSV/JSON file picking; deck/card/review/bookmark CRUD; invalid import rows excluded from submission; microphone permission/recording/playback and TTS; article/dialogue/tree modes and resume/reset; course/unit/lesson/story download, cancellation, removal, retry and process interruption; airplane-mode cold start and cached playback; text-only downloads with no network media request; pending reading sync after reconnect; and logout/second-account cache isolation. Rebuild the development client after native package changes. `expo-audio` and `expo-speech` must match Expo SDK 57. Follow the detailed checklist in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
+The emulator corrective pass verified native CSV picking/import, recording controls, and cached cold start with the backend unavailable. Physical-device Practice acceptance must still include CSV/JSON file picking; deck/card/review/bookmark CRUD; invalid import rows excluded from submission; microphone permission/recording/playback and TTS; article/dialogue/tree modes and resume/reset; course/unit/lesson/story download, cancellation, removal, retry and process interruption; airplane-mode cold start and cached playback; text-only downloads with no network media request; pending reading sync after reconnect; and logout/second-account cache isolation. Rebuild the development client after native package changes. `expo-audio` and `expo-speech` must match Expo SDK 58. Follow the detailed checklist in [PRACTICE_HANDOFF.md](PRACTICE_HANDOFF.md).
 
 ## Full-seed acceptance
 
@@ -34,6 +34,8 @@ Run `npm run test:seed` with the local PostgreSQL server running and a role allo
 `npm run test:unit` includes regressions for exact CEFR labels/values, completed Home, course advancement, text-size factors, foreground-only break timing and seed mode/ID consistency. The learning-preference Android checks and remaining hardware limits are recorded in the [functional/UX report](qa/2026-11-04-functional-ux-audit.md). Demo accounts and reproducible walkthrough: [DEMO.md](DEMO.md).
 
 ## Static verification
+
+After an Expo SDK change, run `npx expo install --check` and `npx expo-doctor` from `mobile/`, check for duplicate React/native modules, and export both Android and iOS bundles. Open the app in a matching Expo Go or rebuilt native client and exercise file picking, offline downloads/cancellation and microphone capture/playback. A successful iOS bundle export does not replace a real iPhone check.
 
 Where available, verify:
 

@@ -1,7 +1,7 @@
 import { LearningText } from "../../components/LearningText";
 import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
@@ -73,7 +73,7 @@ export function StoryReaderScreen() {
   return <Reader key={`${user?.id ?? "guest"}:${storyId}:${offline}`} id={storyId} forceOffline={offline === "1"} />;
 }
 function Reader({ id, forceOffline }: { id: string; forceOffline: boolean }) {
-  const scrollRef = useRef<ScrollView>(null), paragraphOffsets = useRef<Record<number, number>>({});
+  const scrollRef = useRef<ScrollViewInstance | null>(null), paragraphOffsets = useRef<Record<number, number>>({});
   const { user, settings } = useAuth(), action = useAction(), { speak, stop, isSpeaking } = useSpeechPrompt();
   const [mode, setMode] = useState("article"), [position, setPosition] = useState(0), [progressReady, setProgressReady] = useState(false), [pending, setPending] = useState<LocalProgress | null>(null), [progressError, setProgressError] = useState("");
   const [word, setWord] = useState<string | null>(null), [selections, setSelections] = useState<Record<number, string>>({}), [evidence, setEvidence] = useState<Record<number, string>>({});

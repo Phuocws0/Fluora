@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { File } from "expo-file-system";
+import { getDocumentAsync } from "expo-document-picker";
 import { practiceApi } from "./practice.service";
 import { parseImport } from "./import";
 import type { ImportMapping, ImportPreview, ImportRow } from "./practice.types";
@@ -22,12 +23,15 @@ export function ImportScreen() {
   const pick = () => void action.run(async () => {
     // Android document providers can label CSV as Excel or octet-stream. Let
     // the existing size/parser/preview validation decide what can be imported.
-    const result = await File.pickFileAsync({ mimeTypes: ["*/*"] });
+    // DocumentPicker preserves the real filename and copies provider/cloud files into readable cache.
+    const result = await getDocumentAsync({ type: "*/*", multiple: false, copyToCacheDirectory: true });
     if (result.canceled) return;
-    if (result.result.size > 1024 * 1024) throw new Error("Choose a vocabulary file up to 1 MB.");
-    const content = await result.result.text();
-    setText(content); setFilename(result.result.name); setRows([]); invalidate();
-  }, "File loaded. Parse it to map its columns.");
+    const selected = result.assets[0];
+    const file = new File(selected.uri);
+    if (file.size > 1024 * 1024) throw new Error("Choose a vocabulary file up to 1 MB.");
+    const content = await file.text();
+    setText(content); setFilename(selected.name); setRows([]); invalidate();
+  }, "");
   const check = () => void action.run(async () => {
     if (!mapping.front || !mapping.back) throw new Error("Map both Front and Back.");
     const p = await practiceApi.preview(filename, rows, mapping);

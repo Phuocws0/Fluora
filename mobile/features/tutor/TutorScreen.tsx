@@ -1,6 +1,6 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BackHandler, Image, Keyboard, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { BackHandler, Image, Keyboard, ScrollView, StyleSheet, Switch, View, type ScrollViewInstance } from "react-native";
 import { tutorApi } from "./tutor.service";
 import { createTutorPreview } from "./tutor.preview";
 import { useAuth } from "../auth/AuthContext";
@@ -93,7 +93,7 @@ function TutorWorkspace({
   preview: boolean;
   exit: () => void;
 }) {
-  const chatScrollRef = useRef<ScrollView | null>(null);
+  const chatScrollRef = useRef<ScrollViewInstance | null>(null);
   const messageFieldFocused = useRef(false);
   const [tab, setTab] = useState<"chat" | "history" | "notes">("chat");
   const [active, setActive] = useState<ChatDetail | null>(null);
