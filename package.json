@@ -8,6 +8,10 @@
   "engines": {
     "node": ">=24"
   },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
   "scripts": {
     "dev:mobile": "npm run start --workspace @fluora/mobile",
     "dev:backend": "npm run dev --workspace @fluora/backend",

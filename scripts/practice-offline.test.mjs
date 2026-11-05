@@ -33,8 +33,9 @@ test("reader parses article, dialogue, quote and challenge content without assum
   assert.equal(parseReading(null).paragraphs.length, 0);
 });
 
-async function offlineRuntime() {
+async function offlineRuntime({ holdMedia = false, mediaStatus = 200 } = {}) {
   const files = new Map(), directories = new Set();
+  const transfers = [];
   const path = (...segments) => segments.map(p => typeof p === "string" ? p : p.uri).join("/").replace(/\/{2,}/g, "/");
   class Directory {
     constructor(...segments) { this.uri = path(...segments); }
@@ -50,7 +51,21 @@ async function offlineRuntime() {
     write(value) { assert.ok(this.exists, "create a file before writing"); files.set(this.uri, value); }
     async text() { if (!this.exists) throw new Error("missing file"); return files.get(this.uri); }
     delete() { files.delete(this.uri); }
-    static createDownloadTask(_url, destination, options) { return { cancel() {}, release() {}, async downloadAsync() { destination.create(); destination.write("local-audio-data"); options?.onProgress?.({ bytesWritten: destination.size, totalBytes: destination.size }); return destination; } }; }
+  }
+  function createDownloadResumable(_url, uri, _options, onProgress) {
+    let finish;
+    const transfer = {
+      cancelled: false,
+      async cancelAsync() { this.cancelled = true; finish?.(undefined); },
+      async downloadAsync() {
+        const destination = new File(uri);
+        destination.create(); destination.write("local-audio-data");
+        onProgress({ totalBytesWritten: destination.size, totalBytesExpectedToWrite: destination.size });
+        return holdMedia ? new Promise(resolve => { finish = resolve; }) : { uri, status: mediaStatus };
+      },
+    };
+    transfers.push(transfer);
+    return transfer;
   }
   class ApiError extends Error { constructor(message, status) { super(message); this.status = status; } }
   let getLesson = async id => ({ id, title: id, exercises: [{ id: "exercise", type: "listening_choice", content: { audioUrl: "https://example.test/prompt.mp3" } }] });
@@ -69,6 +84,7 @@ async function offlineRuntime() {
     await module.link(async specifier => {
       if (specifier === "./offline.storage") return load("offline.storage");
       const exports = specifier === "expo-file-system" ? { File, Directory, Paths: { document: "/documents" } }
+        : specifier === "expo-file-system/legacy" ? { createDownloadResumable }
         : specifier.includes("learning.service") ? learning
         : specifier.includes("practice.service") ? { practiceApi: { story: async id => ({ id, title: "Story", kind: "article", content: { paragraphs: ["Saved story"] } }) } }
         : { ApiError };
@@ -78,7 +94,7 @@ async function offlineRuntime() {
   }
   const downloads = await load("downloads"); await downloads.evaluate();
   const storage = cache.get("offline.storage").namespace;
-  return { api: downloads.namespace, storage, files, setLesson: value => { getLesson = value; } };
+  return { api: downloads.namespace, storage, files, transfers, setLesson: value => { getLesson = value; } };
 }
 async function until(api, owner, predicate) {
   const current = () => api.downloadSnapshot(owner);
@@ -126,6 +142,26 @@ test("text-only downloads omit remote media so offline playback can use a local 
   const lesson = await api.offlineLesson("alice", "one");
   assert.equal(lesson.exercises[0].content.audioUrl, undefined);
 });
+test("media transfers report bytes and stop when cancelled or cleared", async () => {
+  const { api, files, transfers } = await offlineRuntime({ holdMedia: true });
+  for (const clear of [false, true]) {
+    await api.addDownload("alice", "lesson", "one", "Lesson", true);
+    await until(api, "alice", entries => entries[0]?.bytes > 0);
+    if (clear) await api.eraseDownloads("alice");
+    else await api.cancelDownload("alice", "lesson-one");
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(transfers.at(-1).cancelled, true);
+    assert.ok(![...files.keys()].some(key => key.includes("lesson-one/")));
+    assert.equal(api.downloadSnapshot("alice")[0]?.status, clear ? undefined : "cancelled");
+  }
+});
+test("media HTTP errors do not create a completed offline package", async () => {
+  const { api, files } = await offlineRuntime({ mediaStatus: 404 });
+  await api.addDownload("alice", "lesson", "one", "Lesson", true);
+  await until(api, "alice", entries => entries[0]?.status === "failed");
+  assert.match(api.downloadSnapshot("alice")[0].error, /HTTP 404/);
+  assert.ok(![...files.keys()].some(key => key.includes("lesson-one/")));
+});
 test("failed jobs can retry, interrupted jobs recover as failed, and corrupt libraries can be cleared", async () => {
   const { api, storage, files, setLesson } = await offlineRuntime();
   setLesson(async () => { throw new Error("Connection lost"); });
@@ -138,7 +174,7 @@ test("failed jobs can retry, interrupted jobs recover as failed, and corrupt lib
   await api.initializeDownloads("bob"); assert.equal(api.downloadSnapshot("bob")[0].status, "failed");
   files.set("/documents/fluora-offline/corrupt/manifest.json", "invalid-json");
   await assert.rejects(api.initializeDownloads("corrupt"));
-  api.eraseDownloads("corrupt"); await api.initializeDownloads("corrupt");
+  await api.eraseDownloads("corrupt"); await api.initializeDownloads("corrupt");
   assert.equal(api.downloadSnapshot("corrupt").length, 0);
   assert.equal(api.downloadSnapshot("alice")[0].status, "completed");
   await assert.rejects(api.initializeDownloads("../outside"), /Invalid local/);

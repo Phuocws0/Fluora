@@ -41,14 +41,14 @@ export default function TabLayout() {
         name="learn"
         options={{
           title: t("Learn"),
-          tabBarIcon: ({ color }) => <Ionicons name="home-outline" color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" color={typeof color === "string" ? color : MUTED} size={20} />,
         }}
       />
       <Tabs.Screen
         name="practice"
         options={{
           title: t("Practice"),
-          tabBarIcon: ({ color }) => <Ionicons name="book-outline" color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Ionicons name="book-outline" color={typeof color === "string" ? color : MUTED} size={20} />,
         }}
       />
       <Tabs.Screen
@@ -56,7 +56,7 @@ export default function TabLayout() {
         options={{
           title: t("Tutor"),
           tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubble-ellipses-outline" color={color} size={20} />
+            <Ionicons name="chatbubble-ellipses-outline" color={typeof color === "string" ? color : MUTED} size={20} />
           ),
         }}
       />
@@ -64,14 +64,14 @@ export default function TabLayout() {
         name="league"
         options={{
           title: t("League"),
-          tabBarIcon: ({ color }) => <Ionicons name="trophy-outline" color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Ionicons name="trophy-outline" color={typeof color === "string" ? color : MUTED} size={20} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t("Profile"),
-          tabBarIcon: ({ color }) => <Ionicons name="person-outline" color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Ionicons name="person-outline" color={typeof color === "string" ? color : MUTED} size={20} />,
         }}
       />
     </Tabs>

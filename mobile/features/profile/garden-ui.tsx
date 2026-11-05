@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { ReactNode, RefObject } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
 import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
@@ -66,7 +66,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
   action?: Action;
   showFooter?: boolean;
   activeTab?: GardenTab;
-  scrollRef?: RefObject<ScrollView | null>;
+  scrollRef?: RefObject<ScrollViewInstance | null>;
   translateTitle?: boolean;
 }) {
   const insets = useSafeAreaInsets();

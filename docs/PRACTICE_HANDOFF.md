@@ -42,7 +42,7 @@ The repeatable seed adds the Figma market article and café dialogue alongside t
 
 `npm run test:unit` includes CSV/reading, durable queue/media, cancellation/retry, interrupted/corrupt storage, account isolation, text-only fallback, and token-bound snapshot tests. Native FileSystem is substituted in unit tests. `scripts/practice-api-smoke.mjs` exercises the real mobile service against Express/PostgreSQL with two disposable accounts (56 HTTP checks, cleanup included).
 
-Before Android acceptance, rebuild the development client for the SDK 57 audio packages, migrate/seed the local backend, then verify:
+Before device acceptance, use Expo Go for SDK 58 or regenerate/rebuild a custom development client for the SDK 58 packages, migrate/seed the local backend, then verify:
 
 1. Create/edit/delete a deck/card/custom review item; schedule and recall an item; dismiss/restore a mistake without altering answer history.
 2. Pick a CSV/JSON on-device, map columns, inspect invalid rows, deselect a valid row, import and confirm only approved rows exist. Check cancel/error paths.

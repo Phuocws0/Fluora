@@ -358,7 +358,7 @@ function Security() {
       <ActionState action={action} />
       <Button label="Delete my account" danger disabled={action.busy || email.trim().toLowerCase() !== resource.data.email.toLowerCase()} onPress={() => confirmAction("Permanently delete account?", "Your account and personal data will be deleted. This cannot be undone.", () => void action.run(async () => {
         await profileService.deleteAccount(email.trim());
-        try { if (user) eraseDownloads(user.id); } catch {
+        try { if (user) await eraseDownloads(user.id); } catch {
           Alert.alert("Account deleted", "Some local download files could not be removed. Clear Fluora's app storage in your device settings to remove remaining files.");
         }
         // The deleted account returns 401 to logout; AuthContext still clears local state.

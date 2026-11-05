@@ -1,5 +1,5 @@
 import type { ReactNode, RefObject } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { font, garden, GardenButton, Page } from "../profile/garden-ui";
@@ -8,7 +8,7 @@ export { font, garden, GardenButton, GardenCard, GardenSubtitle, GardenCaption }
 export { ActionState, Button, Card, Copy, Editor, Empty, ResourceState, confirmAction, useAction, useResource, ui } from "../shared/feature-ui";
 export type { EditorSpec } from "../shared/feature-ui";
 
-export function PracticePage({ title, children, tab = false, action, scrollRef, onBack, translateTitle = true }: { title: string; children: ReactNode; tab?: boolean; action?: { label: string; onPress: () => void; disabled?: boolean }; scrollRef?: RefObject<ScrollView | null>; onBack?: () => void; translateTitle?: boolean }) {
+export function PracticePage({ title, children, tab = false, action, scrollRef, onBack, translateTitle = true }: { title: string; children: ReactNode; tab?: boolean; action?: { label: string; onPress: () => void; disabled?: boolean }; scrollRef?: RefObject<ScrollViewInstance | null>; onBack?: () => void; translateTitle?: boolean }) {
   return <Page title={title} translateTitle={translateTitle} back={!tab} showFooter={!tab} activeTab="Practice" eyebrow="PRACTICE & EXPLORE" action={action} scrollRef={scrollRef} onBack={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/learn"))}>{children}</Page>;
 }
 export function PracticeGate({ children }: { children: ReactNode }) {
