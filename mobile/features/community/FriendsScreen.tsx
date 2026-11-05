@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { router } from "expo-router";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 import { community } from "./community.service";
 import type { Person, Relationship } from "./community.types";
 import {
@@ -17,6 +17,7 @@ import {
   useAction,
   useResource,
 } from "../shared/feature-ui";
+import { LocalizedTextInput as TextInput } from "../i18n/i18n";
 export default function FriendsScreen() {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<
@@ -79,7 +80,7 @@ export default function FriendsScreen() {
           {!users.length && <Empty text="No discoverable learners matched." />}
           {users.map((u) => (
             <Card key={u.id}>
-              <Copy>
+              <Copy translate={false}>
                 {u.displayName ?? "Learner"} · {u.relationship}
               </Copy>
               <View style={ui.row}>
@@ -109,7 +110,7 @@ export default function FriendsScreen() {
           )}
           {r.data.requests.map((item) => (
             <Card key={item.id}>
-              <Copy>
+              <Copy translate={false}>
                 {item.user.displayName ?? "Learner"} · {item.direction} ·{" "}
                 {item.status}
               </Copy>
@@ -165,7 +166,7 @@ export default function FriendsScreen() {
           )}
           {r.data.friends.map((friend) => (
             <Card key={friend.id}>
-              <Copy>{friend.displayName ?? "Learner"}</Copy>
+              <Copy translate={!friend.displayName}>{friend.displayName ?? "Learner"}</Copy>
               <Copy>
                 {friend.progress
                   ? `${friend.progress.totalXp} XP · ${friend.progress.currentStreak} day streak`
@@ -210,8 +211,8 @@ export function FriendProfileScreen({ userId }: { userId: string }) {
       <ActionState action={a} />
       {u && (
         <>
-          <Heading>{u.displayName ?? "Learner"}</Heading>
-          <Copy>{u.bio ?? "No bio yet."}</Copy>
+          <Heading translate={!u.displayName}>{u.displayName ?? "Learner"}</Heading>
+          <Copy translate={!u.bio}>{u.bio ?? "No bio yet."}</Copy>
           <Copy>Connection: {u.relationship}</Copy>
           <Card>
             <Copy>

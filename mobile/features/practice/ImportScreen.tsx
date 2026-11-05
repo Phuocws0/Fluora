@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { File } from "expo-file-system";
 import { practiceApi } from "./practice.service";
 import { parseImport } from "./import";
 import type { ImportMapping, ImportPreview, ImportRow } from "./practice.types";
 import { ActionState, Button, Card, Choice, Field, GardenSubtitle, PracticePage, ResourceState, Section, s, useAction, useResource } from "./practice-ui";
+import { LocalizedText as Text } from "../i18n/i18n";
 
 export function ImportScreen() {
   const decks = useResource(practiceApi.decks), action = useAction();
@@ -55,15 +56,15 @@ export function ImportScreen() {
     <ResourceState resource={decks} />
     <Section>DESTINATION DECK</Section>
     {!decks.loading && !decks.data?.length && <Text style={s.error}>Create a deck from My vocabulary before importing.</Text>}
-    <Choice disabled={action.busy} value={destination || decks.data?.[0]?.id || ""} options={(decks.data ?? []).map(d => ({ id: d.id, label: d.name }))} onChange={setDestination} />
+    <Choice disabled={action.busy} value={destination || decks.data?.[0]?.id || ""} options={(decks.data ?? []).map(d => ({ id: d.id, label: d.name, translate: false }))} onChange={setDestination} />
     {!!rows.length && <><Section>FILE COLUMN → CARD FIELD</Section>
-      {(["front", "back", "tag", "example"] as const).map(field => <View key={field}><Text style={s.label}>{field.toUpperCase()}</Text><Choice disabled={action.busy} value={mapping[field] ?? ""} options={[...(field === "tag" || field === "example" ? [{ id: "", label: "Skip" }] : []), ...columns.map(c => ({ id: c, label: c }))]} onChange={v => { setMapping(m => { const next = { ...m }; if (!v && (field === "tag" || field === "example")) delete next[field]; else next[field] = v; return next; }); invalidate(); }} /></View>)}
+      {(["front", "back", "tag", "example"] as const).map(field => <View key={field}><Text style={s.label}>{field.toUpperCase()}</Text><Choice disabled={action.busy} value={mapping[field] ?? ""} options={[...(field === "tag" || field === "example" ? [{ id: "", label: "Skip" }] : []), ...columns.map(c => ({ id: c, label: c, translate: false }))]} onChange={v => { setMapping(m => { const next = { ...m }; if (!v && (field === "tag" || field === "example")) delete next[field]; else next[field] = v; return next; }); invalidate(); }} /></View>)}
       <Button label="Validate mapping & preview" disabled={action.busy} onPress={check} />
     </>}
     <ActionState action={action} />
     {preview && <><Section>{approved.length} APPROVED / {preview.validRows.length} VALID ROWS</Section>
       {preview.errors.map(error => <Text key={error.row} style={s.error}>Source row {error.row}: {error.message}</Text>)}
-      {preview.validRows.map((row, i) => <Card key={i}><Button disabled={action.busy} label={`${approved.includes(i) ? "✓ " : ""}${row.front} → ${row.back}`} onPress={() => setApproved(a => a.includes(i) ? a.filter(id => id !== i) : [...a, i])} /><Text style={s.caption}>{row.tag} {row.example}</Text></Card>)}
+      {preview.validRows.map((row, i) => <Card key={i}><Button translateLabel={false} disabled={action.busy} label={`${approved.includes(i) ? "✓ " : ""}${row.front} → ${row.back}`} onPress={() => setApproved(a => a.includes(i) ? a.filter(id => id !== i) : [...a, i])} /><Text style={s.caption} translate={false}>{row.tag} {row.example}</Text></Card>)}
     </>}
   </PracticePage>;
 }

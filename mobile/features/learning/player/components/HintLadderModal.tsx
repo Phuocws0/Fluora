@@ -2,9 +2,10 @@ import { LearningText as Text } from "../../../../components/LearningText";
 import { PreferenceModal as Modal } from "../../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { getExerciseHint } from "../../activity.service";
 import type { ExerciseHintResult } from "../../../../types/learning";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   visible: boolean;
@@ -62,7 +63,7 @@ export function HintLadderModal({ visible, exerciseId, onClose }: Props) {
             {hints.map((hint) => (
               <View key={hint.step} style={styles.hintCard}>
                 <Text style={styles.stepBadge}>STEP {hint.step} OF 3</Text>
-                <Text style={styles.hintText}>{hint.text}</Text>
+                <Text style={styles.hintText} translate={false}>{hint.text}</Text>
               </View>
             ))}
 

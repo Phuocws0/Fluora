@@ -1,6 +1,7 @@
 import { LearningText as Text } from "../../../../components/LearningText";
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   content: unknown;
@@ -120,7 +121,7 @@ export function MatchingExercise({ content, pairs, onChange, disabled = false }:
                     isSelected && styles.cardTextSelected,
                     isPaired && styleTheme && { color: styleTheme.text },
                   ]}
-                >
+                 translate={false}>
                   {item}
                 </Text>
                 {isPaired ? <Text style={styles.badgeText}>✓</Text> : null}
@@ -159,7 +160,7 @@ export function MatchingExercise({ content, pairs, onChange, disabled = false }:
                     styles.cardText,
                     isPaired && styleTheme && { color: styleTheme.text },
                   ]}
-                >
+                 translate={false}>
                   {item}
                 </Text>
                 {isPaired ? <Text style={styles.badgeText}>✓</Text> : null}

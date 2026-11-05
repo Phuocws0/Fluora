@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ContentState } from "./ContentState";
 import { ScreenContainer } from "./ScreenContainer";
+import { LocalizedText as Text } from "../features/i18n/i18n";
 
 export function DestinationPlaceholder({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
   return (

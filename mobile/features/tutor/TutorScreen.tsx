@@ -1,6 +1,6 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BackHandler, Image, Keyboard, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { BackHandler, Image, Keyboard, ScrollView, StyleSheet, Switch, View } from "react-native";
 import { tutorApi } from "./tutor.service";
 import { createTutorPreview } from "./tutor.preview";
 import { useAuth } from "../auth/AuthContext";
@@ -28,6 +28,7 @@ import {
   type EditorSpec,
 } from "../shared/feature-ui";
 import { font, garden, GardenSubtitle, Page } from "../profile/garden-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../i18n/i18n";
 
 export default function TutorScreen() {
   const { isAuthenticated } = useAuth();
@@ -348,7 +349,7 @@ function TutorWorkspace({
               {active ? (
                 <>
                   <Card>
-                    <Heading>{active.chat.title}</Heading>
+                    <Heading translate={false}>{active.chat.title}</Heading>
                     <View style={ui.row}>
                       <Copy>Save this conversation</Copy>
                       <Switch
@@ -441,13 +442,13 @@ function TutorWorkspace({
                       <Text style={ui.small}>
                         {m.role === "user" ? "YOU" : "FLO"}
                       </Text>
-                      <Copy>{m.content}</Copy>
+                      <Copy translate={false}>{m.content}</Copy>
                       {m.feedback && (
                         <>
                           <Heading>Feedback</Heading>
-                          <Copy>{m.feedback.summary}</Copy>
+                          <Copy translate={false}>{m.feedback.summary}</Copy>
                           {m.feedback.explanation && (
-                            <Copy>{m.feedback.explanation}</Copy>
+                            <Copy translate={false}>{m.feedback.explanation}</Copy>
                           )}
                           {m.feedback.hints
                             ?.slice(0, hintSteps[m.id] ?? 0)
@@ -549,7 +550,7 @@ function TutorWorkspace({
                           ? "Role-play complete ✓"
                           : "Your next turn"}
                       </Heading>
-                      <Copy>{active.chat.nextTurn.prompt}</Copy>
+                      <Copy translate={false}>{active.chat.nextTurn.prompt}</Copy>
                       {active.chat.nextTurn.choices.map((choice) => (
                         <Button
                           key={choice.id}
@@ -678,7 +679,7 @@ function TutorWorkspace({
               )}
               {r.data.chats.map((c) => (
                 <Card key={c.id}>
-                  <Heading>{c.title}</Heading>
+                  <Heading translate={false}>{c.title}</Heading>
                   <View style={ui.row}>
                     <Button
                       label="Open"
@@ -746,9 +747,9 @@ function TutorWorkspace({
               )}
               {r.data.notes.map((n) => (
                 <Card key={n.id}>
-                  <Heading>{n.phrase}</Heading>
-                  <Copy>{n.pattern}</Copy>
-                  <Copy>{n.personalExample || "No personal example yet."}</Copy>
+                  <Heading translate={false}>{n.phrase}</Heading>
+                  <Copy translate={false}>{n.pattern}</Copy>
+                  <Copy translate={!n.personalExample}>{n.personalExample || "No personal example yet."}</Copy>
                   <View style={ui.row}>
                     <Button
                       label="Edit"

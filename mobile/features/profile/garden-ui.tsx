@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { ReactNode, RefObject } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../auth/AuthContext";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 export const garden = {
   ink: "#20352B",
@@ -56,7 +57,7 @@ export function GardenFooter({ activeTab }: { activeTab: GardenTab }) {
   </View>;
 }
 
-export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action, showFooter = true, activeTab = "Profile", scrollRef }: {
+export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PERSONAL SPACE", action, showFooter = true, activeTab = "Profile", scrollRef, translateTitle = true }: {
   title: string;
   children: ReactNode;
   back?: boolean;
@@ -66,6 +67,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
   showFooter?: boolean;
   activeTab?: GardenTab;
   scrollRef?: RefObject<ScrollView | null>;
+  translateTitle?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const topPadding = Math.max(0, 24 - Math.max(0, insets.top - 24));
@@ -77,7 +79,7 @@ export function Page({ title, children, back = true, onBack, eyebrow = "YOUR PER
           {back && <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack ?? (() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile"))}><Text style={styles.back}>‹</Text></Pressable>}
           <Text style={styles.eyebrow}>{eyebrow}</Text>
         </View>
-        <Text style={styles.title}>{title}</Text>
+        <Text translate={translateTitle} style={styles.title}>{title}</Text>
         {children}
       </ScrollView>
       {action && <View style={[styles.action, !showFooter && styles.actionAboveExternalTabs]}><GardenButton {...action} /></View>}
@@ -94,8 +96,8 @@ export function GardenCaption({ children }: { children: ReactNode }) {
   return <Text style={styles.caption}>{children}</Text>;
 }
 
-export function GardenSubtitle({ children, numberOfLines, compact = false }: { children: ReactNode; numberOfLines?: number; compact?: boolean }) {
-  return <Text numberOfLines={numberOfLines} style={[styles.subtitle, compact && styles.subtitleCompact]}>{children}</Text>;
+export function GardenSubtitle({ children, numberOfLines, compact = false, translate = true }: { children: ReactNode; numberOfLines?: number; compact?: boolean; translate?: boolean }) {
+  return <Text translate={translate} numberOfLines={numberOfLines} style={[styles.subtitle, compact && styles.subtitleCompact]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,6 @@
 import { PreferenceModal as Modal } from "../../components/PreferenceModal";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
@@ -13,6 +13,7 @@ import type {
   PlacementQuestion,
   SkillScore,
 } from "./onboarding.types";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 export type PlacementTestModalProps = {
   visible: boolean;
@@ -422,7 +423,7 @@ export function PlacementTestModal({
 
             {/* Question Prompt */}
             <View style={styles.promptCard}>
-              <Text style={styles.promptText}>{currentQuestion.prompt}</Text>
+              <Text style={styles.promptText} translate={false}>{currentQuestion.prompt}</Text>
             </View>
 
             {/* Options */}
@@ -465,7 +466,7 @@ export function PlacementTestModal({
                         styles.optionLabel,
                         isSelected && styles.optionLabelSelected,
                       ]}
-                    >
+                     translate={false}>
                       {option.label}
                     </Text>
 

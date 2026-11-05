@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { community } from "./community.service";
 import {
   ActionState,
@@ -15,12 +15,14 @@ import {
   useResource,
 } from "../shared/feature-ui";
 import { font, garden, GardenCard, Page } from "../profile/garden-ui";
+import { formatUiDate, LocalizedPressable as Pressable, LocalizedText as Text, useAppLanguage } from "../i18n/i18n";
 
 export default function LeagueScreen() {
   return <SessionGate>{() => <LeagueHome />}</SessionGate>;
 }
 
 function LeagueHome() {
+  const { language } = useAppLanguage();
   const [scope, setScope] = useState<"league" | "friends">("league");
   const [detailsVisible, setDetailsVisible] = useState(false);
   const action = useAction();
@@ -93,7 +95,7 @@ function LeagueHome() {
         {d.achievements.map((achievement) => <Card key={achievement.id}>
           <Copy>{achievement.earned ? "🏅" : "🌱"} {achievement.title}</Copy>
           <Copy>{achievement.description}</Copy>
-          <Text style={styles.achievementMeta}>{achievement.progress}/{achievement.target}{achievement.earnedAt ? ` · Earned ${new Date(achievement.earnedAt).toLocaleDateString()}` : ""}</Text>
+          <Text style={styles.achievementMeta}>{achievement.progress}/{achievement.target}{achievement.earnedAt ? ` · Earned ${formatUiDate(achievement.earnedAt, language, { dateStyle: "medium" })}` : ""}</Text>
         </Card>)}
 
       </View>}

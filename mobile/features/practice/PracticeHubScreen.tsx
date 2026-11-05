@@ -1,10 +1,11 @@
 import { useCallback } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { practiceApi } from "./practice.service";
 import { Button, GardenCard, GardenSubtitle, LinkCard, PracticePage, ResourceState, Section, s, useResource } from "./practice-ui";
 import { font, garden } from "../profile/garden-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 const practiceModes = [
   { title: "Listen", id: "listening", detail: "3 min", blue: false },

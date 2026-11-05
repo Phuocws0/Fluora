@@ -96,8 +96,12 @@ try {
   const unaccentedCafeSearch = await call(null, "GET", "/api/lessons/search?query=cafe");
   assert(unaccentedCafeSearch.lessons.some((lesson) => lesson.title === "Ordering at a café"), "Unaccented search should match accented lesson titles");
   assert.equal((await db.query(`SELECT count(*) FROM reward_redemptions rr JOIN rewards r ON r.id=rr."rewardId" WHERE rr.status IN ('pending','cancelled') AND r.fulfillment <> 'deferred'`)).rows[0].count, "0");
-  await call(an, "PATCH", "/api/users/me/settings", { appLanguage: "vi", dailyGoalMinutes: 40 }, 400);
-  assert.equal((await call(an, "GET", "/api/users/me/settings")).settings.dailyGoalMinutes, 10);
+  const vietnameseSettings = await call(an, "PATCH", "/api/users/me/settings", { appLanguage: "vi", dailyGoalMinutes: 40 });
+  assert.equal(vietnameseSettings.settings.appLanguage, "vi");
+  assert.equal(vietnameseSettings.settings.dailyGoalMinutes, 40);
+  await call(an, "PATCH", "/api/users/me/settings", { appLanguage: "es" }, 400);
+  assert.equal((await call(an, "GET", "/api/users/me/settings")).settings.appLanguage, "vi");
+  assert.equal((await call(an, "GET", "/api/users/me/settings")).settings.dailyGoalMinutes, 40);
   for (const level of ["A1", "A2", "B1", "B2", "C1", "C2"]) assert.equal((await call(accounts.new, "PATCH", "/api/users/me/settings", { startingLevel: level })).settings.startingLevel, level);
   for (const path of ["/api/courses", "/api/learning-paths", "/api/stories", "/api/practice", "/api/analytics/weekly", "/api/learning/skill-baseline", "/api/learning/evidence", "/api/missions/passport", "/api/learning/misconceptions", "/api/achievements", "/api/quests", "/api/leagues/current"]) await call(an, "GET", path);
   const { quests } = await call(an, "GET", "/api/quests"); assert(quests.every(q => q.status === "claimed"));

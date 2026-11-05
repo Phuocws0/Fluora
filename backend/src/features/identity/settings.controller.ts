@@ -77,7 +77,9 @@ function readSettingsUpdate(body: JsonBody): settings.SettingsUpdate {
 
   const appLanguage = readNullablePattern(body, "appLanguage", LANGUAGE, "a language code such as en or vi");
   if (appLanguage === null) throw validationError("appLanguage cannot be null.");
-  if (appLanguage !== undefined && appLanguage !== "en") throw validationError("The demo interface currently supports English (en) only.");
+  if (appLanguage !== undefined && appLanguage !== "en" && appLanguage !== "vi") {
+    throw validationError("The demo interface supports English (en) and Vietnamese (vi).");
+  }
   const fields: settings.SettingsUpdate = {
     appLanguage,
     courseLanguage: readNullablePattern(body, "courseLanguage", LANGUAGE, "a language code such as en or vi"),

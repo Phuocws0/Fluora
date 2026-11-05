@@ -20,7 +20,9 @@ import {
   type EditorSpec,
 } from "../shared/feature-ui";
 import type { Challenge, Group } from "./community.types";
+import { formatUiDate, LocalizedText as Text, useAppLanguage } from "../i18n/i18n";
 export default function GroupScreen({ groupId }: { groupId: string }) {
+  const { language } = useAppLanguage();
   const [editor, setEditor] = useState<EditorSpec | null>(null);
   const a = useAction();
   const r = useResource(
@@ -136,17 +138,17 @@ export default function GroupScreen({ groupId }: { groupId: string }) {
       },
     });
   return (
-    <Page title={g?.name ?? "Study group"} back>
+    <Page title={g?.name ?? "Study group"} translateTitle={!g?.name} back>
       <ResourceState resource={r} />
       <ActionState action={a} />
       {g && (
         <>
-          <Copy>{g.goal}</Copy>
+          <Copy translate={false}>{g.goal}</Copy>
           <Copy>
             {g.topic} · {g.memberCount} members · {g.visibility}
           </Copy>
           {g.meetupAt && (
-            <Copy>Meetup: {new Date(g.meetupAt).toLocaleString()}</Copy>
+            <Copy>Meetup: {formatUiDate(g.meetupAt, language, { dateStyle: "medium", timeStyle: "short" })}</Copy>
           )}
           {g.meetupNote && <Copy>{g.meetupNote}</Copy>}
           <View style={ui.row}>
@@ -262,13 +264,13 @@ export default function GroupScreen({ groupId }: { groupId: string }) {
               <Heading>Group challenge</Heading>
               {c ? (
                 <Card>
-                  <Heading>{c.title}</Heading>
+                  <Heading translate={false}>{c.title}</Heading>
                   <Copy>
                     {c.status} · {c.groupProgress}/{c.target} {c.metric}
                   </Copy>
                   <Copy>
-                    {new Date(c.startsAt).toLocaleString()} →{" "}
-                    {new Date(c.endsAt).toLocaleString()}
+                    {formatUiDate(c.startsAt, language, { dateStyle: "medium", timeStyle: "short" })} →{" "}
+                    {formatUiDate(c.endsAt, language, { dateStyle: "medium", timeStyle: "short" })}
                   </Copy>
                   <Copy>Your progress: {c.myProgress ?? "not joined"}</Copy>
                   {c.participants.map((p) => (
@@ -344,10 +346,10 @@ export default function GroupScreen({ groupId }: { groupId: string }) {
               {!g.rooms?.length && <Empty />}
               {g.rooms?.map((room) => (
                 <Card key={room.id}>
-                  <Copy>
-                    {room.name} · {room.closedAt ? "Closed" : "Open"}
+                  <Copy translate={false}>
+                    {room.name} · <Text>{room.closedAt ? "Closed" : "Open"}</Text>
                   </Copy>
-                  <Copy>{room.focus}</Copy>
+                  <Copy translate={false}>{room.focus}</Copy>
                   <Button
                     label="Open room"
                     onPress={() =>

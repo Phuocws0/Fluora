@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 
 export type Learner = { id: string; email: string; displayName: string | null; bio: string | null; avatarUrl: string | null; hasPassword: boolean };
 export type Settings = {
-  appLanguage: string;
+  appLanguage: "en" | "vi";
   reminderEnabled: boolean;
   reminderTime: string | null;
   notifyFriendRequests: boolean;

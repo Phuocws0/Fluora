@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../features/i18n/i18n";
 
 type Props = {
   title: string;
@@ -7,9 +8,10 @@ type Props = {
   detail?: string;
   onPress: () => void;
   highlighted?: boolean;
+  translateContent?: boolean;
 };
 
-export function LearningCard({ title, subtitle, description, detail, onPress, highlighted = false }: Props) {
+export function LearningCard({ title, subtitle, description, detail, onPress, highlighted = false, translateContent = true }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -17,9 +19,9 @@ export function LearningCard({ title, subtitle, description, detail, onPress, hi
       style={[styles.card, highlighted && styles.highlighted]}
     >
       <View style={styles.copy}>
-        <Text style={styles.eyebrow}>{subtitle.toLocaleUpperCase()}</Text>
-        <Text style={styles.title}>{title}</Text>
-        {description ? <Text style={styles.description}>{description}</Text> : null}
+        <Text translate={translateContent} style={styles.eyebrow}>{subtitle.toLocaleUpperCase()}</Text>
+        <Text translate={translateContent} style={styles.title}>{title}</Text>
+        {description ? <Text translate={translateContent} style={styles.description}>{description}</Text> : null}
         {detail ? <Text style={styles.detail}>{detail}</Text> : null}
       </View>
       <Text accessibilityElementsHidden style={styles.arrow}>›</Text>

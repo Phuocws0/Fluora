@@ -1,10 +1,11 @@
 import { LearningText as Text } from "../../../../components/LearningText";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSpeechPrompt } from "../../audio/useSpeechPrompt";
 import { WaveformVisualizer } from "../../components/WaveformVisualizer";
 import { useAuth } from "../../../auth/AuthContext";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   promptText: string;

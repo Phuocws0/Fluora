@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 import { community, postFeed } from "./community.service";
 import {
   ActionState,
@@ -17,6 +17,7 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { LocalizedTextInput as TextInput } from "../i18n/i18n";
 export default function PeerReviewScreen() {
   const [submissionId, setSubmissionId] = useState<string | undefined>();
   const [body, setBody] = useState("");
@@ -38,11 +39,11 @@ export default function PeerReviewScreen() {
       <ActionState action={a} />
       {s && (
         <>
-          <Heading>{s.title}</Heading>
-          <Copy>{s.authorLabel}</Copy>
+          <Heading translate={false}>{s.title}</Heading>
+          <Copy translate={false}>{s.authorLabel}</Copy>
           <Card>
-            <Copy>{s.prompt}</Copy>
-            <Copy>{s.body}</Copy>
+            <Copy translate={false}>{s.prompt}</Copy>
+            <Copy translate={false}>{s.body}</Copy>
           </Card>
           <Copy>{r.data?.remaining} samples still need your feedback.</Copy>
           <View style={ui.row}>
@@ -85,8 +86,8 @@ export default function PeerReviewScreen() {
           {!s.comments.length && <Empty />}
           {s.comments.map((c) => (
             <Card key={c.id}>
-              <Copy>{c.author.displayName ?? "Learner"}</Copy>
-              <Copy>{c.body}</Copy>
+              <Copy translate={!c.author.displayName}>{c.author.displayName ?? "Learner"}</Copy>
+              <Copy translate={false}>{c.body}</Copy>
               <View style={ui.row}>
                 {c.canEdit && (
                   <Button

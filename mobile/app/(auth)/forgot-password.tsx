@@ -1,18 +1,11 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import { forgotPassword } from "../../services/auth";
 import { ScreenContainer } from "../../components/ScreenContainer";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../../features/i18n/i18n";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();

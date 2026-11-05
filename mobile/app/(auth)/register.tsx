@@ -1,18 +1,12 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApiError } from "../../services/api";
 import { useAuth } from "../../features/auth/AuthContext";
 import { loadOnboardingDraft } from "../../features/onboarding/onboarding.storage";
 import { ScreenContainer } from "../../components/ScreenContainer";
+import { LocalizedPressable as Pressable, LocalizedText as Text, LocalizedTextInput as TextInput } from "../../features/i18n/i18n";
 
 export default function RegisterScreen() {
   const router = useRouter();

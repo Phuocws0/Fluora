@@ -3,7 +3,7 @@ import { LearningTextInput as TextInput } from "../../../components/LearningText
 import { PreferenceModal as Modal } from "../../../components/PreferenceModal";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { ContentState } from "../../../components/ContentState";
 import {
   createEvidence,
@@ -12,6 +12,7 @@ import {
   updateEvidence,
 } from "../activity.service";
 import type { CanDoGoal, EvidenceInput, LearningEvidence } from "../../../types/learning";
+import { LocalizedAlert as Alert, LocalizedPressable as Pressable } from "../../i18n/i18n";
 
 export function CanDoEvidenceSection() {
   const [goals, setGoals] = useState<CanDoGoal[]>([]);
@@ -171,8 +172,8 @@ export function CanDoEvidenceSection() {
                 </Pressable>
               </View>
 
-              <Text style={styles.goalTitle}>{goal.title}</Text>
-              <Text style={styles.goalDesc}>{goal.description}</Text>
+              <Text style={styles.goalTitle} translate={false}>{goal.title}</Text>
+              <Text style={styles.goalDesc} translate={false}>{goal.description}</Text>
 
               {sampleCount > 0 ? (
                 <View style={styles.samplesArea}>
@@ -183,7 +184,7 @@ export function CanDoEvidenceSection() {
                         <Text style={styles.evidenceKind}>
                           {ev.kind.replace(/_/g, " ").toLocaleUpperCase()}
                         </Text>
-                        <Text style={styles.evidenceSummary}>{ev.summary}</Text>
+                        <Text style={styles.evidenceSummary} translate={false}>{ev.summary}</Text>
                         {ev.reference ? (
                           <Text style={styles.evidenceRef}>Ref: {ev.reference}</Text>
                         ) : null}

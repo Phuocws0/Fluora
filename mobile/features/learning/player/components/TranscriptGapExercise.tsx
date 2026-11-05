@@ -26,7 +26,7 @@ export function TranscriptGapExercise({ content, mode = "transcript_gap", text, 
       {transcript && mode === "transcript_gap" ? (
         <View style={styles.transcriptCard}>
           <Text style={styles.transcriptEyebrow}>LISTEN & FILL THE GAP:</Text>
-          <Text style={styles.transcriptText}>{transcript}</Text>
+          <Text style={styles.transcriptText} translate={false}>{transcript}</Text>
         </View>
       ) : null}
 

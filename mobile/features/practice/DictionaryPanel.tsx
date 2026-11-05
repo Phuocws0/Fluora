@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Text } from "react-native";
+
 import { router } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { useSpeechPrompt } from "../learning/audio/useSpeechPrompt";
 import { practiceApi } from "./practice.service";
 import type { DictionaryEntry } from "./practice.types";
 import { ActionState, Button, Card, Field, GardenSubtitle, PracticePage, s, useAction } from "./practice-ui";
+import { LocalizedText as Text } from "../i18n/i18n";
 
 export function DictionaryPanel({ initialWord = "" }: { initialWord?: string }) {
   const { isAuthenticated } = useAuth();
@@ -24,7 +25,7 @@ export function DictionaryPanel({ initialWord = "" }: { initialWord?: string }) 
     <Button label="Look up word" disabled={action.busy} onPress={lookup} />
     <Text style={s.caption}>The local demo dictionary currently includes hello, morning and name. Other words may return no result.</Text>
     <ActionState action={action} />
-    {entry && <Card><Text style={s.cardTitle}>{entry.word}</Text><Text style={s.body}>{entry.definition}</Text><Text style={s.caption}>{entry.example}</Text><Button label="Listen" onPress={() => speak(entry.word)} />
+    {entry && <Card><Text style={s.cardTitle} translate={false}>{entry.word}</Text><Text style={s.body} translate={false}>{entry.definition}</Text><Text style={s.caption} translate={false}>{entry.example}</Text><Button label="Listen" onPress={() => speak(entry.word)} />
       <Button label={bookmarkId ? "Remove saved word" : "Save word"} disabled={action.busy} onPress={() => void action.run(async () => {
         if (bookmarkId) { await practiceApi.removeBookmark(bookmarkId); setBookmarkId(null); }
         else { const r = await practiceApi.bookmark("word", entry.word); setBookmarkId(r.bookmark.id); }

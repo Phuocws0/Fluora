@@ -1,6 +1,7 @@
 import { LearningText as Text } from "../../../../components/LearningText";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { font, garden } from "../../../profile/garden-ui";
+import { LocalizedPressable as Pressable } from "../../../i18n/i18n";
 
 type Props = {
   options: Array<{ id: string; label: string; value: string; order: number }>;
@@ -25,7 +26,7 @@ export function ChoiceExercise({ options, selectedOptionId, onSelect, disabled =
             onPress={() => onSelect(option.id)}
             style={[styles.optionCard, isSelected && styles.optionCardSelected, disabled && styles.disabled]}
           >
-            <Text style={styles.label}>{option.label}</Text>
+            <Text style={styles.label} translate={false}>{option.label}</Text>
           </Pressable>
         );
       })}

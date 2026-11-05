@@ -1,6 +1,6 @@
 import { LearningText as Text } from "../../components/LearningText";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Image, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, View, useWindowDimensions } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { LearningCard } from "../../components/LearningCard";
 import { ScreenContainer } from "../../components/ScreenContainer";
@@ -8,6 +8,7 @@ import { SectionTitle } from "../../components/SectionTitle";
 import { font, garden, GardenSubtitle, Page } from "../profile/garden-ui";
 import { getCourse, getLesson, getUnit } from "./learning.service";
 import { useLearningResource } from "./useLearningResource";
+import { LocalizedPressable as Pressable } from "../i18n/i18n";
 
 function DetailHeader({ eyebrow, title, description }: { eyebrow: string; title: string; description?: string | null }) {
   const router = useRouter();
@@ -17,8 +18,8 @@ function DetailHeader({ eyebrow, title, description }: { eyebrow: string; title:
         <Text style={styles.backText}>‹  Back</Text>
       </Pressable>
       <Text style={styles.eyebrow}>{eyebrow.toLocaleUpperCase()}</Text>
-      <Text style={styles.title}>{title}</Text>
-      {description ? <Text style={styles.description}>{description}</Text> : null}
+      <Text style={styles.title} translate={false}>{title}</Text>
+      {description ? <Text style={styles.description} translate={false}>{description}</Text> : null}
     </>
   );
 }
@@ -42,15 +43,15 @@ export function CourseScreen() {
   const { data: course, loading, error, refresh } = useLearningResource(courseId, getCourse);
 
   const lessonCount = course?.units.reduce((count, unit) => count + unit.lessons.length, 0) ?? 0;
-  return <Page title={course?.title ?? "Course"} eyebrow="LEARN EVERY DAY" activeTab="Learn"
+  return <Page title={course?.title ?? "Course"} translateTitle={!course} eyebrow="LEARN EVERY DAY" activeTab="Learn"
     action={course ? { label: "Explore units", onPress: () => router.push({ pathname: "/course/[courseId]/units", params: { courseId: course.id } }) } : undefined}>
     <ResourceStatus loading={loading} error={error} refresh={() => void refresh()} />
     {course ? <>
-      <View style={styles.courseSubtitleGap}><GardenSubtitle compact numberOfLines={2}>{course.description || "From your first hello to confident conversations."}</GardenSubtitle></View>
+      <View style={styles.courseSubtitleGap}><GardenSubtitle translate={!course.description} compact numberOfLines={2}>{course.description || "From your first hello to confident conversations."}</GardenSubtitle></View>
       <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/course/[courseId]/units", params: { courseId: course.id } })} style={styles.courseHero}>
         <View style={styles.courseCopy}>
           <Text style={styles.courseEyebrow}>{course.language.toLocaleUpperCase()} · {course.level}</Text>
-          <Text numberOfLines={2} style={styles.courseTitle}>{course.title}</Text>
+          <Text numberOfLines={2} style={styles.courseTitle} translate={false}>{course.title}</Text>
           <Text style={styles.courseMeta}>{lessonCount} lessons · {course.units.length} units</Text>
           <Text style={styles.courseAvailability}>Free · Offline ready</Text>
         </View>
@@ -98,7 +99,7 @@ export function CourseUnitCatalogScreen() {
           const active = index === 0;
           return <Pressable key={unit.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/unit/[unitId]", params: { unitId: unit.id } })} style={[styles.pathRow, { top: index * 92 }]}>
             <View style={[styles.pathNode, active && styles.pathNodeActive, { left: center - 28 }]}><Text style={[styles.pathNumber, active && styles.pathNumberActive]}>{String(unit.order).padStart(2, "0")}</Text></View>
-            <Text numberOfLines={2} style={styles.pathTitle}>{unit.title}</Text>
+            <Text numberOfLines={2} style={styles.pathTitle} translate={false}>{unit.title}</Text>
           </Pressable>;
         })}
       </View>}
@@ -116,7 +117,7 @@ export function UnitScreen() {
   const firstLesson = unit?.lessons[0];
   const secondLesson = unit?.lessons[1];
   const thirdLesson = unit?.lessons[2];
-  return <Page title={unit?.title ?? "Unit"} eyebrow="LEARN EVERY DAY" activeTab="Learn"
+  return <Page title={unit?.title ?? "Unit"} translateTitle={!unit} eyebrow="LEARN EVERY DAY" activeTab="Learn"
     action={firstLesson ? { label: "Start lesson 1", onPress: () => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: firstLesson.id } }) } : undefined}>
     <ResourceStatus loading={loading} error={error} refresh={() => void refresh()} />
     {unit ? <>
@@ -124,13 +125,13 @@ export function UnitScreen() {
       <Text style={styles.unitMeta}>{unit.lessons.reduce((sum, lesson) => sum + lesson.durationMinutes, 0)} min · {unit.lessons.length} lessons</Text>
       <View style={styles.lessonCards}>
         {firstLesson && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: firstLesson.id } })} style={[styles.lessonCard, styles.lessonCardFeatured]}>
-          <Text style={styles.lessonCardTitle}>01 / {capitalize(firstLesson.skill)}</Text><Text style={styles.lessonCardDescription}>{firstLesson.title}</Text>
+          <Text style={styles.lessonCardTitle}>01 / {capitalize(firstLesson.skill)}</Text><Text style={styles.lessonCardDescription} translate={false}>{firstLesson.title}</Text>
         </Pressable>}
         {[secondLesson, thirdLesson].filter((lesson) => lesson !== undefined).map((lesson, index) => <Pressable key={lesson.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id } })} style={[styles.lessonCard, styles.lessonCardSmall, unit.lessons.length === 2 && styles.lessonCardSingle, index === 1 && styles.lessonCardPlain]}>
-          <Text style={styles.lessonCardTitle}>{String(index + 2).padStart(2, "0")} / {capitalize(lesson.skill)}</Text><Text style={styles.lessonCardDescription}>{lesson.title}</Text>
+          <Text style={styles.lessonCardTitle}>{String(index + 2).padStart(2, "0")} / {capitalize(lesson.skill)}</Text><Text style={styles.lessonCardDescription} translate={false}>{lesson.title}</Text>
         </Pressable>)}
       </View>
-      {unit.lessons.length > 3 && <View style={styles.remainingLessons}><SectionTitle>More lessons</SectionTitle>{unit.lessons.slice(3).map((lesson) => <LearningCard key={lesson.id} title={lesson.title} subtitle={`${lesson.skill} · ${lesson.level}`} detail={`${lesson.durationMinutes} min`} onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id } })} />)}</View>}
+      {unit.lessons.length > 3 && <View style={styles.remainingLessons}><SectionTitle>More lessons</SectionTitle>{unit.lessons.slice(3).map((lesson) => <LearningCard key={lesson.id} translateContent={false} title={lesson.title} subtitle={`${lesson.skill} · ${lesson.level}`} detail={`${lesson.durationMinutes} min`} onPress={() => router.push({ pathname: "/lesson/[lessonId]", params: { lessonId: lesson.id } })} />)}</View>}
       {!unit.lessons.length && <ContentState title="No lessons yet" message="Lessons for this unit will appear here when they are available." />}
     </> : !loading && !error ? <ContentState title="Unit not found" message="This unit may have been removed or is no longer published." /> : null}
   </Page>;
@@ -147,7 +148,7 @@ export function LessonScreen() {
       {lesson ? (
         <>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/unit/[unitId]", params: { unitId: lesson.unit.id } })}>
-            <Text style={styles.breadcrumb}>{lesson.unit.title}  ›</Text>
+            <Text style={styles.breadcrumb} translate={false}>{lesson.unit.title}  ›</Text>
           </Pressable>
           <DetailHeader eyebrow={`${lesson.skill} · ${lesson.level}`} title={lesson.title} description={lesson.description} />
           <Text style={styles.description}>{lesson.durationMinutes} minutes · {lesson.exercises.length} activities</Text>
@@ -155,8 +156,8 @@ export function LessonScreen() {
           {lesson.exercises.map((exercise, index) => (
             <View key={exercise.id} style={styles.exerciseCard}>
               <Text style={styles.eyebrow}>ACTIVITY {index + 1} · {exercise.type.replaceAll("_", " ")}</Text>
-              <Text style={styles.exerciseTitle}>{exercise.prompt}</Text>
-              {exercise.instruction ? <Text style={styles.description}>{exercise.instruction}</Text> : null}
+              <Text style={styles.exerciseTitle} translate={false}>{exercise.prompt}</Text>
+              {exercise.instruction ? <Text style={styles.description} translate={false}>{exercise.instruction}</Text> : null}
             </View>
           ))}
           <ContentState title="Ready to practice?" message="Activity controls and answer feedback will appear here when lesson practice is available." />

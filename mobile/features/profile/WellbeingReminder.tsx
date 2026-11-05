@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
+import { AppState, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
 import { PreferenceModal } from "../../components/PreferenceModal";
 import { addStudyTime, breakIsDue } from "./learning-preferences";
 import { font, garden } from "./garden-ui";
+import { LocalizedPressable as Pressable, LocalizedText as Text } from "../i18n/i18n";
 
 export function WellbeingReminder() {
   const { user, settings } = useAuth();

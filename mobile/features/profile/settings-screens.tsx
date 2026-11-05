@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Alert, Image, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { useEffect, useRef, useState, type ComponentRef } from "react";
+import { Image, View } from "react-native";
 import { ActionState, Button, Card, Copy, Empty, Heading, ResourceState, confirmAction, ui, useAction, useResource } from "../../features/shared/feature-ui";
 import { Learner, Settings, WeeklyDay, profileService } from "../../features/profile/service";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../../services/api";
 import { eraseDownloads } from "../practice/downloads";
 import { font, garden, GardenCaption, GardenCard, GardenSubtitle, Page } from "./garden-ui";
+import { formatUiDate, LocalizedAlert as Alert, LocalizedPressable as Pressable, LocalizedSwitch as Switch, LocalizedText as Text, LocalizedTextInput as TextInput, useAppLanguage } from "../i18n/i18n";
 
 const ink = "#20352B";
 const green = "#236C19";
@@ -98,7 +99,7 @@ function EditProfile() {
   const { refreshSession } = useAuth();
   const resource = useResource(profileService.profile);
   const action = useAction();
-  const photoInput = useRef<TextInput>(null);
+  const photoInput = useRef<ComponentRef<typeof TextInput>>(null);
   const [name, setName] = useState(""); const [bio, setBio] = useState(""); const [avatar, setAvatar] = useState(""); const [validation, setValidation] = useState("");
   useEffect(() => { if (resource.data) { setName(resource.data.displayName || ""); setBio(resource.data.bio || ""); setAvatar(resource.data.avatarUrl || ""); } }, [resource.data]);
   const save = async () => {
@@ -115,11 +116,11 @@ function EditProfile() {
   return <Page title="Make it yours" action={{ label: action.busy ? "Saving…" : "Save changes", onPress: () => void save(), disabled: action.busy || !resource.data }}><GardenSubtitle>Your name and avatar help friends find you.</GardenSubtitle><ResourceState resource={resource} />
     {resource.data && <>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 20, marginBottom: 30 }}>
-        {avatar ? <Image source={{ uri: avatar }} style={{ width: 68, height: 68, borderRadius: 34 }} /> : <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: garden.mint, alignItems: "center", justifyContent: "center" }}><Text style={{ color: green, fontFamily: font.bold, fontSize: 18 }}>{(name || resource.data.email).slice(0, 1).toUpperCase()}</Text></View>}
-        <View style={{ flex: 1 }}><Text style={{ color: ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 32 }}>{name || "Learner"}</Text><Pressable accessibilityRole="button" onPress={() => photoInput.current?.focus()} style={{ backgroundColor: garden.mint, borderRadius: 16, padding: 8, marginTop: 6, maxWidth: 160 }}><Text style={{ color: green, fontFamily: font.bold, fontSize: 12 }}>Change photo link</Text></Pressable></View>
+        {avatar ? <Image source={{ uri: avatar }} style={{ width: 68, height: 68, borderRadius: 34 }} /> : <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: garden.mint, alignItems: "center", justifyContent: "center" }}><Text style={{ color: green, fontFamily: font.bold, fontSize: 18 }} translate={false}>{(name || resource.data.email).slice(0, 1).toUpperCase()}</Text></View>}
+        <View style={{ flex: 1 }}><Text translate={!name} style={{ color: ink, fontFamily: font.heavy, fontSize: 24, lineHeight: 32 }}>{name || "Learner"}</Text><Pressable accessibilityRole="button" onPress={() => photoInput.current?.focus()} style={{ backgroundColor: garden.mint, borderRadius: 16, padding: 8, marginTop: 6, maxWidth: 160 }}><Text style={{ color: green, fontFamily: font.bold, fontSize: 12 }}>Change photo link</Text></Pressable></View>
       </View>
       <GardenCard><Text style={{ color: ink, fontFamily: font.bold, fontSize: 12 }}>Display name</Text><TextInput style={{ color: garden.muted, fontFamily: font.body, fontSize: 16, minHeight: 32 }} accessibilityLabel="Display name" maxLength={50} value={name} onChangeText={setName} /></GardenCard>
-      <GardenCard><Text style={{ color: ink, fontFamily: font.bold, fontSize: 12 }}>Email address</Text><Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 16, marginTop: 4 }}>{resource.data.email}</Text></GardenCard>
+      <GardenCard><Text style={{ color: ink, fontFamily: font.bold, fontSize: 12 }}>Email address</Text><Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 16, marginTop: 4 }} translate={false}>{resource.data.email}</Text></GardenCard>
       <GardenCard tint={garden.blue}><Text style={{ color: green, fontFamily: font.bold, fontSize: 15 }}>ABOUT ME</Text><TextInput style={{ color: garden.muted, fontFamily: font.body, fontSize: 14, minHeight: 70, textAlignVertical: "top", marginTop: 8 }} accessibilityLabel="About me" multiline maxLength={160} value={bio} onChangeText={setBio} placeholder="What are you learning for?" /></GardenCard>
       <GardenCaption>PHOTO LINK</GardenCaption><TextInput ref={photoInput} style={ui.input} accessibilityLabel="Photo URL" maxLength={500} autoCapitalize="none" keyboardType="url" value={avatar} onChangeText={setAvatar} placeholder="https://..." />
       {!!validation && <Text style={ui.error}>{validation}</Text>}<ActionState action={action} />
@@ -128,6 +129,7 @@ function EditProfile() {
 }
 
 function Analytics() {
+  const { language } = useAppLanguage();
   const resource = useResource(profileService.weeklyAnalytics);
   const progress = useResource(profileService.progress);
   const days = resource.data ?? [];
@@ -142,14 +144,14 @@ function Analytics() {
       <View style={{ height: 200, backgroundColor: garden.mint, borderRadius: 24, paddingHorizontal: 18, paddingTop: 16, paddingBottom: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
         {days.map(day => <View key={day.date} style={{ width: 32, alignItems: "center", gap: 8 }}>
           <View style={{ width: 24, height: Math.max(4, Math.round(144 * day.xp / peakXp)), borderRadius: 8, backgroundColor: garden.green }} />
-          <Text style={{ color: green, fontFamily: font.bold, fontSize: 12 }}>{new Date(day.date + "T12:00:00").toLocaleDateString("en", { weekday: "narrow" })}</Text>
+          <Text style={{ color: green, fontFamily: font.bold, fontSize: 12 }}>{formatUiDate(day.date + "T12:00:00", language, { weekday: "narrow" })}</Text>
         </View>)}
       </View>
       <GardenCard><Text style={{ color: ink, fontFamily: font.heavy, fontSize: 18 }}>{totalXp} XP</Text><Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 14 }}>Earned this week</Text></GardenCard>
       <GardenCard><Text style={{ color: ink, fontFamily: font.heavy, fontSize: 18 }}>{totalAnswers} answers</Text><Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 14 }}>Practice completed this week</Text></GardenCard>
       <GardenCard><Text style={{ color: ink, fontFamily: font.heavy, fontSize: 18 }}>{progress.data?.completedLessons ?? "—"} lessons</Text><Text style={{ color: garden.muted, fontFamily: font.body, fontSize: 14 }}>Total completed lessons</Text></GardenCard>
       <GardenCaption>DAILY BREAKDOWN</GardenCaption>
-      {days.length ? days.map(day => <View key={day.date} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 }}><Text style={{ color: ink, fontFamily: font.bold }}>{new Date(day.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</Text><Text style={{ color: green, fontFamily: font.bold }}>{day.xp} XP</Text></View>) : <Empty text="No learning activity recorded in the past 7 days." />}
+      {days.length ? days.map(day => <View key={day.date} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 }}><Text style={{ color: ink, fontFamily: font.bold }}>{formatUiDate(day.date + "T12:00:00", language, { weekday: "short", month: "short", day: "numeric" })}</Text><Text style={{ color: green, fontFamily: font.bold }}>{day.xp} XP</Text></View>) : <Empty text="No learning activity recorded in the past 7 days." />}
     </>}
   </Page>;
 }
@@ -251,7 +253,10 @@ function Preferences({ section }: { section: string }) {
   return <Page title={titles[section] || "Preferences"} eyebrow={section === "low-bandwidth" || section === "wellbeing" ? "ACCESSIBILITY" : "YOUR PERSONAL SPACE"} onBack={back} action={{ label: action.busy ? "Saving…" : "Save preferences", onPress: () => void save(), disabled: action.busy || !dirty || (section === "wellbeing" && draft?.wellbeingTimerMinutes !== null && (!Number.isInteger(draft?.wellbeingTimerMinutes) || (draft?.wellbeingTimerMinutes ?? 0) < 5 || (draft?.wellbeingTimerMinutes ?? 0) > 180)) }}>
     {subtitles[section] && <GardenSubtitle>{subtitles[section]}</GardenSubtitle>}<ResourceState resource={resource} />
     {draft && <>
-      {section === "language" && <><Copy>The demo interface is available in English. Other translations are not available yet.</Copy>{draft.appLanguage !== "en" && <Copy>Your previous preference is saved, but English is the active interface language. Select English to update the saved preference.</Copy>}<Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt — unavailable", disabled: true }, { value: "es", label: "Español — unavailable", disabled: true }, { value: "fr", label: "Français — unavailable", disabled: true }]} onChange={v => set("appLanguage", v)} /></>}
+      {section === "language" && <>
+        <Copy>Choose the language used for Fluora menus and messages. Course and exercise content stays in its learning language.</Copy>
+        <Choice title="App language" value={draft.appLanguage} choices={[{ value: "en", label: "English" }, { value: "vi", label: "Tiếng Việt" }]} onChange={v => set("appLanguage", v)} />
+      </>}
 
       {section === "accessibility" || section === "large-type" ? <>
         <GardenCaption>LIVE PREVIEW</GardenCaption>
@@ -313,6 +318,7 @@ function Preferences({ section }: { section: string }) {
 
 function Security() {
   const { logout, user } = useAuth();
+  const { language } = useAppLanguage();
   const resource = useResource(profileService.profile);
   const sessions = useResource(profileService.sessions);
   const action = useAction();
@@ -333,11 +339,11 @@ function Security() {
   }, "Signed out."));
 
   return <Page title="Keep your account safe" action={{ label: action.busy ? "Updating…" : "Change password", onPress: () => void changePassword(), disabled: action.busy || !resource.data }}><GardenSubtitle>Manage your sign-in details and connected devices.</GardenSubtitle><ResourceState resource={resource} />
-    {resource.data && <><View style={{ flexDirection: "row", alignItems: "center", gap: 20, marginTop: 8, marginBottom: 24 }}><View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: garden.mint, alignItems: "center", justifyContent: "center" }}><Text style={{ color: green, fontFamily: font.heavy, fontSize: 32 }}>✓</Text></View><View style={{ flex: 1 }}><Text style={{ color: green, fontFamily: font.heavy, fontSize: 24 }}>Account protected</Text><Text style={{ color: garden.muted, fontFamily: font.bold, fontSize: 12 }}>{resource.data.hasPassword ? "Password set" : "Google sign-in"} · {resource.data.email}</Text></View></View>
+    {resource.data && <><View style={{ flexDirection: "row", alignItems: "center", gap: 20, marginTop: 8, marginBottom: 24 }}><View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: garden.mint, alignItems: "center", justifyContent: "center" }}><Text style={{ color: green, fontFamily: font.heavy, fontSize: 32 }}>✓</Text></View><View style={{ flex: 1 }}><Text style={{ color: green, fontFamily: font.heavy, fontSize: 24 }}>Account protected</Text><Text style={{ color: garden.muted, fontFamily: font.bold, fontSize: 12 }} translate={false}>{resource.data.hasPassword ? "Password set" : "Google sign-in"} · {resource.data.email}</Text></View></View>
       <GardenCaption>SIGNED-IN SESSIONS</GardenCaption><ResourceState resource={sessions} />
       {!sessions.loading && !sessions.error && (sessions.data?.length ? sessions.data.map(s => <GardenCard key={s.id} tint={s.current ? garden.mint : "white"}>
         <Text style={{ color: green, fontFamily: font.bold, fontSize: 15 }}>{s.deviceName || s.userAgent || "Device"}{s.current ? " · Active now" : ""}</Text>
-        <Text style={{ color: garden.muted, fontFamily: font.bold, fontSize: 12, marginTop: 6 }}>Last used {new Date(s.lastUsedAt).toLocaleString()}</Text>
+        <Text style={{ color: garden.muted, fontFamily: font.bold, fontSize: 12, marginTop: 6 }}>Last used {formatUiDate(s.lastUsedAt, language, { dateStyle: "medium", timeStyle: "short" })}</Text>
         {!s.current && <Button label="Sign out device" danger disabled={action.busy} onPress={() => confirmAction("Sign out this device?", "This session will be revoked.", () => void action.run(async () => { await profileService.revokeSession(s.id); await sessions.refresh(); }, "Device signed out."))} />}
       </GardenCard>) : <Empty text="No active sessions." />)}
       <GardenCaption>CHANGE PASSWORD</GardenCaption>

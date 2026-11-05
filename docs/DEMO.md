@@ -52,7 +52,7 @@ Fixtures supply data for implemented flows; they do not add automatic speech/wri
 
 | Area | Action and account |
 | --- | --- |
-| Welcome/onboarding | Sign in as New; choose a CEFR level, optionally complete placement, finish onboarding. Only English interface/course content is offered in this demo. |
+| Welcome/onboarding | Sign in as New; choose English or Vietnamese for the app interface, select a CEFR level, optionally complete placement, and finish onboarding. Curated course/exercise content is currently in English. |
 | Course → unit → lesson | Use Linh. Submit a wrong answer, open hints, correct/continue, complete the lesson; inspect XP, progress, calendar and quests. A2/B1 courses cover listening choice and dictation. |
 | Completed learning | Use An. Home offers Practice/review; open analytics, misconceptions, goals/evidence and mission passport. Use Minh for partial progress. |
 | Accessibility/wellbeing | Save large/extra-large lesson text; toggle captions and Focus mode, open a listening lesson; reduced motion disables modal transitions and moving waveforms. Set a 5-minute reminder and leave the app foregrounded; background time does not count. |

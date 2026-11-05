@@ -141,17 +141,26 @@ async function transport(fetchImpl) {
     { context },
   );
   await module.link(
-    (specifier) =>
-      new vm.SyntheticModule(
-        specifier === "react-native" ? ["Platform"] : ["getAccessToken"],
+    (specifier) => {
+      const exports =
+        specifier === "react-native"
+          ? ["Platform"]
+          : specifier === "../features/i18n/translations"
+            ? ["translateApiError"]
+            : ["getAccessToken"];
+      return new vm.SyntheticModule(
+        exports,
         function () {
           if (specifier === "react-native")
             this.setExport("Platform", { OS: "android" });
+          else if (specifier === "../features/i18n/translations")
+            this.setExport("translateApiError", (message) => message);
           else
             this.setExport("getAccessToken", async () => "test-session-token");
         },
         { context },
-      ),
+      );
+    },
   );
   await module.evaluate();
   return module.namespace;

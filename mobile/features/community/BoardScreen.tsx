@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { community } from "./community.service";
 import type { BoardNote, Task } from "./community.types";
 import {
@@ -18,6 +18,7 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { LocalizedText as Text } from "../i18n/i18n";
 const colors = {
   yellow: "#fff4bb",
   green: "#eaf8de",
@@ -121,7 +122,7 @@ export default function BoardScreen({ groupId }: { groupId: string }) {
                 .filter((t) => t.lane === lane)
                 .map((t) => (
                   <Card key={t.id}>
-                    <Copy>{t.title}</Copy>
+                    <Copy translate={false}>{t.title}</Copy>
                     <Text style={ui.small}>
                       By {t.createdBy.displayName ?? "Learner"}
                     </Text>
@@ -209,7 +210,7 @@ export default function BoardScreen({ groupId }: { groupId: string }) {
                     borderRadius: 12,
                   }}
                 >
-                  <Copy>{n.text}</Copy>
+                  <Copy translate={false}>{n.text}</Copy>
                   <Text style={ui.small}>
                     {n.author.displayName ?? "Learner"}
                   </Text>
@@ -219,7 +220,7 @@ export default function BoardScreen({ groupId }: { groupId: string }) {
           </ScrollView>
           {r.data.notes.map((n) => (
             <Card key={n.id}>
-              <Copy>{n.text}</Copy>
+              <Copy translate={false}>{n.text}</Copy>
               <Copy>
                 {n.color} · ({n.x}, {n.y})
               </Copy>

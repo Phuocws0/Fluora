@@ -1,10 +1,11 @@
 import { LearningText as Text } from "../../components/LearningText";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { ContentState } from "../../components/ContentState";
 import { ScreenContainer } from "../../components/ScreenContainer";
 import { getLearningPaths, compareLearningPaths } from "./learning.service";
 import type { LearningPath } from "../../types/learning";
+import { LocalizedPressable as Pressable } from "../i18n/i18n";
 
 export function LearningPathComparisonScreen() {
   const [paths, setPaths] = useState<LearningPath[]>([]);
@@ -64,9 +65,9 @@ export function LearningPathComparisonScreen() {
             return (
               <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: selected }} key={path.id} onPress={() => togglePath(path.id)} style={[styles.pathCard, selected && styles.pathSelected]}>
                 <View style={styles.pathCopy}>
-                  <Text style={styles.pathTitle}>{path.title}</Text>
-                  <Text style={styles.pathGoal}>{path.careerGoal} · {path.level}</Text>
-                  <Text style={styles.pathSummary}>{path.summary}</Text>
+                  <Text style={styles.pathTitle} translate={false}>{path.title}</Text>
+                  <Text style={styles.pathGoal} translate={false}>{path.careerGoal} · {path.level}</Text>
+                  <Text style={styles.pathSummary} translate={false}>{path.summary}</Text>
                 </View>
                 <Text style={[styles.check, selected && styles.checked]}>{selected ? "✓" : "+"}</Text>
               </Pressable>
@@ -80,15 +81,15 @@ export function LearningPathComparisonScreen() {
             <View style={styles.comparison}>
               {comparison.map((path) => (
                 <View key={path.id} style={styles.comparisonColumn}>
-                  <Text style={styles.pathTitle}>{path.title}</Text>
-                  <Text style={styles.pathGoal}>{path.careerGoal}</Text>
-                  <Text style={styles.comparisonItem}>{path.targetLanguage} · {path.level}</Text>
+                  <Text style={styles.pathTitle} translate={false}>{path.title}</Text>
+                  <Text style={styles.pathGoal} translate={false}>{path.careerGoal}</Text>
+                  <Text style={styles.comparisonItem} translate={false}>{path.targetLanguage} · {path.level}</Text>
                   <Text style={styles.comparisonItem}>{path.estimatedMinutes} min total</Text>
                   {path.estimatedWeeks ? <Text style={styles.comparisonItem}>{path.estimatedWeeks} weeks</Text> : null}
                   <Text style={styles.comparisonHeading}>You will learn to</Text>
-                  {path.outcomes.map((outcome) => <Text key={outcome} style={styles.outcome}>• {outcome}</Text>)}
+                  {path.outcomes.map((outcome) => <Text key={outcome} style={styles.outcome} translate={false}>• {outcome}</Text>)}
                   <Text style={styles.comparisonHeading}>Course</Text>
-                  <Text style={styles.comparisonItem}>{path.course.title}</Text>
+                  <Text style={styles.comparisonItem} translate={false}>{path.course.title}</Text>
                 </View>
               ))}
             </View>

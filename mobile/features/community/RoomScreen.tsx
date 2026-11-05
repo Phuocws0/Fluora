@@ -20,7 +20,9 @@ import {
   useResource,
   type EditorSpec,
 } from "../shared/feature-ui";
+import { formatUiDate, useAppLanguage } from "../i18n/i18n";
 export default function RoomScreen({ roomId }: { roomId: string }) {
+  const { language } = useAppLanguage();
   const r = useResource(
     useCallback(
       async () => ({
@@ -78,18 +80,18 @@ export default function RoomScreen({ roomId }: { roomId: string }) {
       },
     });
   return (
-    <Page title={room?.name ?? "Study room"} back>
+    <Page title={room?.name ?? "Study room"} translateTitle={!room?.name} back>
       <ResourceState resource={r} />
       <ActionState action={a} />
       {room && (
         <>
-          <Copy>{room.focus ?? "A shared place to practice."}</Copy>
+          <Copy translate={!room.focus}>{room.focus ?? "A shared place to practice."}</Copy>
           <Copy>
             {room.closedAt ? "Closed" : "Open"} · Host:{" "}
             {room.host.displayName ?? "Learner"}
           </Copy>
           {room.startsAt && (
-            <Copy>Starts: {new Date(room.startsAt).toLocaleString()}</Copy>
+            <Copy>Starts: {formatUiDate(room.startsAt, language, { dateStyle: "medium", timeStyle: "short" })}</Copy>
           )}
           <Copy>
             Participants:{" "}
@@ -218,7 +220,7 @@ export default function RoomScreen({ roomId }: { roomId: string }) {
           {!r.data?.polls.length && <Empty text="No polls yet." />}
           {r.data?.polls.map((p) => (
             <Card key={p.id}>
-              <Heading>{p.question}</Heading>
+              <Heading translate={false}>{p.question}</Heading>
               <Copy>
                 {p.closed ? "Closed" : "Open"} · {p.totalVotes} votes
               </Copy>
